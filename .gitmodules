@@ -1,0 +1,3 @@
+[submodule "RoboFusionLib"]
+	path = RoboFusionLib
+	url = https://gitee.com/wpie/robofusionlib.git
