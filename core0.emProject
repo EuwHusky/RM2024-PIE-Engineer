@@ -1,0 +1,259 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="core0" target="20" version="2">
+  <configuration
+    Name="Common"
+    c_preprocessor_definitions="portasmHAS_MTIME=1;FLASH_XIP=1;CONFIG_DISABLE_GLOBAL_IRQ_ON_STARTUP=1;HPM_FEATURE_MBX_SIDE_A;__freertos_irq_stack_top=_stack;CONFIG_FREERTOS=1;USE_NONVECTOR_MODE=1;DISABLE_IRQ_PREEMPTIVE=1;CONFIG_USBDEV_TX_THREAD=1;CONFIG_USBDEV_RX_THREAD=1;HPM_EN_MATH_DSP_LIB=1;"
+    gdb_server_write_timeout="300"
+    link_symbol_definitions="_flash_size=8M;_extram_size=16M;" />
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG"
+    gcc_debugging_level="Level 3"
+    gcc_optimization_level="None" />
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_debugging_level="None"
+    gcc_omit_frame_pointer="Yes"
+    gcc_optimization_level="Level 1" />
+  <project Name="core0">
+    <configuration
+      LIBRARY_IO_TYPE="STD"
+      Name="Common"
+      RISCV_TOOLCHAIN_VARIANT="Andes"
+      arm_linker_heap_size="0x4000"
+      arm_linker_no_warn_on_mismatch="Yes"
+      arm_linker_stack_size="0x4000"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      build_generic_options_file_name="$(StudioDir)/targets/Andes_build_options.xml"
+      c_additional_options="-Wall;-Wundef;-Wno-format;-fomit-frame-pointer;-fno-builtin;-ffunction-sections;-fdata-sections;-g;-mcpu=d45;-mext-dsp"
+      c_user_include_directories="App\\core0;Function;Task\\core0;Task;Module\\BMI088;Module\\Referee;RoboFusionLib\\algorithm;RoboFusionLib\\algorithm\\ahrs;RoboFusionLib\\algorithm\\controller;RoboFusionLib\\algorithm\\data_check;RoboFusionLib\\algorithm\\data_processing;RoboFusionLib\\algorithm\\data_structure;RoboFusionLib\\application;RoboFusionLib\\bsp;RoboFusionLib\\bsp\\bmi088;RoboFusionLib\\device;RoboFusionLib\\device\\motor;RoboFusionLib\\driver;RoboFusionLib;SDK_Support\\arch;SDK_Support\\boards\\hpm6750new;SDK_Support\\drivers\\inc;SDK_Support\\config;SDK_Support\\soc\\ip;SDK_Support\\soc\\HPM6750;SDK_Support\\soc\\HPM6750\\toolchains;SDK_Support\\soc\\HPM6750\\boot;SDK_Support\\components\\debug_console;SDK_Support\\components\\usb\\device;SDK_Support\\middleware\\FreeRTOS\\Source\\include;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V\\chip_specific_extensions\\HPMicro;SDK_Support\\middleware\\cherryusb\\common;SDK_Support\\middleware\\cherryusb\\class\\cdc;SDK_Support\\middleware\\cherryusb\\core;SDK_Support\\middleware\\cherryusb\\osal;SDK_Support\\middleware\\hpm_math;SDK_Support\\middleware\\hpm_math\\nds_dsp"
+      debug_target_connection="GDB Server"
+      gdb_server_autostart_server="Yes"
+      gdb_server_command_line="$(ProjectDir)/SDK_Support/tools/openocd/openocd.exe -f $(ProjectDir)/SDK_Support/boards/openocd/probes/cmsis_dap.cfg -f $(ProjectDir)/SDK_Support/boards/openocd/soc/hpm6750-dual-core.cfg -f $(ProjectDir)/SDK_Support/boards/openocd/boards/hpm6750evkmini.cfg"
+      gdb_server_port="3333"
+      gdb_server_reset_command="reset halt"
+      gdb_server_type="Custom"
+      heap_size="0x4000"
+      link_linker_script_file="$(ProjectDir)/SDK_Support/soc/HPM6750/toolchains/segger/flash_sdram_xip.icf"
+      link_use_linker_script_file="Yes"
+      linker_additional_files="$(ProjectDir)/SDK_Support/middleware/hpm_math/nds_dsp/libdspf/libdspf.a"
+      linker_output_format="bin"
+      linker_printf_fmt_level="int"
+      linker_printf_fp_enabled="Float"
+      linker_printf_wchar_enabled="No"
+      linker_printf_width_precision_supported="Yes"
+      linker_scanf_character_group_matching_enabled="No"
+      linker_scanf_fmt_level="int"
+      linker_scanf_fp_enabled="No"
+      macros=""
+      post_build_command=""
+      project_directory=""
+      project_type="Executable"
+      rv32andes_compiler_ext_dsp="Yes"
+      rv_abi="ilp32"
+      rv_arch_ext="xv5"
+      rv_arch_zicsr="No"
+      rv_arch_zifencei="No"
+      rv_architecture="rv32imac"
+      rv_debug_extensions="Andes"
+      rv_toolchain_prefix="andes-"
+      stack_size="0x4000"
+      target_device_name="HPM6750xVMx" />
+    <configuration
+      Name="Debug"
+      debug_cpu_registers_file="$(ProjectDir)/SDK_Support\soc\HPM6750\hpm_ses_riscv_cpu_regs.xml"
+      debug_register_definition_file="$(ProjectDir)/SDK_Support\soc\HPM6750\hpm_ses_reg.xml"
+      debug_target_connection="GDB Server"
+      gdb_server_allow_memory_access_during_execution="Yes"
+      gdb_server_ignore_checksum_errors="No"
+      gdb_server_register_access="General and Individual"
+      link_linker_script_file="$(ProjectDir)/SDK_Support/soc/HPM6750/toolchains/segger/flash_xip.icf" />
+    <configuration
+      Name="Release"
+      debug_cpu_registers_file="$(ProjectDir)/SDK_Support\soc\HPM6750\hpm_ses_riscv_cpu_regs.xml"
+      debug_register_definition_file="$(ProjectDir)/SDK_Support\soc\HPM6750\hpm_ses_reg.xml" />
+    <folder Name="App">
+      <file file_name="App/core0/main.c" />
+      <file file_name="App/core0/multicore_common.c" />
+      <file file_name="App/core0/sec_core_img.c" />
+    </folder>
+    <folder Name="Function">
+      <file file_name="Function/array.c" />
+      <file file_name="Function/CAN_receive.c" />
+      <file file_name="Function/cnu_hpm_bsp_cyc.c" />
+      <file file_name="Function/crc_16.c" />
+    </folder>
+    <folder Name="Module">
+      <folder Name="BMI088">
+        <file file_name="Module/BMI088/BMI088driver.c" />
+        <file file_name="Module/BMI088/BMI088Middleware.c" />
+      </folder>
+      <folder Name="Referee">
+        <file file_name="Module/Referee/CRC8_CRC16.c" />
+        <file file_name="Module/Referee/fifo.c" />
+        <file file_name="Module/Referee/referee.c" />
+      </folder>
+    </folder>
+    <folder Name="robofusionlib">
+      <folder Name="algorithm">
+        <folder Name="ahrs">
+          <file file_name="robofusionlib/algorithm/ahrs/algo_ahrs_quaternionekf.c" />
+        </folder>
+        <folder Name="controller">
+          <file file_name="robofusionlib/algorithm/controller/algo_pid.c" />
+        </folder>
+        <folder Name="data_check" />
+        <folder Name="data_processing">
+          <file file_name="robofusionlib/algorithm/data_processing/algo_data_limiting.c" />
+          <file file_name="robofusionlib/algorithm/data_processing/algo_kalman_filter.c" />
+        </folder>
+        <folder Name="data_structure">
+          <file file_name="robofusionlib/algorithm/data_structure/algo_angle.c" />
+          <file file_name="robofusionlib/algorithm/data_structure/algo_matrix.c" />
+        </folder>
+      </folder>
+      <folder Name="bsp">
+        <folder Name="bmi088" />
+      </folder>
+      <folder Name="device" />
+      <folder Name="driver" />
+    </folder>
+    <folder Name="SDK_Support">
+      <folder Name="boards">
+        <file file_name="SDK_Support/boards/hpm6750new/board.c" />
+        <file file_name="SDK_Support/boards/hpm6750new/pinmux.c" />
+      </folder>
+      <folder Name="components">
+        <folder Name="debug_console">
+          <file file_name="SDK_Support/components/debug_console/hpm_debug_console.c" />
+        </folder>
+        <folder Name="usb">
+          <folder Name="device">
+            <file file_name="SDK_Support/components/usb/device/hpm_usb_device.c" />
+          </folder>
+        </folder>
+      </folder>
+      <folder Name="drivers">
+        <file file_name="SDK_Support/drivers/src/hpm_can_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_crc_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_dma_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_enet_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_femc_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_ffa_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_gpio_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_gptmr_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_i2c_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_jpeg_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_lcdc_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_lin_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_mchtmr_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pcfg_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pdm_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pdma_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pla_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pllctl_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pllctlv2_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pmp_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_ptpc_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_pwm_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_rng_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_rtc_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_sdm_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_sdp_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_sdxc_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_spi_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_tsns_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_uart_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_usb_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_vad_drv.c" />
+        <file file_name="SDK_Support/drivers/src/hpm_wdg_drv.c" />
+      </folder>
+      <folder Name="middleware">
+        <folder Name="cherryusb">
+          <folder Name="class">
+            <folder Name="cdc">
+              <file file_name="SDK_Support/middleware/cherryusb/class/cdc/usbd_cdc.c" />
+            </folder>
+          </folder>
+          <folder Name="core">
+            <file file_name="SDK_Support/middleware/cherryusb/core/usbd_core.c" />
+          </folder>
+          <folder Name="osal">
+            <file file_name="SDK_Support/middleware/cherryusb/osal/usb_osal_freertos.c" />
+          </folder>
+          <folder Name="port">
+            <folder Name="hpm">
+              <file file_name="SDK_Support/middleware/cherryusb/port/hpm/usb_dc_hpm.c" />
+            </folder>
+          </folder>
+        </folder>
+        <folder Name="FreeRTOS">
+          <folder Name="Source">
+            <folder Name="portable">
+              <folder Name="GCC">
+                <folder Name="RISC-V">
+                  <folder Name="chip_specific_extensions">
+                    <folder Name="HPMicro">
+                      <file file_name="SDK_Support/middleware/FreeRTOS/Source/portable/GCC/RISC-V/chip_specific_extensions/HPMicro/hpm_port.c" />
+                    </folder>
+                  </folder>
+                  <file file_name="SDK_Support/middleware/FreeRTOS/Source/portable/GCC/RISC-V/port.c" />
+                  <file file_name="SDK_Support/middleware/FreeRTOS/Source/portable/GCC/RISC-V/portASM.S" />
+                </folder>
+              </folder>
+              <folder Name="MenMang">
+                <file file_name="SDK_Support/middleware/FreeRTOS/Source/portable/MemMang/heap_4.c" />
+              </folder>
+            </folder>
+            <file file_name="SDK_Support/middleware/FreeRTOS/Source/croutine.c" />
+            <file file_name="SDK_Support/middleware/FreeRTOS/Source/event_groups.c" />
+            <file file_name="SDK_Support/middleware/FreeRTOS/Source/list.c" />
+            <file file_name="SDK_Support/middleware/FreeRTOS/Source/queue.c" />
+            <file file_name="SDK_Support/middleware/FreeRTOS/Source/stream_buffer.c" />
+            <file file_name="SDK_Support/middleware/FreeRTOS/Source/tasks.c" />
+            <file file_name="SDK_Support/middleware/FreeRTOS/Source/timers.c" />
+          </folder>
+        </folder>
+        <folder Name="hpm_math">
+          <folder Name="ws_dsp">
+            <file file_name="SDK_Support/middleware/hpm_math/sw_dsp/hpm_math_sw.c" />
+          </folder>
+        </folder>
+      </folder>
+      <folder Name="soc">
+        <folder Name="HPM6750">
+          <folder Name="boot">
+            <file file_name="SDK_Support/soc/HPM6750/boot/hpm_bootheader.c" />
+          </folder>
+          <folder Name="toolchains">
+            <folder Name="segger">
+              <file file_name="SDK_Support/soc/HPM6750/toolchains/segger/startup.s" />
+            </folder>
+            <file file_name="SDK_Support/soc/HPM6750/toolchains/reset.c" />
+            <file file_name="SDK_Support/soc/HPM6750/toolchains/trap.c" />
+          </folder>
+          <file file_name="SDK_Support/soc/HPM6750/hpm_clock_drv.c" />
+          <file file_name="SDK_Support/soc/HPM6750/hpm_l1c_drv.c" />
+          <file file_name="SDK_Support/soc/HPM6750/hpm_otp_drv.c" />
+          <file file_name="SDK_Support/soc/HPM6750/hpm_sysctl_drv.c" />
+          <file file_name="SDK_Support/soc/HPM6750/system.c" />
+        </folder>
+      </folder>
+      <folder Name="tools" />
+      <folder Name="utils">
+        <file file_name="SDK_Support/utils/hpm_ffssi.c" />
+        <file file_name="SDK_Support/utils/hpm_sbrk.c" />
+        <file file_name="SDK_Support/utils/hpm_swap.c" />
+      </folder>
+    </folder>
+    <folder Name="Task">
+      <file file_name="Task/Detect_task.c" />
+      <file file_name="Task/Dualcore_task.c" />
+      <file file_name="Task/core0/INS_task.c" />
+      <file file_name="Task/Print_task.c" />
+      <file file_name="Task/core0/Referee_task.c" />
+    </folder>
+  </project>
+</solution>

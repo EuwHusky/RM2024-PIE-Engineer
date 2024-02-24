@@ -1,0 +1,280 @@
+{
+  "socName": "HPM6750",
+  "packageName": "BGA289",
+  "functions": {
+    "init_pins": {
+      "groupOptions": {
+        "CAN.CAN3": "C"
+      },
+      "selectPins": {
+        "PB15": {
+          "signal": "CAN.CAN0.TXD",
+          "padCtls": {}
+        },
+        "PB17": {
+          "signal": "CAN.CAN0.RXD",
+          "padCtls": {}
+        },
+        "PB19": {
+          "signal": "CAN.CAN1.TXD",
+          "padCtls": {}
+        },
+        "PB18": {
+          "signal": "CAN.CAN1.RXD",
+          "padCtls": {}
+        },
+        "PB09": {
+          "signal": "CAN.CAN2.TXD",
+          "padCtls": {}
+        },
+        "PB08": {
+          "signal": "CAN.CAN2.RXD",
+          "padCtls": {}
+        },
+        "PA05": {
+          "signal": "I2C.I2C0.SDA"
+        },
+        "PA06": {
+          "signal": "I2C.I2C0.SCL"
+        },
+        "PA11": {
+          "signal": "I2C.I2C1.SCL"
+        },
+        "PA10": {
+          "signal": "I2C.I2C1.SDA"
+        },
+        "PD22": {
+          "signal": "SPI.SPI0.CSN"
+        },
+        "PD26": {
+          "signal": "SPI.SPI0.MISO"
+        },
+        "PD21": {
+          "signal": "SPI.SPI0.MOSI"
+        },
+        "PD27": {
+          "signal": "SPI.SPI0.SCLK"
+        },
+        "PE03": {
+          "signal": "SPI.SPI1.CSN"
+        },
+        "PD30": {
+          "signal": "SPI.SPI1.MISO"
+        },
+        "PE04": {
+          "signal": "SPI.SPI1.MOSI"
+        },
+        "PD31": {
+          "signal": "SPI.SPI1.SCLK"
+        },
+        "PF10": {
+          "signal": "USB.USB0.ID"
+        },
+        "PE29": {
+          "signal": "USB.USB0.OC"
+        },
+        "PF09": {
+          "signal": "USB.USB0.PWR"
+        },
+        "PB26": {
+          "signal": "UART.UART1.RXD"
+        },
+        "PB27": {
+          "signal": "UART.UART1.TXD"
+        },
+        "PB21": {
+          "signal": "UART.UART2.RXD"
+        },
+        "PB22": {
+          "signal": "UART.UART2.TXD"
+        },
+        "PB24": {
+          "signal": "UART.UART3.RXD"
+        },
+        "PB25": {
+          "signal": "UART.UART3.TXD"
+        },
+        "PC01": {
+          "signal": "PWM.PWM0.P[0]"
+        },
+        "PC00": {
+          "signal": "PWM.PWM0.P[1]"
+        },
+        "PB31": {
+          "signal": "PWM.PWM0.P[2]"
+        },
+        "PA00": {
+          "signal": "GPIO.GPIO.A[00]",
+          "gpiom": {
+            "direction": "1",
+            "interrupt": "1",
+            "interruptConfig": "11",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        },
+        "PA02": {
+          "signal": "GPIO.GPIO.A[02]",
+          "gpiom": {
+            "direction": "1",
+            "interrupt": "1",
+            "interruptConfig": "11",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        },
+        "PA03": {
+          "signal": "GPIO.GPIO.A[03]",
+          "gpiom": {
+            "direction": "1",
+            "interrupt": "1",
+            "interruptConfig": "11",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        },
+        "PA29": {
+          "signal": "CAN.CAN3.RXD"
+        },
+        "PA30": {
+          "signal": "CAN.CAN3.TXD"
+        },
+        "PA01": {
+          "signal": "GPIO.GPIO.A[01]",
+          "gpiom": {
+            "direction": "1",
+            "interrupt": "1",
+            "interruptConfig": "11",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        },
+        "PA04": {
+          "signal": "GPIO.GPIO.A[04]",
+          "gpiom": {
+            "direction": "1",
+            "interrupt": "1",
+            "interruptConfig": "11",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        },
+        "PB29": {
+          "signal": "UART.UART4.RXD"
+        },
+        "PB30": {
+          "signal": "UART.UART4.TXD"
+        },
+        "PF07": {
+          "signal": "USB.USB1.ID"
+        },
+        "PF05": {
+          "signal": "USB.USB1.OC"
+        },
+        "PF06": {
+          "signal": "USB.USB1.PWR"
+        },
+        "PA31": {
+          "signal": "PWM.PWM0.P[3]"
+        },
+        "PB28": {
+          "signal": "UART.UART0.RXD"
+        },
+        "PB23": {
+          "signal": "UART.UART0.TXD"
+        },
+        "PZ04": {
+          "signal": "GPIO.GPIO.Z[04]",
+          "nextIOC": {
+            "signal": "BATT.SOC_PZ[04]"
+          },
+          "gpiom": {
+            "direction": "0",
+            "outputLevel": "1",
+            "source": "IOC",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        },
+        "PD29": {
+          "signal": "GPIO.GPIO.D[29]",
+          "gpiom": {
+            "direction": "0",
+            "outputLevel": "1",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        },
+        "PE07": {
+          "signal": "GPIO.GPIO.E[07]",
+          "gpiom": {
+            "direction": "0",
+            "outputLevel": "1",
+            "select": "1",
+            "hide": [],
+            "lock": "1"
+          }
+        }
+      },
+      "unlockedSignals": {}
+    }
+  },
+  "selectFunctionName": "init_pins",
+  "userLabels": {
+    "PB15": "CAN0_TXD",
+    "PB17": "CAN0_RXD",
+    "PB19": "CAN1_TXD",
+    "PB18": "CAN1_RXD",
+    "PB09": "CAN2_TXD",
+    "PB08": "CAN2_RXD",
+    "PA05": "I2C0_SDA",
+    "PA06": "I2C0_SCL",
+    "PA11": "I2C1_SCL",
+    "PA10": "I2C1_SDA",
+    "PD22": "SPI0_CSN",
+    "PD26": "SPI0_MISO",
+    "PD21": "SPI0_MOSI",
+    "PD27": "SPI0_SCLK",
+    "PE03": "SPI1_CSN",
+    "PD30": "SPI1_MISO",
+    "PE04": "SPI1_MOSI",
+    "PD31": "SPI1_SCLK",
+    "PF10": "USB0_ID",
+    "PE29": "USB0_OC",
+    "PF09": "USB0_PWR",
+    "PB26": "UART1_RX",
+    "PB27": "UART1_TX",
+    "PB21": "UART2_RX",
+    "PB22": "UART2_TX",
+    "PB24": "UART3_RX",
+    "PB25": "UART3_TX",
+    "PC01": "PWM0_CH1",
+    "PC00": "PWM0_CH2",
+    "PB31": "PWM0_CH3",
+    "PB29": "UART4_RX",
+    "PB30": "UART4_TX",
+    "PA29": "CAN3_RXD",
+    "PA30": "CAN3_TXD",
+    "PA00": "KEY_MID",
+    "PA02": "KEY_DOWN",
+    "PA03": "KEY_LEFT",
+    "PA01": "KEY_UP",
+    "PA04": "KEY_RIGHT",
+    "PF07": "USB1_ID",
+    "PF05": "USB1_OC",
+    "PF06": "USB1_PWR",
+    "PA31": "PWM0_CH4",
+    "PB28": "UART0_RX",
+    "PB23": "UART0_TX",
+    "PZ04": "RGB_R",
+    "PD29": "RGB_G",
+    "PE07": "RGB_B"
+  }
+}

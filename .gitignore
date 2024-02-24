@@ -16,3 +16,6 @@
 *.hex
 
 # 其他
+Output/
+*.emSession
+*.url

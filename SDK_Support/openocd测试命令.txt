@@ -1,0 +1,3 @@
+.\tools\openocd\openocd.exe -f .\boards\openocd\probes\cmsis_dap.cfg -f .\boards\openocd\soc\hpm6750-dual-core.cfg
+
+直接在SDK_Support文件夹下打开命令行窗口，复制上面命令并根据烧录器类型修改ft2232.cfg名称，根据芯片型号等修改hpm6750-dual-core.cfg。
