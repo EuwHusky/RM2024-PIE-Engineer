@@ -86,27 +86,28 @@
 #define BOARD_HDMA_IRQ IRQn_HDMA
 #define BOARD_DMAMUX HPM_DMAMUX
 /*------------------------------*/
-/* DEBUGS相关（使用uart4） */
-#define BOARD_DEBUGS_BAUDRATE (100000UL)
-#define BOARD_DEBUGS_UART HPM_UART4
-#define BOARD_DEBUGS_UART_CLK clock_uart4
-#define BOARD_DEBUGS_UART_RX_DMA_CHN (0U)
-#define BOARD_DEBUGS_UART_RX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_HDMA, BOARD_DEBUGS_UART_RX_DMA_CHN)
-#define BOARD_DEBUGS_UART_RX_DMA_REQ HPM_DMA_SRC_UART4_RX
-/* 裁判系统串口相关（使用uart2） */
-#define REFEREE_BAUDRATE (115200UL)
-#define REFEREE_UART HPM_UART3
-#define REFEREE_UART_CLK clock_uart3
-#define REFEREE_UART_RX_DMA_CHN (1U)
-#define REFEREE_UART_RX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_HDMA, REFEREE_UART_RX_DMA_CHN)
-#define REFEREE_UART_RX_DMA_REQ HPM_DMA_SRC_UART3_RX
-/* 图传链路串口相关（使用uart3） */
-#define IMAGE_BAUDRATE (115200UL)
-#define IMAGE_UART HPM_UART2
-#define IMAGE_UART_CLK clock_uart2
-#define IMAGE_UART_RX_DMA_CHN (2U)
-#define IMAGE_UART_RX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_HDMA, IMAGE_UART_RX_DMA_CHN)
-#define IMAGE_UART_RX_DMA_REQ HPM_DMA_SRC_UART2_RX
+/* DBUS相关（使用uart4） */
+#define DBUS_BAUDRATE (100000UL)
+#define DBUS_UART HPM_UART4
+#define DBUS_UART_CLK clock_uart4
+#define DBUS_UART_RX_DMA_CHN (0U)
+// #define DBUS_UART_RX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_HDMA, DBUS_UART_RX_DMA_CHN)
+#define DBUS_UART_RX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_XDMA, DBUS_UART_RX_DMA_CHN)
+#define DBUS_UART_RX_DMA_REQ HPM_DMA_SRC_UART4_RX
+/* 电管裁判系统UART相关 */
+#define PM_BAUDRATE (115200UL)
+#define PM_UART HPM_UART3
+#define PM_UART_CLK clock_uart3
+#define PM_UART_RX_DMA_CHN (1U)
+#define PM_UART_RX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_HDMA, PM_UART_RX_DMA_CHN)
+#define PM_UART_RX_DMA_REQ HPM_DMA_SRC_UART3_RX
+/* 图传裁判系统UART相关 */
+#define VT_BAUDRATE (115200UL)
+#define VT_UART HPM_UART2
+#define VT_UART_CLK clock_uart2
+#define VT_UART_RX_DMA_CHN (2U)
+#define VT_UART_RX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_HDMA, VT_UART_RX_DMA_CHN)
+#define VT_UART_RX_DMA_REQ HPM_DMA_SRC_UART2_RX
 
 /* UART相关 */
 #define BOARD_UART_BAUDRATE (115200UL)
@@ -166,39 +167,40 @@
 #endif
 
 #if defined(__cplusplus)
-extern "C" {
+extern "C"
+{
 #endif /* __cplusplus */
 
-typedef void (*board_timer_cb)(void);
+    typedef void (*board_timer_cb)(void);
 
-void board_delay_ms(uint32_t ms); // 毫秒延时
-void board_delay_us(uint32_t us); // 微秒延时
+    void board_delay_ms(uint32_t ms); // 毫秒延时
+    void board_delay_us(uint32_t us); // 微秒延时
 
-void board_init(void);         // 初始化板子
-void board_init_clock(void);   // 初始化soc时钟
-void board_init_console(void); // 初始化控制台
-void board_init_pmp(void);     // 初始化pmp和pma
+    void board_init(void);         // 初始化板子
+    void board_init_clock(void);   // 初始化soc时钟
+    void board_init_console(void); // 初始化控制台
+    void board_init_pmp(void);     // 初始化pmp和pma
 
-void board_init_led_pins(void);        // 初始化LED
-void board_write_led_r(uint8_t state); // 对红色灯写状态
-void board_write_led_g(uint8_t state); // 对绿色灯写状态
-void board_write_led_b(uint8_t state); // 对蓝色灯写状态
+    void board_init_led_pins(void);        // 初始化LED
+    void board_write_led_r(uint8_t state); // 对红色灯写状态
+    void board_write_led_g(uint8_t state); // 对绿色灯写状态
+    void board_write_led_b(uint8_t state); // 对蓝色灯写状态
 
-void board_init_beep_pins(void); // 初始化蜂鸣器
-void board_beep_open(void);      // 打开蜂鸣器
-void board_beep_close(void);     // 关闭蜂鸣器
+    void board_init_beep_pins(void); // 初始化蜂鸣器
+    void board_beep_open(void);      // 打开蜂鸣器
+    void board_beep_close(void);     // 关闭蜂鸣器
 
-void board_init_uart(UART_Type *ptr);           // 初始化UART
-uint32_t board_init_uart_clock(UART_Type *ptr); // 初始化串口时钟
+    void board_init_uart(UART_Type *ptr);           // 初始化UART
+    uint32_t board_init_uart_clock(UART_Type *ptr); // 初始化串口时钟
 
-void board_init_can(CAN_Type *ptr);           // 初始化CAN
-uint32_t board_init_can_clock(CAN_Type *ptr); // 初始化CAN时钟
+    void board_init_can(CAN_Type *ptr);           // 初始化CAN
+    uint32_t board_init_can_clock(CAN_Type *ptr); // 初始化CAN时钟
 
-void board_init_i2c(I2C_Type *ptr); // 初始化i2c
+    void board_init_i2c(I2C_Type *ptr); // 初始化i2c
 
-void board_init_spi_pins(SPI_Type *ptr);      // 初始化spi
-uint32_t board_init_spi_clock(SPI_Type *ptr); // 初始化spi时钟
+    void board_init_spi_pins(SPI_Type *ptr);      // 初始化spi
+    uint32_t board_init_spi_clock(SPI_Type *ptr); // 初始化spi时钟
 
-void board_init_usb_pins(void); // 初始化usb
+    void board_init_usb_pins(void); // 初始化usb
 
 #endif /* _HPM_BOARD_H */

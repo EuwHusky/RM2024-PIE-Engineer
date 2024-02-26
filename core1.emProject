@@ -27,7 +27,7 @@
       arm_linker_variant="SEGGER"
       arm_rtl_variant="SEGGER"
       build_generic_options_file_name=""
-      c_user_include_directories="App\\core1;Function;Task\\core1;Task;Module\\BMI088;Module\\Referee;RoboFusionLib\\cfg;RoboFusionLib\\algorithm;RoboFusionLib\\algorithm\\ahrs;RoboFusionLib\\algorithm\\controller;RoboFusionLib\\algorithm\\data_check;RoboFusionLib\\algorithm\\data_processing;RoboFusionLib\\algorithm\\data_structure;RoboFusionLib\\application;RoboFusionLib\\bsp;RoboFusionLib\\bsp\\bmi088;RoboFusionLib\\bsp\\ma600;RoboFusionLib\\bsp\\rm_motor;RoboFusionLib\\device;RoboFusionLib\\device\\motor;RoboFusionLib\\driver;RoboFusionLib\\driver\\can;RoboFusionLib;SDK_Support\\arch;SDK_Support\\boards\\hpm6750new;SDK_Support\\drivers\\inc;SDK_Support\\config;SDK_Support\\soc\\ip;SDK_Support\\soc\\HPM6750;SDK_Support\\soc\\HPM6750\\toolchains;SDK_Support\\soc\\HPM6750\\boot;SDK_Support\\components\\debug_console;SDK_Support\\components\\usb\\device;SDK_Support\\middleware\\FreeRTOS\\Source\\include;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V\\chip_specific_extensions\\HPMicro;SDK_Support\\middleware\\cherryusb\\common;SDK_Support\\middleware\\cherryusb\\class\\cdc;SDK_Support\\middleware\\cherryusb\\core;SDK_Support\\middleware\\cherryusb\\osal"
+      c_user_include_directories="App\\core1;Task;Task\\core1;Module\\remote_control;SDK_Support\\arch;SDK_Support\\boards\\hpm6750new;SDK_Support\\drivers\\inc;SDK_Support\\config;SDK_Support\\soc\\ip;SDK_Support\\soc\\HPM6750;SDK_Support\\soc\\HPM6750\\toolchains;SDK_Support\\soc\\HPM6750\\boot;SDK_Support\\components\\debug_console;SDK_Support\\components\\usb\\device;SDK_Support\\middleware\\FreeRTOS\\Source\\include;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V\\chip_specific_extensions\\HPMicro;SDK_Support\\middleware\\cherryusb\\common;SDK_Support\\middleware\\cherryusb\\class\\cdc;SDK_Support\\middleware\\cherryusb\\core;SDK_Support\\middleware\\cherryusb\\osal"
       debug_target_connection="GDB Server"
       gdb_server_autostart_server="No"
       gdb_server_command_line="$(ProjectDir)/SDK_Support/tools/openocd/openocd.exe -f $(ProjectDir)/SDK_Support/boards/openocd/probes/cmsis_dap.cfg -f $(ProjectDir)/SDK_Support/boards/openocd/soc/hpm6750-dual-core.cfg -f $(ProjectDir)/SDK_Support/boards/openocd/boards/hpm6750evkmini.cfg"
@@ -71,58 +71,6 @@
       debug_register_definition_file="$(ProjectDir)/SDK_Support\soc\HPM6750\hpm_ses_reg.xml" />
     <folder Name="App">
       <file file_name="App/core1/main.c" />
-    </folder>
-    <folder Name="Function">
-      <file file_name="Function/remote_control.c" />
-    </folder>
-    <folder Name="Module">
-      <folder Name="BMI088">
-        <file file_name="Module/BMI088/BMI088driver.c" />
-        <file file_name="Module/BMI088/BMI088Middleware.c" />
-      </folder>
-      <folder Name="Referee">
-        <file file_name="Module/Referee/CRC8_CRC16.c" />
-        <file file_name="Module/Referee/fifo.c" />
-        <file file_name="Module/Referee/referee.c" />
-      </folder>
-    </folder>
-    <folder Name="RoboFusionLib">
-      <folder Name="algorithm">
-        <folder Name="controller">
-          <file file_name="robofusionlib/algorithm/controller/algo_pid.c" />
-        </folder>
-        <folder Name="data_processing">
-          <file file_name="robofusionlib/algorithm/data_processing/algo_data_limiting.c" />
-          <file file_name="robofusionlib/algorithm/data_processing/algo_filter.c" />
-          <file file_name="robofusionlib/algorithm/data_processing/algo_kalman_filter.c" />
-        </folder>
-        <folder Name="data_structure">
-          <file file_name="robofusionlib/algorithm/data_structure/algo_angle.c" />
-          <file file_name="robofusionlib/algorithm/data_structure/algo_matrix.c" />
-        </folder>
-      </folder>
-      <folder Name="bsp">
-        <folder Name="bmi088" />
-        <folder Name="ma600">
-          <file file_name="RoboFusionLib/bsp/ma600/bsp_ma600.c" />
-          <file file_name="RoboFusionLib/bsp/ma600/bsp_ma600_middleware.c" />
-        </folder>
-        <folder Name="rm_motor">
-          <file file_name="RoboFusionLib/bsp/rm_motor/bsp_rm_motor.c" />
-        </folder>
-      </folder>
-      <folder Name="cfg">
-        <file file_name="robofusionlib/cfg/rfl_config.h" />
-        <file file_name="robofusionlib/cfg/rfl_core_rm_c_board.h" />
-        <file file_name="robofusionlib/cfg/rfl_core_wpie_hpm6750.h" />
-      </folder>
-      <folder Name="device">
-        <file file_name="RoboFusionLib/device/motor/dev_motor.c" />
-        <file file_name="RoboFusionLib/device/motor/dev_motor_control.c" />
-      </folder>
-      <folder Name="driver">
-        <file file_name="RoboFusionLib/driver/can/drv_can.c" />
-      </folder>
     </folder>
     <folder Name="SDK_Support">
       <folder Name="boards">
@@ -225,9 +173,9 @@
       </folder>
     </folder>
     <folder Name="Task">
-      <file file_name="Task/Detect_task.c" />
-      <file file_name="Task/Dualcore_task.c" />
-      <file file_name="Task/Print_task.c" />
+      <file file_name="Task/detect_task.c" />
+      <file file_name="Task/dualcore_task.c" />
+      <file file_name="Task/print_task.c" />
     </folder>
   </project>
 </solution>

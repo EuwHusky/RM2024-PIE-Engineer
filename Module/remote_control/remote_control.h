@@ -9,12 +9,6 @@
 #include "hpm_trgmmux_src.h"
 #include "hpm_uart_drv.h"
 
-#include "fifo.h"
-#include "referee.h"
-/* ----------------------- 图传链路数据结构&函数 ------------------------------------- */
-#define IMAGE_RX_BUF_LENGHT 512    // 图传链路数据接受数组大小
-#define IMAGE_FIFO_BUF_LENGTH 1024 // 图传链路fifo数组大小
-
 /* ----------------------- 遥控器数据结构&函数 ------------------------------------- */
 #define RC_SW_UP ((uint16_t)1)
 #define RC_SW_MID ((uint16_t)3)
@@ -37,27 +31,26 @@
 
 typedef struct
 {
-  __packed struct
-  {
-    int16_t ch[5]; // 遥控器遥感&拨盘
-    char s[2];     // 遥控器拨杆
-  } rc;
-  __packed struct
-  {
-    int16_t x;       // 鼠标x
-    int16_t y;       // 鼠标y
-    int16_t z;       // 鼠标滚轮
-    uint8_t press_l; // 鼠标左键
-    uint8_t press_r; // 鼠标右键
-  } mouse;
-  __packed struct
-  {
-    uint16_t v; // 16个按键数据
-  } key;
+    struct
+    {
+        int16_t ch[5]; // 遥控器遥感&拨盘
+        char s[2];     // 遥控器拨杆
+    } __packed rc;
+    struct
+    {
+        int16_t x;       // 鼠标x
+        int16_t y;       // 鼠标y
+        int16_t z;       // 鼠标滚轮
+        uint8_t press_l; // 鼠标左键
+        uint8_t press_r; // 鼠标右键
+    } __packed mouse;
+    struct
+    {
+        uint16_t v; // 16个按键数据
+    } __packed key;
 } __packed RC_ctrl_t;
 
-extern bool remote_lose;                         // 遥控器丢失或出错超过上限标志位
-extern void Remote_task(void *pvParameters);     // 遥控器接收任务
+extern void dbus_task(void *pvParameters);       // 遥控器接收任务
 const RC_ctrl_t *get_remote_control_point(void); // 获取遥控器数据指针
 
 /* ----------------------- 键盘数据结构&函数 ------------------------------------- */
@@ -92,14 +85,15 @@ const RC_ctrl_t *get_remote_control_point(void); // 获取遥控器数据指针
 #define CHASSIS_POWER_UP KEY_PRESSED_OFFSET_SHIFT // 加速按键（左shift）
 
 // 按键信息结构体
-typedef struct {
-  uint16_t Up_Down;               // 检测抬起-按下状态
-  uint16_t Down_Up;               // 检测按下-抬起状态
-  uint16_t Now_State;             // 检测当前是否正在按下（按下就为1）
-  uint16_t Last_State;            // 上次按键状态
-  uint16_t Continue;              // 检测当前是否按下（间隔脉冲返回1）
-  uint64_t Time_Flag[KEY_NUMBER]; // 目标时间
-  uint64_t Time_Now;              // 按键时间线
+typedef struct
+{
+    uint16_t Up_Down;               // 检测抬起-按下状态
+    uint16_t Down_Up;               // 检测按下-抬起状态
+    uint16_t Now_State;             // 检测当前是否正在按下（按下就为1）
+    uint16_t Last_State;            // 上次按键状态
+    uint16_t Continue;              // 检测当前是否按下（间隔脉冲返回1）
+    uint64_t Time_Flag[KEY_NUMBER]; // 目标时间
+    uint64_t Time_Now;              // 按键时间线
 } IfKey;
 
 void rc_keyboard_update(void); // 按键状态更新

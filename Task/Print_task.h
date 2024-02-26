@@ -3,5 +3,5 @@
 
 #include "board.h"
 
-extern void Print_task(void *pvParameters); // 调试输出任务
+extern void print_task(void *pvParameters); // 调试输出任务
 #endif

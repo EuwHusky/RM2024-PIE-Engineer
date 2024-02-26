@@ -5,13 +5,16 @@
 #include "referee.h"
 #include "stdarg.h"
 
-#define USART_RX_BUF_LENGHT 512 // 512
-#define REFEREE_FIFO_BUF_LENGTH 1024
+#define PM_UART_RX_BUF_LENGHT 512    // 电管链路裁判系统数据接收数组大小
+#define PM_UART_FIFO_BUF_LENGTH 1024 // 电管链路裁判系统数据fifo数组大小
+
+#define VT_UART_RX_BUF_LENGHT 512    // 图传链路裁判系统数据接收数组大小
+#define VT_UART_FIFO_BUF_LENGTH 1024 // 图传链路裁判系统数据fifo数组大小
 
 #pragma pack(1) // 按一字节对齐
 
-#define NULL 0
-#define __FALSE 100
+// #define NULL 0
+// #define __FALSE 100
 
 /****************************开始标志*********************/
 #define UI_SOF 0xA5
@@ -83,59 +86,61 @@
 #define UI_Color_Cyan 6         // 青色
 #define UI_Color_Black 7        // 黑色
 #define UI_Color_White 8        // 白色
+
+typedef enum RefereeLinkType
+{
+    PM_REFEREE_LINK = 0,
+    VT_REFEREE_LINK,
+} referee_link_type_e;
+
 typedef struct
 {
-  uint8_t Delate[17];
+    uint8_t Delate[17];
 } __packed UI_Delate_t; // UI删除图层数组
 typedef struct
 {
-  uint8_t P1[30];
+    uint8_t P1[30];
 } __packed UI_Refresh_P1; // UI添加图层数组
 typedef struct
 {
-  uint8_t P2[45];
+    uint8_t P2[45];
 } __packed UI_Refresh_P2; // UI添加图层数组
 typedef struct
 {
-  uint8_t P5[90];
+    uint8_t P5[90];
 } __packed UI_Refresh_P5; // UI添加图层数组
 typedef struct
 {
-  uint8_t P7[120];
+    uint8_t P7[120];
 } __packed UI_Refresh_P7; // UI添加图层数组
 typedef struct
 {
-  uint8_t ch[60];
+    uint8_t ch[60];
 } __packed UI_Refresh_char; // UI添加图层数组
 typedef struct
 {
-  uint8_t fp[30];
+    uint8_t fp[30];
 } __packed UI_Refresh_float; // UI添加图层数组
 typedef struct
 {
-  uint8_t communication[113];
+    uint8_t communication[113];
 } __packed UI_Refresh_communication; // 机器人间通信
 
 typedef struct
 {
-  uint8_t num;
-  uint8_t Picture_Data[128];
-  graphic_data_struct_t *graphic_data[7];
+    uint8_t num;
+    uint8_t Picture_Data[128];
+    // graphic_data_struct_t *graphic_data[7];
 } Refreedata_UI;
 
 // 裁判系统数据结构体，用来向cpu1传输数据
-typedef struct {
-  uint8_t robot_id;
-  float now_power;
-  uint16_t power_limit;
-  uint16_t power_buffer;
-  uint16_t heat;
-  uint16_t heat_limit;
-  float shoot_speed;
-  uint16_t shoot_speed_limit;
-} Refree_data_t;
+typedef struct
+{
+    uint8_t robot_id;
 
-extern void Referee_task(void *pvParameters);
-extern Refree_data_t *get_refree_data_point(void);
+} Referee_data_t;
+
+extern void referee_task(void *pvParameters);
+extern Referee_data_t *get_referee_data_pointer(void);
 
 #endif

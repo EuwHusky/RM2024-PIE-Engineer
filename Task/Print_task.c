@@ -1,4 +1,5 @@
-#include "Print_task.h"
+#include "print_task.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -7,19 +8,22 @@
 
 #if !BOARD_RUNNING_CORE
 // core0
-#include "Detect_task.h"
-#include "Dualcore_task.h"
 #include "INS_task.h"
-#include "Referee_task.h"
+#include "detect_task.h"
+#include "dualcore_task.h"
+#include "referee_task.h"
+#include "remote_control.h"
 
 // 需求变量
 INS_t *ins_;
 transmit_data_021 *data_send;
 transmit_data_120 *data_read;
 
-void Print_task(void *pvParameters)
+void print_task(void *pvParameters)
 {
-    vTaskDelay(1000);
+    while (!INS_init_finished)
+        vTaskDelay(8);
+    vTaskDelay(300);
 
     ins_ = get_INS_data_point();
     data_read = get_data_120_point();
@@ -28,19 +32,34 @@ void Print_task(void *pvParameters)
     while (true)
     {
 #if PRINT_ERROR
-        for (uint8_t i = My_dualcore; i < DETECT_ERROR_LIST_LENGHT; i++)
+        for (uint8_t i = DUAL_COMM_DH; i < DETECT_ERROR_LIST_LENGHT; i++)
         {
             if (detect_error(i))
                 switch (i)
                 {
-                case My_dualcore: // 双核
+                case DUAL_COMM_DH: // 双核
                     printf("核间通信异常\n");
                     break;
-                case My_referee: // 裁判系统
+                case PM_REFEREE_DH: // 裁判系统
                     printf("裁判系统串口异常\n");
                     break;
-                case My_computer: // 电脑通信
-                    printf("小电脑通信异常\n");
+                case DBUS_DH: // 遥控器
+                    printf("遥控器串口连接异常\n");
+                    break;
+                case My_vtm: // 图传
+                    printf("图传串口连接异常\n");
+                    break;
+                case CHASSIS_MOTOR_0_DH: // 驱动1
+                    printf("左前驱动信号异常\n");
+                    break;
+                case CHASSIS_MOTOR_1_DH: // 驱动2
+                    printf("右前驱动信号异常\n");
+                    break;
+                case CHASSIS_MOTOR_2_DH: // 驱动2
+                    printf("左后驱动信号异常\n");
+                    break;
+                case CHASSIS_MOTOR_3_DH: // 驱动4
+                    printf("右后驱动信号异常\n");
                     break;
                 }
         }
@@ -66,82 +85,31 @@ void Print_task(void *pvParameters)
 
 #else
 // core1
-// #include "Chassis_task.h"
-#include "Detect_task.h"
-#include "Dualcore_task.h"
-// #include "Gimbal_task.h"
-#include "Print_task.h"
-// #include "Shoot_task.h"
-#include "remote_control.h"
+#include "detect_task.h"
+#include "dualcore_task.h"
+#include "print_task.h"
 
 // 需求变量
-const RC_ctrl_t *rc_data_print;
 const transmit_data_021 *core0_data_print;
-// const gimbal_control_t *gimbal_print;
-// const shoot_control_t *shoot_print;
-// const chassis_control_t *chassis_print;
 
-void Print_task(void *pvParameters)
+void print_task(void *pvParameters)
 {
     board_init_console(); // 初始化调试用串口
-    while (detect_error(My_dualcore))
+    while (detect_error(DUAL_COMM_DH))
         vTaskDelay(PRINT_TIME_MS);
 
-    rc_data_print = get_remote_control_point();
     core0_data_print = get_data_021_point();
-    // gimbal_print = get_gimbal_control_point();
-    // shoot_print = get_shoot_control_point();
-    // chassis_print = get_chassis_control_point();
 
     while (true)
     {
 #if PRINT_ERROR
-        for (uint8_t i = My_dualcore; i < DETECT_ERROR_LIST_LENGHT; i++)
+        for (uint8_t i = DUAL_COMM_DH; i < DETECT_ERROR_LIST_LENGHT; i++)
         {
             if (detect_error(i))
                 switch (i)
                 {
-                case My_dualcore: // 双核
+                case DUAL_COMM_DH: // 双核
                     printf("核间通信异常\n");
-                    break;
-                case My_remote: // 遥控器
-                    printf("遥控器串口连接异常\n");
-                    break;
-                case My_vtm: // 图传
-                    printf("图传串口连接异常\n");
-                    break;
-                case My_super: // 超电
-                    printf("超电通信异常\n");
-                    break;
-                case My_shootl: // 左摩擦轮
-                    printf("左摩擦轮信号异常\n");
-                    break;
-                case My_shootr: // 右摩擦轮
-                    printf("右摩擦轮信号异常\n");
-                    break;
-                case My_tri2006: // 拨弹2006
-                    printf("拨弹2006信号异常\n");
-                    break;
-                case My_pitch: // pitch
-                    printf("pitch信号异常\n");
-                    break;
-                case My_drive1: // 驱动1
-                    printf("左前驱动信号异常\n");
-                    break;
-                case My_drive2: // 驱动2
-                    printf("右前驱动信号异常\n");
-                    break;
-                case My_drive3: // 驱动2
-                    printf("左后驱动信号异常\n");
-                    break;
-                case My_drive4: // 驱动4
-                    printf("右后驱动信号异常\n");
-                    break;
-                case My_yaw: // yaw
-                    printf("yaw信号异常\n");
-                    break;
-                case My_tri3508: // 拨弹3508
-                    printf("拨弹3508信号异常\n");
                     break;
                 }
         }
@@ -149,8 +117,9 @@ void Print_task(void *pvParameters)
         vTaskDelay(2000);
 #else
 
-        // printf("%d,%d,%d,%d,%d\r\n", rc_data_print->rc.ch[0], rc_data_print->rc.ch[1], rc_data_print->rc.ch[2],
-        //        rc_data_print->rc.ch[3], rc_data_print->rc.ch[4]);
+        printf("%d,%d,%d,%d,%d\r\n", core0_data_print->rc_data_image.rc.ch[0], core0_data_print->rc_data_image.rc.ch[1],
+               core0_data_print->rc_data_image.rc.ch[2], core0_data_print->rc_data_image.rc.ch[3],
+               core0_data_print->rc_data_image.rc.ch[4]);
 
         // printf("%f,%d,%d,%d,%d,%d,%d,%f,%f,%f,%d,%f,%d\n",
         //     core0_data_print->refree_data.shoot_speed,
@@ -180,10 +149,6 @@ void Print_task(void *pvParameters)
         //     shoot_print->shootl.send_current,
         //     shoot_print->shootr.send_current,
         //     shoot_print->tri_2006.send_current);
-
-        // printf("%d,%d,%d,%d,%d,%d,%d,%d\n", remote_lose, rc_data_print->rc.s[0], rc_data_print->rc.s[1],
-        // rc_data_print->rc.ch[0], rc_data_print->rc.ch[1], rc_data_print->rc.ch[2], rc_data_print->rc.ch[3],
-        // rc_data_print->rc.ch[4]);
 
         // PITCH轴相关参数输出
         // printf("%d,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d\n",
