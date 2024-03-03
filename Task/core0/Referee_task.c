@@ -90,6 +90,7 @@ void referee_task(void *pvParameters)
             uart_rx_trigger_dma(BOARD_HDMA, PM_UART_RX_DMA_CHN, PM_UART,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_rx_buf),
                                 PM_UART_RX_BUF_LENGHT);
+            printf("pm\n");
         }
 
         if (vt_uart_rx_dma_done)
@@ -99,6 +100,7 @@ void referee_task(void *pvParameters)
             uart_rx_trigger_dma(BOARD_HDMA, VT_UART_RX_DMA_CHN, VT_UART,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)vt_rx_buf),
                                 VT_UART_RX_BUF_LENGHT);
+            printf("vt\n");
         }
 
         // refree_data.robot_id = get_robot_id();
@@ -117,26 +119,26 @@ void referee_task(void *pvParameters)
     }
 }
 
-// // DMA中断回调函数
-// void referee_dma_isr(void)
-// {
-//     volatile hpm_stat_t stat_rx_chn;
+// DMA中断回调函数
+void referee_dma_isr(void)
+{
+    volatile hpm_stat_t stat_rx_chn;
 
-//     if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, PM_UART_RX_DMA_CHN), stat_rx_chn & DMA_CHANNEL_STATUS_TC)
-//     {
-//         fifo_s_puts(&pm_uart_fifo, (char *)pm_rx_buf, PM_UART_RX_BUF_LENGHT);
-//         pm_uart_rx_dma_done = true; // 更新标志位
-//         detect_hook(PM_REFEREE_DH);
-//     }
-//     else if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, VT_UART_RX_DMA_CHN),
-//              stat_rx_chn & DMA_CHANNEL_STATUS_TC)
-//     {
-//         fifo_s_puts(&vt_uart_fifo, (char *)vt_rx_buf, VT_UART_RX_BUF_LENGHT);
-//         vt_uart_rx_dma_done = true; // 更新标志位
-//         detect_hook(VT_REFEREE_DH);
-//     }
-// }
-// SDK_DECLARE_EXT_ISR_M(BOARD_HDMA_IRQ, referee_dma_isr)
+    if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, PM_UART_RX_DMA_CHN), stat_rx_chn & DMA_CHANNEL_STATUS_TC)
+    {
+        fifo_s_puts(&pm_uart_fifo, (char *)pm_rx_buf, PM_UART_RX_BUF_LENGHT);
+        pm_uart_rx_dma_done = true; // 更新标志位
+        detect_hook(PM_REFEREE_DH);
+    }
+    else if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, VT_UART_RX_DMA_CHN),
+             stat_rx_chn & DMA_CHANNEL_STATUS_TC)
+    {
+        fifo_s_puts(&vt_uart_fifo, (char *)vt_rx_buf, VT_UART_RX_BUF_LENGHT);
+        vt_uart_rx_dma_done = true; // 更新标志位
+        detect_hook(VT_REFEREE_DH);
+    }
+}
+SDK_DECLARE_EXT_ISR_M(BOARD_HDMA_IRQ, referee_dma_isr)
 
 // 裁判系统串口初始化
 void pm_uart_init(void)

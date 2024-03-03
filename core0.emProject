@@ -28,7 +28,7 @@
       arm_rtl_variant="SEGGER"
       build_generic_options_file_name="$(StudioDir)/targets/Andes_build_options.xml"
       c_additional_options="-Wall;-Wundef;-Wno-format;-fomit-frame-pointer;-fno-builtin;-ffunction-sections;-fdata-sections;-g;-mcpu=d45;-mext-dsp"
-      c_user_include_directories="App\\core0;Task;Task\\core0;Function;Module\\bmi088;Module\\referee;Module\\remote_control;RoboFusionLib\\algorithm\\ahrs;RoboFusionLib\\algorithm\\controller;RoboFusionLib\\algorithm\\data_check;RoboFusionLib\\algorithm\\data_processing;RoboFusionLib\\algorithm\\data_structure;RoboFusionLib\\algorithm\\protocol;RoboFusionLib\\bsp\\bmi088;RoboFusionLib\\bsp\\rm_motor;RoboFusionLib\\bsp\\damiao_motor;RoboFusionLib\\cfg;RoboFusionLib\\device\\motor;RoboFusionLib\\driver\\can;RoboFusionLib\\driver\\delay;RoboFusionLib\\driver\\machine_time;SDK_Support\\arch;SDK_Support\\boards\\hpm6750new;SDK_Support\\drivers\\inc;SDK_Support\\config;SDK_Support\\soc\\ip;SDK_Support\\soc\\HPM6750;SDK_Support\\soc\\HPM6750\\toolchains;SDK_Support\\soc\\HPM6750\\boot;SDK_Support\\components\\debug_console;SDK_Support\\components\\usb\\device;SDK_Support\\middleware\\FreeRTOS\\Source\\include;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V\\chip_specific_extensions\\HPMicro;SDK_Support\\middleware\\cherryusb\\common;SDK_Support\\middleware\\cherryusb\\class\\cdc;SDK_Support\\middleware\\cherryusb\\core;SDK_Support\\middleware\\cherryusb\\osal;SDK_Support\\middleware\\hpm_math;SDK_Support\\middleware\\hpm_math\\nds_dsp"
+      c_user_include_directories="App\\core0;Task;Task\\core0;Function;Module\\bmi088;Module\\referee;Module\\remote_control;RoboFusionLib\\algorithm\\ahrs;RoboFusionLib\\algorithm\\controller;RoboFusionLib\\algorithm\\data_check;RoboFusionLib\\algorithm\\data_processing;RoboFusionLib\\algorithm\\data_structure;RoboFusionLib\\algorithm\\protocol;RoboFusionLib\\bsp\\bmi088;RoboFusionLib\\bsp\\rm_motor;RoboFusionLib\\bsp\\damiao_motor;RoboFusionLib\\bsp\\ma600;RoboFusionLib\\cfg;RoboFusionLib\\device\\motor;RoboFusionLib\\driver\\can;RoboFusionLib\\driver\\delay;RoboFusionLib\\driver\\machine_time;RoboFusionLib\\robot_kinematics\\stable_chassis;SDK_Support\\arch;SDK_Support\\boards\\hpm6750new;SDK_Support\\drivers\\inc;SDK_Support\\config;SDK_Support\\soc\\ip;SDK_Support\\soc\\HPM6750;SDK_Support\\soc\\HPM6750\\toolchains;SDK_Support\\soc\\HPM6750\\boot;SDK_Support\\components\\debug_console;SDK_Support\\components\\usb\\device;SDK_Support\\middleware\\FreeRTOS\\Source\\include;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V;SDK_Support\\middleware\\FreeRTOS\\Source\\portable\\GCC\\RISC-V\\chip_specific_extensions\\HPMicro;SDK_Support\\middleware\\cherryusb\\common;SDK_Support\\middleware\\cherryusb\\class\\cdc;SDK_Support\\middleware\\cherryusb\\core;SDK_Support\\middleware\\cherryusb\\osal;SDK_Support\\middleware\\hpm_math;SDK_Support\\middleware\\hpm_math\\nds_dsp"
       debug_target_connection="GDB Server"
       gdb_server_autostart_server="Yes"
       gdb_server_command_line="$(ProjectDir)/SDK_Support/tools/openocd/openocd.exe -f $(ProjectDir)/SDK_Support/boards/openocd/probes/cmsis_dap.cfg -f $(ProjectDir)/SDK_Support/boards/openocd/soc/hpm6750-dual-core.cfg -f $(ProjectDir)/SDK_Support/boards/openocd/boards/hpm6750evkmini.cfg"
@@ -104,7 +104,9 @@
         <folder Name="data_check" />
         <folder Name="data_processing">
           <file file_name="robofusionlib/algorithm/data_processing/algo_data_limiting.c" />
+          <file file_name="RoboFusionLib/algorithm/data_processing/algo_filter.c" />
           <file file_name="robofusionlib/algorithm/data_processing/algo_kalman_filter.c" />
+          <file file_name="RoboFusionLib/algorithm/data_processing/algo_math.c" />
           <file file_name="RoboFusionLib/algorithm/data_processing/algo_value.c" />
         </folder>
         <folder Name="data_structure">
@@ -119,6 +121,10 @@
         <folder Name="bmi088" />
         <folder Name="damiao_motor">
           <file file_name="RoboFusionLib/bsp/damiao_motor/bsp_damiao_motor.c" />
+        </folder>
+        <folder Name="ma600">
+          <file file_name="RoboFusionLib/bsp/ma600/bsp_ma600.c" />
+          <file file_name="RoboFusionLib/bsp/ma600/bsp_ma600_middleware.c" />
         </folder>
         <folder Name="rm_motor">
           <file file_name="RoboFusionLib/bsp/rm_motor/bsp_rm_motor.c" />
@@ -144,6 +150,11 @@
         </folder>
         <folder Name="machine_time">
           <file file_name="RoboFusionLib/driver/machine_time/drv_machine_time.c" />
+        </folder>
+      </folder>
+      <folder Name="robot_kinematics">
+        <folder Name="stable_chassis">
+          <file file_name="RoboFusionLib/robot_kinematics/stable_chassis/kine_stable_chassis.c" />
         </folder>
       </folder>
     </folder>
@@ -276,7 +287,11 @@
       </folder>
     </folder>
     <folder Name="Task">
+      <file file_name="Task/core0/arm_control.c" />
+      <file file_name="Task/core0/arm_kinematics.c" />
+      <file file_name="Task/core0/arm_motor.c" />
       <file file_name="Task/core0/arm_task.c" />
+      <file file_name="Task/core0/chassis_task.c" />
       <file file_name="Task/detect_task.c" />
       <file file_name="Task/dualcore_task.c" />
       <file file_name="Task/core0/INS_task.c" />

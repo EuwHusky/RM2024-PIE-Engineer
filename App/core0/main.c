@@ -10,6 +10,7 @@
 
 #include "INS_task.h"
 #include "arm_task.h"
+#include "chassis_task.h"
 #include "detect_task.h"
 #include "dualcore_task.h"
 #include "print_task.h"
@@ -20,6 +21,7 @@
 #define INS_TASK_PRIORITY (configMAX_PRIORITIES - 1U)
 #define DUALCORE_TASK_PRIORITY (configMAX_PRIORITIES - 1U)
 #define ARM_TASK_PRIORITY (configMAX_PRIORITIES - 2U)
+#define CHASSIS_TASK_PRIORITY (configMAX_PRIORITIES - 3U)
 #define DBUS_TASK_PRIORITY (configMAX_PRIORITIES - 4U)
 #define DETECT_TASK_PRIORITY (configMAX_PRIORITIES - 5U)
 #define REFEREE_TASK_PRIORITY (configMAX_PRIORITIES - 6U)
@@ -48,13 +50,9 @@ void test_task(void *pvParameters)
 
     while (1)
     {
-        // board_write_led_r(LED_ON);
         board_write_led_g(LED_ON);
-        // board_write_led_b(LED_ON);
         vTaskDelay(200);
-        // board_write_led_r(LED_OFF);
         board_write_led_g(LED_OFF);
-        // board_write_led_b(LED_OFF);
         vTaskDelay(200);
     }
 }
@@ -81,13 +79,17 @@ int main(void)
     xTaskCreate(dbus_task, "dbus_task", configMINIMAL_STACK_SIZE + 128U, NULL, DBUS_TASK_PRIORITY, NULL);
 
     xTaskCreate(arm_task, "arm_task", configMINIMAL_STACK_SIZE + 256U, NULL, ARM_TASK_PRIORITY, NULL);
+    xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 256U, NULL, CHASSIS_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);
     xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE, NULL, PRINT_TASK_PRIORITY, NULL);
 
-    //    启动freertos
+    // 启动freertos
     vTaskStartScheduler();
+
     while (1)
-        ;
+    {
+    }
+
     return 0;
 }

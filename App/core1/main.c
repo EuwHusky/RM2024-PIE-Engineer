@@ -4,8 +4,6 @@
 #include "semphr.h"
 #include "task.h"
 
-// #include "bsp_ma600.h"
-
 #include "detect_task.h"
 #include "dualcore_task.h"
 #include "print_task.h"
@@ -20,24 +18,8 @@ void test_task(void *pvParameters)
 {
     vTaskDelay(1000);
 
-    // MA600_init();
-    // uint16_t angle = 0;
-    // bool error;
-    bool has_error = false;
-
     while (true)
     {
-        // angle = MA600_read_with_check(&error);
-        // printf("%d,%d\n", error, angle);
-        // for (uint8_t i = DUAL_COMM_DH; i < DETECT_ERROR_LIST_LENGHT; i++) {
-        //  if (detect_error(i)) {
-        //    has_error = true;
-        //    break;
-        //  } else {
-        //    has_error = false;
-        //  }
-        //}
-        board_write_led_r(!has_error);
         board_write_led_b(LED_ON);
         vTaskDelay(200);
         board_write_led_b(LED_OFF);

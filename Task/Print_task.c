@@ -4,7 +4,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 5     // 输出数据的周期
+#define PRINT_TIME_MS 20    // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE
 // core0
@@ -46,7 +46,7 @@ void print_task(void *pvParameters)
                 case DBUS_DH: // 遥控器
                     printf("遥控器串口连接异常\n");
                     break;
-                case My_vtm: // 图传
+                case VT_REFEREE_DH: // 图传
                     printf("图传串口连接异常\n");
                     break;
                 case CHASSIS_MOTOR_0_DH: // 驱动1

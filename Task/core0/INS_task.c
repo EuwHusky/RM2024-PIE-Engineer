@@ -49,13 +49,21 @@ static void IMU_Param_Correction(IMU_Param_t *param, float gyro[3], float accel[
 // 陀螺仪姿态解算任务
 void INS_task(void *pvParameters)
 {
-    INS_Param_Init();             // 参数初始化
+    INS_Param_Init(); // 参数初始化
+
     while (BMI088_init() != true) // 初始化BMI088
         ;
     Calibrate_MPU_Offset(&BMI088); // 计算零飘
+
+    // 蜂鸣器提示校准完成
     board_beep_open();
-    vTaskDelay(500); // 蜂鸣器提示校准完成
+    vTaskDelay(50);
     board_beep_close();
+    vTaskDelay(50);
+    board_beep_open();
+    vTaskDelay(50);
+    board_beep_close();
+
     INS_init_finished = true;                   // 至此陀螺仪初始化完成，更新标志位
     TickType_t last_tick = xTaskGetTickCount(); // 获取当前时间
     while (true)

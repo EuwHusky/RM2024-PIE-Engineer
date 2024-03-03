@@ -3,18 +3,30 @@
 
 #include "arm_task.h"
 
-#include "board.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "arm_control.h"
+#include "arm_kinematics.h"
+#include "arm_motor.h"
+
+// #include "board.h"
+
 #include "drv_can.h"
+
+#include "bsp_ma600.h"
 
 #include "dev_motor.h"
 
+#include "algo_data_limiting.h"
+
 #include "INS_task.h"
 #include "detect_task.h"
-#include "remote_control.h"
+
+engineer_scara_arm_s arm = {0};
+
+static void arm_init(engineer_scara_arm_s *arm);
+static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *arm);
 
 void arm_task(void *pvParameters)
 {
@@ -22,95 +34,76 @@ void arm_task(void *pvParameters)
         vTaskDelay(2);
     vTaskDelay(30);
 
-    const RC_ctrl_t *rc_data;
-    rc_data = get_remote_control_point();
-
-    rfl_motor_s motor_1;
-    rfl_motor_s motor_2;
-
-    damiao_motor_s *drv_1 = NULL;
-    damiao_motor_s *drv_2 = NULL;
-
-    rfl_motor_config_s motor_config;
-    rflMotorGetDefaultConfig(&motor_config, RFL_MOTOR_DM_J8009_2EC, RFL_MOTOR_CONTROLLER_DAMIAO);
-    motor_config.is_reversed = false;
-    motor_config.can_ordinal = 1;
-    motor_config.master_can_id = 0x02;
-    motor_config.slave_can_id = 0x00;
-    rflMotorInit(&motor_1, &motor_config);
-    motor_config.is_reversed = true;
-    motor_config.can_ordinal = 1;
-    motor_config.master_can_id = 0x03;
-    motor_config.slave_can_id = 0x01;
-    rflMotorInit(&motor_2, &motor_config);
-
-    // drv_1 = (damiao_motor_s *)(motor_1.driver);
-    // drv_2 = (damiao_motor_s *)(motor_2.driver);
-
-    rfl_motor_s test_motor;
-    rfl_motor_config_s test_motor_config;
-    rflMotorGetDefaultConfig(&test_motor_config, RFL_MOTOR_RM_M2006, RFL_MOTOR_CONTROLLER_PID);
-    motor_config.can_ordinal = 1;
-    motor_config.master_can_id = 0x201;
-    rflAngleUpdate(&test_motor_config.max_angle, RFL_ANGLE_FORMAT_DEGREE, 660.0f);
-    rflAngleUpdate(&test_motor_config.min_angle, RFL_ANGLE_FORMAT_DEGREE, -660.0f);
-    motor_config.angle_pid_kp = 0.8f;
-    motor_config.angle_pid_kd = 0.1f;
-    rflMotorInit(&test_motor, &test_motor_config);
-    rflMotorSetMode(&test_motor, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-
-    char mode_control_key_value = 0;
-    char last_mode_control_key_value = 0;
+    arm_init(&arm);
 
     while (1)
     {
-        mode_control_key_value = rc_data->rc.s[1];
-        if (last_mode_control_key_value != 3 && mode_control_key_value == 3)
-        {
-            rflMotorSetMode(&motor_1, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        // 接收用户输入的模式控制指令 设定机械臂工作模式
+        arm_set_mode(&arm);
+        // 根据工作模式 接收用户输入的关节/位姿操控指令 控制机械臂
+        arm_mode_control(&arm);
 
-            printf("enable\r\n");
-            rflMotorSetMode(&motor_2, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-        }
-        else if (last_mode_control_key_value != 1 && mode_control_key_value == 1)
-        {
-            rflMotorSetMode(&motor_1, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        // 更新磁编码器反馈
+        update_mag_encoder_ma600_feedback(&arm);
 
-            printf("failure\r\n");
-            rflMotorSetMode(&motor_2, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
-        }
-        last_mode_control_key_value = mode_control_key_value;
+        // 机械臂模型更新
+        arm_model_update_status(&arm);
+        arm_model_update_control(&arm);
 
-        if (rflMotorGetMode(&motor_1) == RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE &&
-            rflMotorGetMode(&motor_2) == RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE)
-        {
-            rflMotorSetAngle(&motor_1, RFL_ANGLE_FORMAT_RADIAN, (float)rc_data->rc.ch[2] / 660.0f * 3.14f);
-            rflMotorSetSpeed(&motor_1, 5.0f);
-            rflMotorSetAngle(&motor_2, RFL_ANGLE_FORMAT_RADIAN, (float)rc_data->rc.ch[2] / 660.0f * 6.28f);
-            rflMotorSetSpeed(&motor_2, 5.0f);
-        }
+        // 机械臂电机更新与执行
+        arm_motor_update_and_execute(&arm);
 
-        rflMotorUpdateStatus(&motor_1);
-        rflMotorUpdateControl(&motor_1);
-        rflMotorExecuteControl(&motor_1);
-        // vTaskDelay(1);
-        rflMotorUpdateStatus(&motor_2);
-        rflMotorUpdateControl(&motor_2);
-        rflMotorExecuteControl(&motor_2);
-        // vTaskDelay(1);
-
-        printf("%f,%f,%d\r\n", rflMotorGetAngle(&motor_1, RFL_ANGLE_FORMAT_DEGREE),
-               rflMotorGetAngle(&motor_2, RFL_ANGLE_FORMAT_DEGREE), mode_control_key_value);
-
-        rflMotorSetAngle(&test_motor, RFL_ANGLE_FORMAT_DEGREE, (float)rc_data->rc.ch[2]);
-
-        rflMotorUpdateStatus(&test_motor);
-        rflMotorUpdateControl(&test_motor);
-
-        rflRmMotorControl(1, 0x200, (int16_t)rflMotorGetOutput(&test_motor), 0, 0, 0);
-
-        printf("%f,%f\r\n", rflMotorGetAngle(&test_motor, RFL_ANGLE_FORMAT_DEGREE), rflMotorGetSpeed(&test_motor));
-
-        vTaskDelay(2);
+        vTaskDelay(2); // 在达妙电机CAN发送后还各有一个1ms延迟，所以总共有4ms周期
     }
+}
+
+static void arm_init(engineer_scara_arm_s *arm)
+{
+    memset(arm, 0, sizeof(engineer_scara_arm_s));
+
+    arm_model_init(arm);
+
+    arm_motor_init(arm);
+
+    arm->mode = ARM_MODE_NO_FORCE;
+    arm->last_mode = ARM_MODE_NO_FORCE;
+    arm->is_arm_ready = false;
+    for (uint8_t i = 0; i < 6; i++)
+        arm->is_joints_ready[i] = false;
+    arm->last_mode_control_key_value = 1;
+
+    arm->dr16_rc = get_remote_control_point();
+    arm->custom_cmd = getCustomerControllerData();
+    arm->custom_mk = getRemoteControlData();
+
+    arm->last_custom_rc_cmd[0] = arm->custom_cmd->x;
+    arm->last_custom_rc_cmd[1] = arm->custom_cmd->y;
+    arm->last_custom_rc_cmd[2] = arm->custom_cmd->z;
+    arm->last_custom_rc_cmd[3] = arm->custom_cmd->yaw;
+    arm->last_custom_rc_cmd[4] = arm->custom_cmd->pitch;
+    arm->last_custom_rc_cmd[5] = arm->custom_cmd->roll;
+
+    for (uint8_t i = 0; i < 2; i++)
+        rlfSlidingWindowFilterInit(arm->encoder_angle_filter + i, 11, 2);
+}
+
+static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *arm)
+{
+    bool is_error = false;
+    float angle_offset[2] = {ENGINEER_ARM_JOINT_4_ENCODER_ANGLE_OFFSET, ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET};
+    for (uint8_t i = 0; i < 2; i++)
+    {
+        if (arm->encoder_value[i] = MA600_read_with_check(&is_error, i), is_error == false)
+        {
+            if (i == 2)
+                arm->encoder_value[i] = 65535 - arm->encoder_value[i];
+
+            arm->encoder_angle[i] = rlfSlidingWindowFilterCalc(
+                arm->encoder_angle_filter + i,
+                rflFloatLoopConstrain(((float)arm->encoder_value[i] * 0.005493248f) - 180.0f - angle_offset[i], -DEG_PI,
+                                      DEG_PI));
+        }
+    }
+
+    arm->encoder_angle[3] = 0.0f; // 因为关节6磁编失效临时写的 记得删
 }
