@@ -16,13 +16,16 @@
 
 void test_task(void *pvParameters)
 {
+    board_write_led_b(LED_ON);
     vTaskDelay(1000);
+    int a = 0;
 
     while (true)
     {
-        board_write_led_b(LED_ON);
+        a = (a > 100) ? 0 : a++;
+        // board_write_led_b(LED_ON);
         vTaskDelay(200);
-        board_write_led_b(LED_OFF);
+        // board_write_led_b(LED_OFF);
         vTaskDelay(200);
     }
 }

@@ -8,12 +8,12 @@
 /**
  * @brief 获取用户输入 更新机械臂控制模式
  */
-extern void arm_set_mode(engineer_scara_arm_s *arm);
+extern void arm_set_mode(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量
  */
-extern void arm_mode_control(engineer_scara_arm_s *arm);
+extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 
 #define JOINT_1_HOMING_STEP_ANGLE (0.5f)
 #define JOINT_1_HOMING_TORQUE_THRESHOLD (1.0f)
@@ -23,8 +23,9 @@ extern void arm_mode_control(engineer_scara_arm_s *arm);
 #define JOINT_2_HOMING_STEP_ANGLE (0.05f)
 #define JOINT_2_HOMING_TORQUE_THRESHOLD (0.5f)
 #define JOINT_2_HOMING_ANGLE (98.1f)
+#define JOINT_2_START_ANGLE (90.0f)
 
-#define JOINT_3_START_ANGLE (70.0f)
+#define JOINT_3_START_ANGLE (90.0f)
 
 #define JOINT_4_START_ANGLE (0.0f)
 

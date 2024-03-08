@@ -6,6 +6,7 @@
 frame_header_struct_t referee_receive_header;
 frame_header_struct_t referee_send_header;
 
+game_robot_HP_t game_robot_HP;
 custom_robot_data_t customer_controller_data;
 remote_control_t remote_control;
 
@@ -14,6 +15,7 @@ void init_referee_struct_data(void)
     memset(&referee_receive_header, 0, sizeof(frame_header_struct_t));
     memset(&referee_send_header, 0, sizeof(frame_header_struct_t));
 
+    memset(&game_robot_HP, 0, sizeof(game_robot_HP_t));
     memset(&customer_controller_data, 0, sizeof(custom_robot_data_t));
     memset(&remote_control, 0, sizeof(remote_control_t));
 }
@@ -33,6 +35,10 @@ void referee_data_solve(uint8_t *frame)
 
     switch (cmd_id)
     {
+    case GAME_ROBOT_HP_CMD_ID: {
+        memcpy(&game_robot_HP, frame + index, sizeof(game_robot_HP_t));
+    }
+    break;
     case CUSTOM_ROBOT_DATA_CMD_ID: {
         uint32_t temp;
         float temp_out;

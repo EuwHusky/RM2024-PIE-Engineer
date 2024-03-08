@@ -3,6 +3,8 @@
 
 #include "stdint.h"
 
+#include "board.h"
+
 #include "dev_motor.h"
 
 #include "algo_filter.h"
@@ -94,7 +96,10 @@ typedef struct EngineerScaraArm
 
 } engineer_scara_arm_s;
 
+extern engineer_scara_arm_s scara_arm;
+
 extern void arm_task(void *pvParameters);
+extern engineer_scara_arm_s *getArmDataPointer(void);
 
 /* 机械臂结构参数 */
 
@@ -163,7 +168,8 @@ extern void arm_task(void *pvParameters);
          EFFECTOR_TIMING_BELT_TRANSMISSION_RATIO)
 
 // 电机控制器参数
-#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (2.0f)
+// #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (2.0f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (0.6f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KI (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)

@@ -1,3 +1,5 @@
+#include "referee_task.h"
+
 #include "hpm_dma_drv.h"
 #include "hpm_dmamux_drv.h"
 #include "hpm_uart_drv.h"
@@ -8,10 +10,11 @@
 #include "algo_robomaster_referee_protocol.h"
 
 #include "CRC8_CRC16.h"
+#include "fifo.h"
+#include "referee.h"
+
 #include "INS_task.h"
 #include "detect_task.h"
-#include "fifo.h"
-#include "referee_task.h"
 
 // 裁判系统串口初始化
 static void pm_uart_init(void);
@@ -90,7 +93,6 @@ void referee_task(void *pvParameters)
             uart_rx_trigger_dma(BOARD_HDMA, PM_UART_RX_DMA_CHN, PM_UART,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_rx_buf),
                                 PM_UART_RX_BUF_LENGHT);
-            printf("pm\n");
         }
 
         if (vt_uart_rx_dma_done)
@@ -100,7 +102,6 @@ void referee_task(void *pvParameters)
             uart_rx_trigger_dma(BOARD_HDMA, VT_UART_RX_DMA_CHN, VT_UART,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)vt_rx_buf),
                                 VT_UART_RX_BUF_LENGHT);
-            printf("vt\n");
         }
 
         // refree_data.robot_id = get_robot_id();

@@ -8,17 +8,17 @@
 /**
  * @brief 初始化机械臂模型
  */
-extern void arm_model_init(engineer_scara_arm_s *arm);
+extern void arm_model_init(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 更新机械臂模型状态量 正运动学分析
  */
-extern void arm_model_update_status(engineer_scara_arm_s *arm);
+extern void arm_model_update_status(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 更新机械臂模型控制量 逆运动学解算
  */
-extern void arm_model_update_control(engineer_scara_arm_s *arm);
+extern void arm_model_update_control(engineer_scara_arm_s *scara_arm);
 
 #define ARM_JI_TO_BASE_X (0.0f)
 #define ARM_JI_TO_BASE_Y (0.0f)

@@ -4,20 +4,25 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 20    // 输出数据的周期
+#define PRINT_TIME_MS 300   // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE
 // core0
+
 #include "INS_task.h"
 #include "detect_task.h"
 #include "dualcore_task.h"
-#include "referee_task.h"
-#include "remote_control.h"
+
+#include "arm_task.h"
 
 // 需求变量
 INS_t *ins_;
 transmit_data_021 *data_send;
 transmit_data_120 *data_read;
+
+engineer_scara_arm_s *arm_data;
+
+// engineer_scara_s *scara_data_pointer;
 
 void print_task(void *pvParameters)
 {
@@ -28,6 +33,8 @@ void print_task(void *pvParameters)
     ins_ = get_INS_data_point();
     data_read = get_data_120_point();
     data_send = get_data_021_point();
+
+    arm_data = getArmDataPointer();
 
     while (true)
     {
@@ -66,18 +73,21 @@ void print_task(void *pvParameters)
         printf("--------------------\n");
         vTaskDelay(2000);
 #else
-        // float speed_fliter_1, speed_fliter_2, speed_fliter_3;
-        // static const float fliter_num[3] = {1.725709860247969f, -0.75594777109163436f, 0.030237910843665373f};
-        // float gyro = ins_->Gyro[2];
-        // speed_fliter_1 = speed_fliter_2;
-        // speed_fliter_2 = speed_fliter_3;
-        // speed_fliter_3 = speed_fliter_2 * fliter_num[0] + speed_fliter_1 * fliter_num[1] + gyro * fliter_num[2];
-        // printf("%.3f,%.3f\n", gyro, speed_fliter_3);
-        // printf("%f,%f,%f,%f\n", ins_->Yaw, -ins_->Pitch, computer_print->aim_yaw, computer_print->aim_pitch);
+        printf("rd:\t%d\nmd:\t%d\nm1:\t%d\t%d\t%f\t%f\nm2:\t%d\t%d\t%f\t%f\nm3:\t%d\t%d\t%f\t%f\n===\n",
+               arm_data->is_arm_ready, arm_data->mode, arm_data->is_joints_ready[0], arm_data->joint_1_motor[0].mode_,
+               arm_data->joint_1_motor[0].set_angle_.deg, arm_data->joint_1_motor[0].angle_.deg,
+               arm_data->is_joints_ready[1], arm_data->joint_23_motor[0].mode_,
+               arm_data->joint_23_motor[0].set_angle_.deg, arm_data->joint_23_motor[0].angle_.deg,
+               arm_data->is_joints_ready[2], arm_data->joint_23_motor[1].mode_,
+               arm_data->joint_23_motor[1].set_angle_.deg, arm_data->joint_23_motor[1].angle_.deg);
+
+        // printf("%f,%f\n", arm_data->test_num1, arm_data->test_num2);
+        // printf("%f,%f\n", scara_data_pointer->test_num1, scara_data_pointer->test_num2);
 
         // printf("%f,%f,%f\n", ins_->Yaw, -ins_->Pitch, ins_->Roll);
 
         // printf("running\n");
+
         vTaskDelay(PRINT_TIME_MS);
 #endif
     }
