@@ -66,7 +66,7 @@ void arm_motor_init(engineer_scara_arm_s *scara_arm)
 
     /* 关节4 一个电机 */
     rflMotorGetDefaultConfig(&config, RFL_MOTOR_RM_M3508, RFL_MOTOR_CONTROLLER_PID);
-    config.control_period_factor = 1.0f;
+    config.control_period_factor = 10.0f;
     config.is_reversed = true;
     rflAngleUpdate(&config.max_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_ARM_JOINT_4_MAX_ANGLE);
     rflAngleUpdate(&config.min_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_ARM_JOINT_4_MIN_ANGLE);
@@ -86,7 +86,7 @@ void arm_motor_init(engineer_scara_arm_s *scara_arm)
 
     /* 关节56 共用两个电机 */
     rflMotorGetDefaultConfig(&config, RFL_MOTOR_RM_M2006, RFL_MOTOR_CONTROLLER_PID);
-    config.control_period_factor = 1.0f;
+    config.control_period_factor = 4.0f;
     config.effector_transmission_ratio = RM_M2006_REDUCTION_RATIO * EFFECTOR_TIMING_BELT_TRANSMISSION_RATIO;
     config.angle_pid_kp = ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KP;
     config.angle_pid_ki = ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KI;
@@ -148,39 +148,39 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
 
     // 电机更新&执行
 
-    rflMotorUpdateStatus(scara_arm->joint_1_motor + 0);
-    rflMotorUpdateStatus(scara_arm->joint_1_motor + 1);
-    rflMotorUpdateControl(scara_arm->joint_1_motor + 0);
-    rflMotorUpdateControl(scara_arm->joint_1_motor + 1);
+    // rflMotorUpdateStatus(scara_arm->joint_1_motor + 0);
+    // rflMotorUpdateStatus(scara_arm->joint_1_motor + 1);
+    // rflMotorUpdateControl(scara_arm->joint_1_motor + 0);
+    // rflMotorUpdateControl(scara_arm->joint_1_motor + 1);
 
-    while (can_is_secondary_transmit_buffer_full(BOARD_CAN1)) // 检查发送缓冲区是否已满
-        ;
-    rflRmMotorControl(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, ENGINEER_ARM_JOINTS_123_RM_MOTORS_CAN_SLAVE_ID,
-                      (int16_t)rflMotorGetOutput(scara_arm->joint_1_motor + 0),
-                      (int16_t)rflMotorGetOutput(scara_arm->joint_1_motor + 1), 0, 0);
+    // while (can_is_secondary_transmit_buffer_full(BOARD_CAN1)) // 检查发送缓冲区是否已满
+    //     ;
+    // rflRmMotorControl(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, ENGINEER_ARM_JOINTS_123_RM_MOTORS_CAN_SLAVE_ID,
+    //                   (int16_t)rflMotorGetOutput(scara_arm->joint_1_motor + 0),
+    //                   (int16_t)rflMotorGetOutput(scara_arm->joint_1_motor + 1), 0, 0);
 
-    rflMotorUpdateStatus(scara_arm->joint_23_motor + 0);
-    rflMotorUpdateControl(scara_arm->joint_23_motor + 0);
-    rflMotorExecuteControl(scara_arm->joint_23_motor + 0);
+    // rflMotorUpdateStatus(scara_arm->joint_23_motor + 0);
+    // rflMotorUpdateControl(scara_arm->joint_23_motor + 0);
+    // rflMotorExecuteControl(scara_arm->joint_23_motor + 0);
 
-    rflMotorUpdateStatus(scara_arm->joint_23_motor + 1);
-    rflMotorUpdateControl(scara_arm->joint_23_motor + 1);
-    rflMotorExecuteControl(scara_arm->joint_23_motor + 1);
+    // rflMotorUpdateStatus(scara_arm->joint_23_motor + 1);
+    // rflMotorUpdateControl(scara_arm->joint_23_motor + 1);
+    // rflMotorExecuteControl(scara_arm->joint_23_motor + 1);
 
-    // rflMotorUpdateStatus(scara_arm->joint_4_motor + 0);
-    // rflMotorUpdateControl(scara_arm->joint_4_motor + 0);
+    rflMotorUpdateStatus(scara_arm->joint_4_motor + 0);
+    rflMotorUpdateControl(scara_arm->joint_4_motor + 0);
 
-    // rflMotorUpdateStatus(scara_arm->joint_56_motor + 0);
-    // rflMotorUpdateStatus(scara_arm->joint_56_motor + 1);
-    // rflMotorUpdateControl(scara_arm->joint_56_motor + 0);
-    // rflMotorUpdateControl(scara_arm->joint_56_motor + 1);
+    rflMotorUpdateStatus(scara_arm->joint_56_motor + 0);
+    rflMotorUpdateStatus(scara_arm->joint_56_motor + 1);
+    rflMotorUpdateControl(scara_arm->joint_56_motor + 0);
+    rflMotorUpdateControl(scara_arm->joint_56_motor + 1);
 
     // while (can_is_secondary_transmit_buffer_full(BOARD_CAN2)) // 检查发送缓冲区是否已满
     //     ;
-    // rflRmMotorControl(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, ENGINEER_ARM_JOINTS_456_RM_MOTORS_CAN_SLAVE_ID,
-    //                   (int16_t)rflMotorGetOutput(scara_arm->joint_4_motor + 0),
-    //                   (int16_t)rflMotorGetOutput(scara_arm->joint_56_motor + 0),
-    //                   (int16_t)rflMotorGetOutput(scara_arm->joint_56_motor + 1), 0);
+    rflRmMotorControl(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, ENGINEER_ARM_JOINTS_456_RM_MOTORS_CAN_SLAVE_ID,
+                      (int16_t)rflMotorGetOutput(scara_arm->joint_4_motor + 0),
+                      (int16_t)rflMotorGetOutput(scara_arm->joint_56_motor + 0),
+                      (int16_t)rflMotorGetOutput(scara_arm->joint_56_motor + 1), 0);
 }
 
 /**

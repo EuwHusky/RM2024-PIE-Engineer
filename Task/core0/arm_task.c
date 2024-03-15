@@ -38,7 +38,7 @@ void arm_task(void *pvParameters)
         arm_mode_control(&scara_arm);
 
         // 更新磁编码器反馈
-        // update_mag_encoder_ma600_feedback(&scara_arm);
+        update_mag_encoder_ma600_feedback(&scara_arm);
 
         // 机械臂模型更新
         arm_model_update_status(&scara_arm);
@@ -51,21 +51,6 @@ void arm_task(void *pvParameters)
     }
 }
 
-// const engineer_scara_arm_s *scara_data_p;
-// void print_task(void *pvParameters)
-// {
-//     while (!INS_init_finished)
-//         vTaskDelay(8);
-//     vTaskDelay(300);
-
-//     scara_data_p = getArmDataPointer();
-//     while (true)
-//     {
-//         printf("%d\n", scara_data_p->test_num);
-//         vTaskDelay(500);
-//     }
-// }
-
 static void arm_init(engineer_scara_arm_s *scara_arm)
 {
     memset(scara_arm, 0, sizeof(engineer_scara_arm_s));
@@ -73,6 +58,8 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     arm_model_init(scara_arm);
 
     arm_motor_init(scara_arm);
+
+    MA600_init();
 
     scara_arm->mode = ARM_MODE_NO_FORCE;
     scara_arm->last_mode = ARM_MODE_NO_FORCE;
@@ -104,9 +91,6 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
     {
         if (scara_arm->encoder_value[i] = MA600_read_with_check(&is_error, i), is_error == false)
         {
-            if (i == 2)
-                scara_arm->encoder_value[i] = 65535 - scara_arm->encoder_value[i];
-
             scara_arm->encoder_angle[i] = rlfSlidingWindowFilterCalc(
                 scara_arm->encoder_angle_filter + i,
                 rflFloatLoopConstrain(((float)scara_arm->encoder_value[i] * 0.005493248f) - 180.0f - angle_offset[i],

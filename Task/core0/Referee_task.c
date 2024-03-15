@@ -7,6 +7,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "drv_dma.h"
+
 #include "algo_robomaster_referee_protocol.h"
 
 #include "CRC8_CRC16.h"
@@ -20,11 +22,6 @@
 static void pm_uart_init(void);
 // 图传链路串口初始化
 static void vt_uart_init(void);
-// DMA接收&发送触发函数
-static hpm_stat_t uart_rx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t dst,
-                                      uint32_t size);
-static hpm_stat_t uart_tx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t src,
-                                      uint32_t size);
 // 裁判系统数据解包
 static void referee_unpack_fifo_data(referee_link_type_e referee_link_type);
 // 自定义UI相关操作
@@ -62,12 +59,47 @@ uint8_t vt_uart_fifo_buf[VT_UART_FIFO_BUF_LENGTH];                   // FIFO缓�
 
 unpack_data_t referee_unpack_obj; // 数据解包结构体
 
-static Referee_data_t referee_data; // 需要用到的裁判系统数据结构体
+Referee_data_t referee_data; // 需要用到的裁判系统数据结构体
 /*----------------------------------------*/
-uint16_t Robot_ID;
-uint16_t Cilent_ID;
-uint8_t UI_Seq = 0;   // 包序号
-uint8_t UI_data[128]; // 发送数据长度
+// uint16_t Robot_ID;
+// uint16_t Cilent_ID;
+// uint8_t UI_Seq = 0;   // 包序号
+// uint8_t UI_data[128]; // 发送数据长度
+
+void pm_referee_dma_isr(void)
+{
+    fifo_s_puts(&pm_uart_fifo, (char *)pm_rx_buf, PM_UART_RX_BUF_LENGHT);
+    pm_uart_rx_dma_done = true; // 更新标志位
+    detect_hook(PM_REFEREE_DH);
+}
+
+void vt_referee_dma_isr(void)
+{
+    fifo_s_puts(&vt_uart_fifo, (char *)vt_rx_buf, VT_UART_RX_BUF_LENGHT);
+    vt_uart_rx_dma_done = true; // 更新标志位
+    detect_hook(VT_REFEREE_DH);
+}
+
+// // DMA中断回调函数
+// void referee_dma_isr(void)
+// {
+//     volatile hpm_stat_t stat_rx_chn;
+
+//     if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, PM_UART_RX_DMA_CHN), stat_rx_chn & DMA_CHANNEL_STATUS_TC)
+//     {
+//         fifo_s_puts(&pm_uart_fifo, (char *)pm_rx_buf, PM_UART_RX_BUF_LENGHT);
+//         pm_uart_rx_dma_done = true; // 更新标志位
+//         detect_hook(PM_REFEREE_DH);
+//     }
+//     else if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, VT_UART_RX_DMA_CHN),
+//              stat_rx_chn & DMA_CHANNEL_STATUS_TC)
+//     {
+//         fifo_s_puts(&vt_uart_fifo, (char *)vt_rx_buf, VT_UART_RX_BUF_LENGHT);
+//         vt_uart_rx_dma_done = true; // 更新标志位
+//         detect_hook(VT_REFEREE_DH);
+//     }
+// }
+// SDK_DECLARE_EXT_ISR_M(BOARD_HDMA_IRQ, referee_dma_isr)
 
 // 裁判系统串口任务
 void referee_task(void *pvParameters)
@@ -81,6 +113,9 @@ void referee_task(void *pvParameters)
 
     vt_uart_init();                                                        // 初始化图传链路串口
     fifo_s_init(&vt_uart_fifo, vt_uart_fifo_buf, VT_UART_FIFO_BUF_LENGTH); // FIFO初始化
+
+    rflDmaAddCallbackFunction(BOARD_HDMA, PM_UART_RX_DMA_CHN, pm_referee_dma_isr);
+    rflDmaAddCallbackFunction(BOARD_HDMA, VT_UART_RX_DMA_CHN, vt_referee_dma_isr);
 
     init_referee_struct_data(); // 初始化裁判系统数据结构体
 
@@ -119,27 +154,6 @@ void referee_task(void *pvParameters)
         vTaskDelay(20);
     }
 }
-
-// DMA中断回调函数
-void referee_dma_isr(void)
-{
-    volatile hpm_stat_t stat_rx_chn;
-
-    if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, PM_UART_RX_DMA_CHN), stat_rx_chn & DMA_CHANNEL_STATUS_TC)
-    {
-        fifo_s_puts(&pm_uart_fifo, (char *)pm_rx_buf, PM_UART_RX_BUF_LENGHT);
-        pm_uart_rx_dma_done = true; // 更新标志位
-        detect_hook(PM_REFEREE_DH);
-    }
-    else if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, VT_UART_RX_DMA_CHN),
-             stat_rx_chn & DMA_CHANNEL_STATUS_TC)
-    {
-        fifo_s_puts(&vt_uart_fifo, (char *)vt_rx_buf, VT_UART_RX_BUF_LENGHT);
-        vt_uart_rx_dma_done = true; // 更新标志位
-        detect_hook(VT_REFEREE_DH);
-    }
-}
-SDK_DECLARE_EXT_ISR_M(BOARD_HDMA_IRQ, referee_dma_isr)
 
 // 裁判系统串口初始化
 void pm_uart_init(void)
@@ -547,32 +561,3 @@ void referee_unpack_fifo_data(referee_link_type_e referee_link_type)
 //         image->radius = 1024 - (Graph_Float - image->end_y * 2097152 - image->end_x * 1024);
 //     }
 // }
-
-// dma接收触发函数
-hpm_stat_t uart_rx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t dst, uint32_t size)
-{
-    dma_handshake_config_t config;
-    dma_default_handshake_config(dma_ptr, &config);
-    config.ch_index = ch_num;
-    config.dst = dst;
-    config.dst_fixed = false;
-    config.src = (uint32_t)&uart_ptr->RBR;
-    config.src_fixed = true;
-    config.data_width = DMA_TRANSFER_WIDTH_BYTE;
-    config.size_in_byte = size;
-    return dma_setup_handshake(dma_ptr, &config, true);
-}
-// dma发送触发函数
-hpm_stat_t uart_tx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t src, uint32_t size)
-{
-    dma_handshake_config_t config;
-    dma_default_handshake_config(dma_ptr, &config);
-    config.ch_index = ch_num;
-    config.dst = (uint32_t)&uart_ptr->THR;
-    config.dst_fixed = true;
-    config.src = src;
-    config.src_fixed = false;
-    config.data_width = DMA_TRANSFER_WIDTH_BYTE;
-    config.size_in_byte = size;
-    return dma_setup_handshake(dma_ptr, &config, true);
-}

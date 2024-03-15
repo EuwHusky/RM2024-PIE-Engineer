@@ -7,6 +7,7 @@
 #include "usb_osal.h"
 
 #include "drv_can.h"
+#include "drv_dma.h"
 
 #include "INS_task.h"
 #include "arm_task.h"
@@ -69,6 +70,7 @@ int main(void)
     board_init_led_pins();  // 初始化LED
     start_cpu1();           // 启动cpu1
 
+    rflDmaInit();
     rflCanInit();
 
     xTaskCreate(INS_task, "INS_task", configMINIMAL_STACK_SIZE, NULL, INS_TASK_PRIORITY, NULL);
@@ -78,7 +80,7 @@ int main(void)
     xTaskCreate(referee_task, "referee_task", configMINIMAL_STACK_SIZE, NULL, REFEREE_TASK_PRIORITY, NULL);
     xTaskCreate(dbus_task, "dbus_task", configMINIMAL_STACK_SIZE + 128U, NULL, DBUS_TASK_PRIORITY, NULL);
 
-    xTaskCreate(arm_task, "arm_task", configMINIMAL_STACK_SIZE + 256U, NULL, ARM_TASK_PRIORITY, NULL);
+    xTaskCreate(arm_task, "arm_task", configMINIMAL_STACK_SIZE + 768U, NULL, ARM_TASK_PRIORITY, NULL);
     xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 256U, NULL, CHASSIS_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);

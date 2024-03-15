@@ -73,6 +73,8 @@ typedef struct
 extern void init_referee_struct_data(void);
 extern void referee_data_solve(uint8_t *frame);
 
+extern const game_robot_HP_t *getRobotHp(void);
+
 extern const custom_robot_data_t *getCustomerControllerData(void);
 extern const remote_control_t *getRemoteControlData(void);
 

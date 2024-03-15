@@ -219,26 +219,26 @@ static bool starting_control(engineer_scara_arm_s *scara_arm)
     scara_arm->is_joints_ready[5] = true;
     // }
 
-    /*关节1 向固定方向运动通过机械限位触发归中*/
-    if (scara_arm->is_joints_ready[0] == false)
-    {
-        if (rflMotorGetTorque(scara_arm->joint_1_motor + 0) < -JOINT_1_HOMING_TORQUE_THRESHOLD ||
-            rflMotorGetTorque(scara_arm->joint_1_motor + 1) < -JOINT_1_HOMING_TORQUE_THRESHOLD)
-        {
-            rflMotorResetAngle(scara_arm->joint_1_motor + 0, RFL_ANGLE_FORMAT_DEGREE, JOINT_1_HOMING_ANGLE);
-            rflMotorResetAngle(scara_arm->joint_1_motor + 1, RFL_ANGLE_FORMAT_DEGREE, JOINT_1_HOMING_ANGLE);
-            scara_arm->is_joints_ready[0] = true;
-        }
+    // /*关节1 向固定方向运动通过机械限位触发归中*/
+    // if (scara_arm->is_joints_ready[0] == false)
+    // {
+    //     if (rflMotorGetTorque(scara_arm->joint_1_motor + 0) < -JOINT_1_HOMING_TORQUE_THRESHOLD ||
+    //         rflMotorGetTorque(scara_arm->joint_1_motor + 1) < -JOINT_1_HOMING_TORQUE_THRESHOLD)
+    //     {
+    //         rflMotorResetAngle(scara_arm->joint_1_motor + 0, RFL_ANGLE_FORMAT_DEGREE, JOINT_1_HOMING_ANGLE);
+    //         rflMotorResetAngle(scara_arm->joint_1_motor + 1, RFL_ANGLE_FORMAT_DEGREE, JOINT_1_HOMING_ANGLE);
+    scara_arm->is_joints_ready[0] = true;
+    //     }
 
-        rflMotorSetMode(scara_arm->joint_1_motor + 0, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-        rflMotorSetMode(scara_arm->joint_1_motor + 1, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-        rflMotorSetAngle(scara_arm->joint_1_motor + 0, RFL_ANGLE_FORMAT_DEGREE,
-                         rflMotorGetAngle(scara_arm->joint_1_motor + 0, RFL_ANGLE_FORMAT_DEGREE) -
-                             JOINT_1_HOMING_STEP_ANGLE);
-        rflMotorSetAngle(scara_arm->joint_1_motor + 1, RFL_ANGLE_FORMAT_DEGREE,
-                         rflMotorGetAngle(scara_arm->joint_1_motor + 1, RFL_ANGLE_FORMAT_DEGREE) -
-                             JOINT_1_HOMING_STEP_ANGLE);
-    }
+    //     rflMotorSetMode(scara_arm->joint_1_motor + 0, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+    //     rflMotorSetMode(scara_arm->joint_1_motor + 1, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+    //     rflMotorSetAngle(scara_arm->joint_1_motor + 0, RFL_ANGLE_FORMAT_DEGREE,
+    //                      rflMotorGetAngle(scara_arm->joint_1_motor + 0, RFL_ANGLE_FORMAT_DEGREE) -
+    //                          JOINT_1_HOMING_STEP_ANGLE);
+    //     rflMotorSetAngle(scara_arm->joint_1_motor + 1, RFL_ANGLE_FORMAT_DEGREE,
+    //                      rflMotorGetAngle(scara_arm->joint_1_motor + 1, RFL_ANGLE_FORMAT_DEGREE) -
+    //                          JOINT_1_HOMING_STEP_ANGLE);
+    // }
 
     // /*关节5 向固定方向运动通过微动开关触发归中*/
     // if (scara_arm->is_joints_ready[4] == false && scara_arm->is_joints_ready[5] == true)
@@ -289,16 +289,15 @@ static void joints_control(engineer_scara_arm_s *scara_arm)
     else if (scara_arm->dr16_rc->rc.s[0] == 3)
         scara_arm->set_joints_value[2] +=
             ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_3_CONTROL_SEN);
-    // else if (scara_arm->dr16_rc->rc.s[0] == 1)
-    //     scara_arm->set_joints_value[3] +=
-    //         ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f *
-    //         -JOINT_4_CONTROL_SEN);
+    else if (scara_arm->dr16_rc->rc.s[0] == 1)
+        scara_arm->set_joints_value[3] +=
+            ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_4_CONTROL_SEN);
 
-    // scara_arm->set_joints_value[4] +=
-    //     ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * -JOINT_5_CONTROL_SEN);
+    scara_arm->set_joints_value[4] +=
+        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * -JOINT_5_CONTROL_SEN);
 
-    // scara_arm->set_joints_value[5] +=
-    //     ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * JOINT_6_CONTROL_SEN);
+    scara_arm->set_joints_value[5] +=
+        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * JOINT_6_CONTROL_SEN);
 }
 
 static void pose_control_dbus(engineer_scara_arm_s *scara_arm)

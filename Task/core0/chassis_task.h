@@ -41,6 +41,8 @@ typedef struct EngineerChassis
 
 extern void chassis_task(void *pvParameters);
 
+extern engineer_chassis_s *getChassisDataPointer(void);
+
 #define CHASSIS_RC_DEADLINE (3)
 #define CHASSIS_VX_RC_CONTROL_MAX (3.0f)
 #define CHASSIS_VY_RC_CONTROL_MAX (3.0f)

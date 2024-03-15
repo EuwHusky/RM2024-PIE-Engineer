@@ -19,7 +19,7 @@ typedef struct
 // 裁判系统数据结构体，用来向cpu1传输数据
 typedef struct
 {
-    uint8_t robot_id;
+    uint8_t struct_keep;
 
 } Referee_data_t;
 

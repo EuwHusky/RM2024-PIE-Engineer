@@ -7,10 +7,12 @@
 #include "detect_task.h"
 #include "dualcore_task.h"
 #include "print_task.h"
+#include "pump_task.h"
 
 /* Freertos任务优先级（数字越小优先级越高1-7） */
 #define DUALCORE_TASK_PRIORITY (configMAX_PRIORITIES - 1U)
 #define DETECT_TASK_PRIORITY (configMAX_PRIORITIES - 3U)
+#define PUMP_TASK_PRIORITY (configMAX_PRIORITIES - 4U)
 #define PRINT_TASK_PRIORITY (configMAX_PRIORITIES - 7U)
 #define TEST_TASK_PRIORITY (configMAX_PRIORITIES - 7U)
 
@@ -36,6 +38,8 @@ int main(void)
 
     xTaskCreate(dualcore_task, "dualcore_task", configMINIMAL_STACK_SIZE + 256U, NULL, DUALCORE_TASK_PRIORITY, NULL);
     xTaskCreate(detect_task, "detect_task", configMINIMAL_STACK_SIZE + 128U, NULL, DETECT_TASK_PRIORITY, NULL);
+
+    xTaskCreate(pump_task, "pump_task", configMINIMAL_STACK_SIZE, NULL, PUMP_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);
     xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE, NULL, PRINT_TASK_PRIORITY, NULL);

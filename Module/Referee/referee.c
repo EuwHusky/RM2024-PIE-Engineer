@@ -84,6 +84,11 @@ void referee_data_solve(uint8_t *frame)
     }
 }
 
+const game_robot_HP_t *getRobotHp(void)
+{
+    return &game_robot_HP;
+}
+
 const custom_robot_data_t *getCustomerControllerData(void)
 {
     return &customer_controller_data;

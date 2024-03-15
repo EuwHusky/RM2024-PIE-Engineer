@@ -176,6 +176,7 @@
       <file file_name="Task/detect_task.c" />
       <file file_name="Task/dualcore_task.c" />
       <file file_name="Task/print_task.c" />
+      <file file_name="Task/core1/pump_task.c" />
     </folder>
   </project>
 </solution>

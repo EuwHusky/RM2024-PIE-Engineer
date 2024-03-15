@@ -3,7 +3,7 @@
 
 #include "chassis_task.h"
 
-// #include "board.h"
+#include "board.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -17,7 +17,7 @@ static void chassis_set_mode(engineer_chassis_s *chassis);
 static void chassis_set_control(engineer_chassis_s *chassis);
 static void chassis_update_and_execute(engineer_chassis_s *chassis);
 
-engineer_chassis_s chassis = {0};
+engineer_chassis_s chassis;
 
 // float feedback[4] = {0.0f};
 // float wheel_set_speed[4] = {0.0f};
@@ -50,7 +50,7 @@ static void chassis_set_mode(engineer_chassis_s *chassis)
 {
     if (chassis->rc->rc.s[1] == 2)
     {
-        // chassis->mode = CHASSIS_MODE_FOLLOW;
+        chassis->mode = CHASSIS_MODE_FOLLOW;
     }
     else if (chassis->rc->rc.s[1] != 2)
     {
@@ -178,4 +178,9 @@ static void chassis_init(engineer_chassis_s *chassis)
         motor_config.master_can_id = 0x201 + i;
         rflMotorInit(chassis->motor + i, &motor_config);
     }
+}
+
+engineer_chassis_s *getChassisDataPointer(void)
+{
+    return &chassis;
 }

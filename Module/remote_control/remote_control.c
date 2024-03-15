@@ -5,6 +5,8 @@
 #include "hpm_uart_drv.h"
 #include "task.h"
 
+#include "drv_dma.h"
+
 #include "detect_task.h"
 #include "dualcore_task.h"
 
@@ -21,38 +23,36 @@ static uint8_t dbus_err_counts = 0;                              // 遥控器数
 static int16_t RC_abs(int16_t value);                                         // 取正函数
 static void sbus_to_rc(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl); // 遥控器协议解析
 static bool RC_data_is_error(void);                                           // 判断遥控器数据是否出错
-static hpm_stat_t uart_rx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t dst,
-                                      uint32_t size); //  接收触发函数
 
 static void dbus_uart_init(void); // 遥控器串口初始化
 
-// DMA中断回调函数
 void dbus_dma_isr(void)
 {
-    volatile hpm_stat_t stat_rx_chn;
-
-    // if (stat_rx_chn = dma_check_transfer_status(BOARD_HDMA, DBUS_UART_RX_DMA_CHN), stat_rx_chn &
-    // DMA_CHANNEL_STATUS_TC)
-    // {
-    //     dbus_uart_rx_dma_done = true;
-    //     sbus_to_rc(&sbus_rx_buf[dbus_err_counts], &rc_ctrl); // 数据解包
-    //     detect_hook(DBUS_DH);                                // 记录更新时间
-    //     if (RC_data_is_error())                              // 记录数据错误次数
-    //         dbus_err_counts++;
-    //     dbus_err_counts %= 18; // 遥控器数据解包偏移值
-    // }
-    if (stat_rx_chn = dma_check_transfer_status(BOARD_XDMA, DBUS_UART_RX_DMA_CHN), stat_rx_chn & DMA_CHANNEL_STATUS_TC)
-    {
-        dbus_uart_rx_dma_done = true;
-        sbus_to_rc(&sbus_rx_buf[dbus_err_counts], &rc_ctrl); // 数据解包
-        detect_hook(DBUS_DH);                                // 记录更新时间
-        if (RC_data_is_error())                              // 记录数据错误次数
-            dbus_err_counts++;
-        dbus_err_counts %= 18; // 遥控器数据解包偏移值
-    }
+    dbus_uart_rx_dma_done = true;
+    sbus_to_rc(&sbus_rx_buf[dbus_err_counts], &rc_ctrl); // 数据解包
+    detect_hook(DBUS_DH);                                // 记录更新时间
+    if (RC_data_is_error())                              // 记录数据错误次数
+        dbus_err_counts++;
+    dbus_err_counts %= 18; // 遥控器数据解包偏移值
 }
-// SDK_DECLARE_EXT_ISR_M(BOARD_HDMA_IRQ, dbus_dma_isr)
-SDK_DECLARE_EXT_ISR_M(BOARD_XDMA_IRQ, dbus_dma_isr)
+
+// // DMA中断回调函数
+// void dbus_dma_isr(void)
+// {
+//     volatile hpm_stat_t stat_rx_chn;
+
+//     if (stat_rx_chn = dma_check_transfer_status(BOARD_XDMA, DBUS_UART_RX_DMA_CHN), stat_rx_chn &
+//     DMA_CHANNEL_STATUS_TC)
+//     {
+//         dbus_uart_rx_dma_done = true;
+//         sbus_to_rc(&sbus_rx_buf[dbus_err_counts], &rc_ctrl); // 数据解包
+//         detect_hook(DBUS_DH);                                // 记录更新时间
+//         if (RC_data_is_error())                              // 记录数据错误次数
+//             dbus_err_counts++;
+//         dbus_err_counts %= 18; // 遥控器数据解包偏移值
+//     }
+// }
+// SDK_DECLARE_EXT_ISR_M(BOARD_XDMA_IRQ, dbus_dma_isr)
 
 // 遥控器链路接收任务
 void dbus_task(void *pvParameters)
@@ -62,14 +62,13 @@ void dbus_task(void *pvParameters)
 
     dbus_uart_init(); // 初始化遥控器串口
 
+    rflDmaAddCallbackFunction(BOARD_XDMA, DBUS_UART_RX_DMA_CHN, dbus_dma_isr);
+
     while (true)
     {
         // dma传输完成
         if (dbus_uart_rx_dma_done)
         {
-            // uart_rx_trigger_dma(BOARD_HDMA, DBUS_UART_RX_DMA_CHN, DBUS_UART,
-            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)sbus_rx_buf),
-            //                     SBUS_RX_BUF_NUM);
             uart_rx_trigger_dma(BOARD_XDMA, DBUS_UART_RX_DMA_CHN, DBUS_UART,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)sbus_rx_buf),
                                 SBUS_RX_BUF_NUM);
@@ -77,21 +76,6 @@ void dbus_task(void *pvParameters)
         }
         vTaskDelay(DBUS_TASK_LOOP_TIME);
     }
-}
-
-// dma接收触发函数
-hpm_stat_t uart_rx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t dst, uint32_t size)
-{
-    dma_handshake_config_t config;
-    dma_default_handshake_config(dma_ptr, &config);
-    config.ch_index = ch_num;
-    config.dst = dst;
-    config.dst_fixed = false;
-    config.src = (uint32_t)&uart_ptr->RBR;
-    config.src_fixed = true;
-    config.data_width = DMA_TRANSFER_WIDTH_BYTE;
-    config.size_in_byte = size;
-    return dma_setup_handshake(dma_ptr, &config, true);
 }
 
 /*遥控器串口初始化**/
@@ -113,7 +97,6 @@ void dbus_uart_init(void)
         {
         }
     }
-    // intc_m_enable_irq_with_priority(BOARD_HDMA_IRQ, 1);
     intc_m_enable_irq_with_priority(BOARD_XDMA_IRQ, 1);
     dmamux_config(BOARD_DMAMUX, DBUS_UART_RX_DMAMUX_CHN, DBUS_UART_RX_DMA_REQ, true);
 }

@@ -123,6 +123,9 @@
 #define BOARD_UART5_CLK clock_uart4
 #define BOARD_UART6 HPM_UART5
 #define BOARD_UART6_CLK clock_uart5
+#define BOARD_UART6_TX_DMA_CHN (3U)
+#define BOARD_UART6_TX_DMAMUX_CHN DMA_SOC_CHN_TO_DMAMUX_CHN(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN)
+#define BOARD_UART6_TX_DMA_REQ HPM_DMA_SRC_UART5_TX
 
 /*------------------------------*/
 /* i2c 相关 */
@@ -202,5 +205,10 @@ extern "C"
     uint32_t board_init_spi_clock(SPI_Type *ptr); // 初始化spi时钟
 
     void board_init_usb_pins(void); // 初始化usb
+
+    extern hpm_stat_t uart_rx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t dst,
+                                          uint32_t size);
+    extern hpm_stat_t uart_tx_trigger_dma(DMA_Type *dma_ptr, uint8_t ch_num, UART_Type *uart_ptr, uint32_t src,
+                                          uint32_t size);
 
 #endif /* _HPM_BOARD_H */
