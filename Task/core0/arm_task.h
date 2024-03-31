@@ -13,24 +13,83 @@
 #include "referee.h"
 #include "remote_control.h"
 
-typedef enum
+typedef enum EngineerScaraArmMode
 {
     ARM_MODE_NO_FORCE, // 无力 跟没上电一样
-    ARM_MODE_STARTING, // 启动 各个关节全部重新获取初始角度
+    ARM_MODE_START_UP, // 启动 各个关节全部重新获取初始角度
     ARM_MODE_JOINTS,   // 关节控制 既挖掘机式控制
     ARM_MODE_POSE,     // 位姿控制
     ARM_MODE_CUSTOMER, // 自定义控制器控制
-} arm_mode_e;
+} engineer_scara_arm_mode_e;
+
+typedef enum EngineerScaraArmJoints
+{
+    JOINT_1 = 0,
+    JOINT_2,
+    JOINT_3,
+    JOINT_4,
+    JOINT_5,
+    JOINT_6,
+} engineer_scara_arm_joints_e;
+
+typedef enum EngineerScaraArmStartUpStatus
+{
+    ARM_START_UP_OK = 0x00,
+
+    ARM_START_UP_JOINT_1_FAILED = 0x01, // 归位失败
+    ARM_START_UP_JOINT_2_FAILED = 0x02, // 归位失败
+    ARM_START_UP_JOINT_3_FAILED = 0x04, // 归位失败
+    ARM_START_UP_JOINT_4_FAILED = 0x08, // 归位失败
+    ARM_START_UP_JOINT_5_FAILED = 0x10, // 归位失败
+    ARM_START_UP_JOINT_6_FAILED = 0x20, // 归位失败
+
+    ARM_START_UP_JOINT_4_STEP1_FAILED = 0x40, // 机械限位获取角度失败
+    ARM_START_UP_JOINT_5_STEP1_FAILED = 0x80, // 机械限位获取角度失败
+
+    ARM_NOT_START_UP = 0xff,
+} engineer_scara_arm_start_up_status_e;
+
+#define JOINT45_START_UP_STEP1_BIT_OFFSET 3
+
+typedef enum EngineerScaraArmJointsMotorsIndex
+{
+    MOTOR_JOINT1_LEFT = 0,
+    MOTOR_JOINT1_RIGHT,
+    MOTOR_JOINT23_BACK,
+    MOTOR_JOINT23_FRONT,
+    MOTOR_JOINT4,
+    MOTOR_JOINT56_LEFT,
+    MOTOR_JOINT56_RIGHT,
+} engineer_scara_arm_joints_motors_index_e;
+
+/**
+ * @brief 清除机械臂启动状态
+ * @param[out] arm_start_up_status 机械臂状态簇
+ */
+#define resetArmStartUpStatus(arm_start_up_status) (arm_start_up_status = ARM_NOT_START_UP)
+
+/**
+ * @brief 设定机械臂某一关节启动状态为OK
+ * @param[in] joint_index 机械臂关节号
+ * @param[out] arm_start_up_status 机械臂状态簇
+ */
+#define setJointStartUpStateOk(joint_index, arm_start_up_status)                                                       \
+    (scara_arm->start_up_status &= (~((1 << (joint_index)) & 0xff)))
+
+/**
+ * @brief 获取机械臂某一关节的启动状态 若未成功启动则返回非零
+ * @param[in] joint_index 机械臂关节号
+ * @param[in] arm_start_up_status 机械臂状态簇
+ */
+#define checkIfJointNotStartUp(joint_index, arm_start_up_status) ((((arm_start_up_status) >> (joint_index)) & 1) != 0)
 
 typedef struct EngineerScaraArm
 {
     /*自身属性*/
 
-    arm_mode_e mode;
-    arm_mode_e last_mode;
-    bool is_arm_ready;
-    bool is_joints_ready[6];
-    char last_mode_control_key_value;
+    engineer_scara_arm_mode_e mode;
+    engineer_scara_arm_mode_e last_mode;
+    uint8_t start_up_status;
 
     /*运动学模型*/
 
@@ -83,15 +142,13 @@ typedef struct EngineerScaraArm
     const RC_ctrl_t *dbus_rc;                  // dt7-dr16遥控器链路 数据
     const custom_robot_data_t *vt_customer_rc; // 图传链路 自定义控制器数据
     const remote_control_t *vt_mk;             // 图传链路 键鼠数据
+    char last_mode_control_key_value;
 
-    uint16_t encoder_value;
-    float encoder_angle; // 磁编获取到的关节4、6的绝对角度，逆时针为正，单位为角度deg
-    sliding_window_filter_s_t encoder_angle_filter;
+    uint16_t joint_6_encoder_value;
+    float joint_6_encoder_angle; // 磁编获取到的关节6的绝对角度，逆时针为正，单位为角度deg
+    sliding_window_filter_s_t joint_6_encoder_angle_filter;
 
-    rfl_motor_s joint_1_motor[2];  // 0-左 1-右
-    rfl_motor_s joint_23_motor[2]; // 0-2 1-3
-    rfl_motor_s joint_4_motor[1];
-    rfl_motor_s joint_56_motor[2]; // 0-左 1-右
+    rfl_motor_s joints_motors[7];
 
 } engineer_scara_arm_s;
 
@@ -107,8 +164,10 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_3_LENGTH (0.073f)  /*第三节小臂臂长*/
 #define ENGINEER_ARM_4_LENGTH (0.0505f) /*第四节小臂臂长*/
 
-#define EFFECTOR_TIMING_BELT_TRANSMISSION_RATIO (2.0f)        /*同步带传动比*/
-#define EFFECTOR_CONICAL_TOOTH_PAIR_TRANSMISSION_RATIO (2.0f) /*锥齿组传动比*/
+#define LIFTER_BABOU (1260.0f)                 /* 抬升babou */
+#define JOINT2_REDUCTION (1.8f)                /* 关节2 驱动源到执行器减速比 */
+#define END_TRANSMISSION_GEAR_REDUCTION (2.0f) /* 末端传动齿轮减速比 */
+#define END_BEVEL_GEAR_SET_REDUCTION (2.0f)    /* 末端锥型齿轮组减速比 */
 
 /* 机械臂模型参数 */
 
@@ -120,16 +179,11 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_ROLL_MAX_ANGLE (180.0f)  /* 末端ROLL最大角度 */
 #define ENGINEER_ARM_ROLL_MIN_ANGLE (-180.0f) /* 末端ROLL最小角度 */
 
-// 关节1电机距离角度转换系数 单位 degree/m
-#define ENGINEER_ARM_JOINT_1_DISTANCE_TO_ANGLE_FACTOR (1260.0f)
-
 // 正常运行时的关节可达范围
 #define ENGINEER_ARM_JOINT_1_MAX_DISTANCE (0.5f)
 #define ENGINEER_ARM_JOINT_1_MIN_DISTANCE (0.0f)
-#define ENGINEER_ARM_JOINT_1_MAX_ANGLE                                                                                 \
-    (ENGINEER_ARM_JOINT_1_MAX_DISTANCE * ENGINEER_ARM_JOINT_1_DISTANCE_TO_ANGLE_FACTOR)
-#define ENGINEER_ARM_JOINT_1_MIN_ANGLE                                                                                 \
-    (ENGINEER_ARM_JOINT_1_MIN_DISTANCE * ENGINEER_ARM_JOINT_1_DISTANCE_TO_ANGLE_FACTOR)
+#define ENGINEER_ARM_JOINT_1_MAX_ANGLE (ENGINEER_ARM_JOINT_1_MAX_DISTANCE * LIFTER_BABOU)
+#define ENGINEER_ARM_JOINT_1_MIN_ANGLE (ENGINEER_ARM_JOINT_1_MIN_DISTANCE * LIFTER_BABOU)
 #define ENGINEER_ARM_JOINT_2_MAX_ANGLE (98.3f)
 #define ENGINEER_ARM_JOINT_2_MIN_ANGLE (-98.3f)
 #define ENGINEER_ARM_JOINT_3_MAX_ANGLE (175.0f)
@@ -144,10 +198,8 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 // 关节初始化扩展可达范围 用于归中操作 有一定的危险性
 #define ENGINEER_ARM_JOINT_1_INITIAL_MAX_DISTANCE (0.6f)
 #define ENGINEER_ARM_JOINT_1_INITIAL_MIN_DISTANCE (-0.6f)
-#define ENGINEER_ARM_JOINT_1_INITIAL_MAX_ANGLE                                                                         \
-    (ENGINEER_ARM_JOINT_1_INITIAL_MAX_DISTANCE * ENGINEER_ARM_JOINT_1_DISTANCE_TO_ANGLE_FACTOR)
-#define ENGINEER_ARM_JOINT_1_INITIAL_MIN_ANGLE                                                                         \
-    (ENGINEER_ARM_JOINT_1_INITIAL_MIN_DISTANCE * ENGINEER_ARM_JOINT_1_DISTANCE_TO_ANGLE_FACTOR)
+#define ENGINEER_ARM_JOINT_1_INITIAL_MAX_ANGLE (ENGINEER_ARM_JOINT_1_INITIAL_MAX_DISTANCE * LIFTER_BABOU)
+#define ENGINEER_ARM_JOINT_1_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_1_INITIAL_MIN_DISTANCE * LIFTER_BABOU)
 
 /* 机械臂设备参数 */
 
@@ -158,19 +210,16 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 
 // 电机控制范围 由于关节56共用两个电机 故需要单独处理 其他关节的电机直接使用关节可达范围作为控制范围
 #define ENGINEER_ARM_JOINT_56_MOTOR_MAX_ANGLE                                                                          \
-    (ENGINEER_ARM_JOINT_5_MAX_ANGLE * EFFECTOR_TIMING_BELT_TRANSMISSION_RATIO +                                        \
-     ENGINEER_ARM_JOINT_6_MAX_ANGLE * EFFECTOR_CONICAL_TOOTH_PAIR_TRANSMISSION_RATIO *                                 \
-         EFFECTOR_TIMING_BELT_TRANSMISSION_RATIO)
+    (ENGINEER_ARM_JOINT_5_MAX_ANGLE * END_TRANSMISSION_GEAR_REDUCTION +                                                \
+     ENGINEER_ARM_JOINT_6_MAX_ANGLE * END_BEVEL_GEAR_SET_REDUCTION * END_TRANSMISSION_GEAR_REDUCTION)
 #define ENGINEER_ARM_JOINT_56_MOTOR_MIN_ANGLE                                                                          \
-    (ENGINEER_ARM_JOINT_5_MIN_ANGLE * EFFECTOR_TIMING_BELT_TRANSMISSION_RATIO +                                        \
-     ENGINEER_ARM_JOINT_6_MIN_ANGLE * EFFECTOR_CONICAL_TOOTH_PAIR_TRANSMISSION_RATIO *                                 \
-         EFFECTOR_TIMING_BELT_TRANSMISSION_RATIO)
+    (ENGINEER_ARM_JOINT_5_MIN_ANGLE * END_TRANSMISSION_GEAR_REDUCTION +                                                \
+     ENGINEER_ARM_JOINT_6_MIN_ANGLE * END_BEVEL_GEAR_SET_REDUCTION * END_TRANSMISSION_GEAR_REDUCTION)
 
 // 电机控制器参数
-// #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (2.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (0.6f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (1.2f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KI (0.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KD (0.0f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KD (0.02f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KP (1200.0f)
@@ -178,13 +227,10 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
-// #define ENGINEER_ARM_JOINT_2_UNITREE_GO_M8010_6_K_ANGLE (5.0f)
-// #define ENGINEER_ARM_JOINT_2_UNITREE_GO_M8010_6_K_SPEED (0.03f)
-// #define ENGINEER_ARM_JOINT_3_UNITREE_GO_M8010_6_K_ANGLE (4.0f)
-// #define ENGINEER_ARM_JOINT_3_UNITREE_GO_M8010_6_K_SPEED (0.03f)
-#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KP (0.8f)
+
+#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KP (0.4f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KI (0.0f)
-#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KD (0.2f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KD (0.01f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KP (1200.0f)
@@ -192,13 +238,14 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
-#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KP (0.8f)
+
+#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KP (0.12f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KI (0.0f)
-#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KD (0.2f)
+#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KD (0.002f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_MAX_OUT (16.0f)
-#define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_KP (2000.0f)
-#define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_KI (100.0f)
+#define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_KP (1800.0f)
+#define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_KI (60.0f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_MAX_IOUT (2000.0f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_MAX_OUT (10000.0f)

@@ -4,7 +4,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 200   // 输出数据的周期
+#define PRINT_TIME_MS 600   // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -31,7 +31,7 @@ const robot_status_t *referee_robot_status;
 
 const custom_robot_data_t *customer_controller;
 
-ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[200];
+ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[512];
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
 
 rfl_motor_pid_controller_s *motor_controller_test;
@@ -79,8 +79,8 @@ void print_task(void *pvParameters)
     referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
 
-    motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joint_56_motor[1].controller;
-    motor_driver_test = (rm_motor_s *)arm_data->joint_56_motor[1].driver;
+    motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].controller;
+    motor_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
 
     while (true)
     {
@@ -124,71 +124,38 @@ void print_task(void *pvParameters)
         {
             print_uart_tx_dma_done = false;
 
-            // sprintf((char *)test_txt, "\nrd:\t%d\nmd:\t%d\nm5:\t%d\t%f\t%f\t%f\nm6:\t%d\t%f\t%f\t%f\n===\n",
-            //         arm_data->is_arm_ready, arm_data->mode, arm_data->joint_56_motor[0].mode_,
-            //         arm_data->joint_56_motor[0].set_angle_.deg, arm_data->joint_56_motor[0].track_angle.deg,
-            //         arm_data->joint_56_motor[0].angle_.deg, arm_data->joint_56_motor[1].mode_,
-            //         arm_data->joint_56_motor[1].set_angle_.deg, arm_data->joint_56_motor[1].track_angle.deg,
-            //         arm_data->joint_56_motor[1].angle_.deg);
+            /**
+             * @brief Scara Arm
+             */
+            // sprintf((char *)test_txt, "\r\n%x,%d,%d\r\n%f,%f,%f,%f,%f,%f,%f\r\n%f,%f,%f,%f,%f,%f\r\n",
+            //         arm_data->start_up_status, arm_data->mode,
+            //         rflMotorGetMode(&arm_data->joints_motors[MOTOR_JOINT4]),
+            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_RADIAN),
+            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_RADIAN),
+            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_RADIAN),
+            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN),
+            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_RADIAN),
+            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_RADIAN),
+            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_RADIAN),
+            //         arm_data->joints_value[JOINT_1], arm_data->joints_value[JOINT_2],
+            //         arm_data->joints_value[JOINT_3], arm_data->joints_value[JOINT_4],
+            //         arm_data->joints_value[JOINT_5], arm_data->joints_value[JOINT_6]);
+            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", motor_controller_test->angle_pid.set,
+                    motor_controller_test->angle_pid.fdb, motor_controller_test->angle_pid.out,
+                    motor_controller_test->speed_pid.set, motor_controller_test->speed_pid.fdb,
+                    motor_controller_test->speed_pid.out);
 
-            // sprintf((char *)test_txt,
-            //         "\nrd:\t%d\nmd:\t%d\nm6:\t%d\t%f\t%f\t%f\t%f\t\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n===\n",
-            //         arm_data->is_arm_ready, arm_data->mode, arm_data->joint_56_motor[1].mode_,
-            //         arm_data->joint_56_motor[1].set_angle_.deg, arm_data->joint_56_motor[1].track_angle.deg,
-            //         arm_data->joint_56_motor[1].angle_.deg, arm_data->joint_56_motor[1].speed_,
-            //         motor_controller_test->angle_pid.fdb, motor_controller_test->angle_pid.set,
-            //         motor_controller_test->angle_pid.error[0], motor_controller_test->angle_pid.out,
-            //         motor_controller_test->speed_pid.fdb, motor_controller_test->speed_pid.set,
-            //         motor_controller_test->speed_pid.out);
-
-            // sprintf((char *)test_txt, "\nrd:\t%d\nmd:\t%d\nm6:\t%d\t%f\t%f\t%f\t\t%f\t%d\n===\n",
-            //         arm_data->is_arm_ready, arm_data->mode, arm_data->joint_56_motor[1].mode_,
-            //         arm_data->joint_56_motor[1].set_angle_.deg, arm_data->joint_56_motor[1].track_angle.deg,
-            //         arm_data->joint_56_motor[1].angle_.deg, motor_driver_test->deg_angle,
-            //         motor_driver_test->rotor_turns);
-
+            /**
+             * @brief Referee System Comm
+             */
             // sprintf((char *)test_txt, "%d,%d,%d\r\n ", referee_robot_status->robot_id,
             // referee_robot_status->current_HP,
             //         referee_robot_status->maximum_HP);
 
-            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d\n", referee_robot_hp->blue_1_robot_HP,
-            //         referee_robot_hp->blue_2_robot_HP, referee_robot_hp->blue_3_robot_HP,
-            //         referee_robot_hp->blue_base_HP, referee_robot_hp->red_1_robot_HP,
-            //         referee_robot_hp->red_2_robot_HP, referee_robot_hp->red_3_robot_HP,
-            //         referee_robot_hp->red_base_HP);
-
-            // uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-            //                     strlen((char *)test_txt) - 1);
+            uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                strlen((char *)test_txt) - 1);
         }
-
-        /**
-         * @brief 裁判系统
-         */
-        // printf("%d,%d,%d,%d,%d,%d,%d,%d\n", referee_robot_hp->blue_1_robot_HP, referee_robot_hp->blue_2_robot_HP,
-        //        referee_robot_hp->blue_3_robot_HP, referee_robot_hp->blue_base_HP, referee_robot_hp->red_1_robot_HP,
-        //        referee_robot_hp->red_2_robot_HP, referee_robot_hp->red_3_robot_HP, referee_robot_hp->red_base_HP);
-        // printf("%f,%f,%f,%f,%f,%f\n", customer_controller->x, customer_controller->y, customer_controller->z,
-        //        customer_controller->yaw, customer_controller->pitch, customer_controller->roll);
-
-        /**
-         * @brief Chassis
-         */
-        // printf("md:\t%d\nm1:\t%d\t%f\n===\n", chassis_data->mode, chassis_data->motor[0].mode_,
-        //        chassis_data->motor[0].speed_);
-
-        /**
-         * @brief Arm
-         */
-        // printf("rd:\t%d\nmd:\t%d\nm4:\t%d\t%f\t%f\nm5:\t%d\t%f\t%f\t%f\nm6:\t%d\t%f\t%f\t%f\n===\n",
-        //        arm_data->is_arm_ready, arm_data->mode, arm_data->joint_4_motor[0].mode_,
-        //        arm_data->joint_4_motor[0].set_angle_.deg, arm_data->joint_4_motor[0].angle_.deg,
-        //        arm_data->joint_56_motor[0].mode_, arm_data->joint_56_motor[0].set_angle_.deg,
-        //        arm_data->joint_56_motor[0].track_angle.deg, arm_data->joint_56_motor[0].angle_.deg,
-        //        arm_data->joint_56_motor[1].mode_, arm_data->joint_56_motor[1].set_angle_.deg,
-        //        arm_data->joint_56_motor[1].track_angle.deg, arm_data->joint_56_motor[1].angle_.deg);
-        // printf("%f,%d,%f,%d\n", arm_data->encoder_angle[0], arm_data->encoder_value[0], arm_data->encoder_angle[1],
-        //        arm_data->encoder_value[1]);
 
         /**
          * @brief IMU

@@ -47,7 +47,7 @@ void arm_task(void *pvParameters)
         // 机械臂电机更新与执行
         arm_motor_update_and_execute(&scara_arm);
 
-        vTaskDelay(2);
+        vTaskDelay(1);
     }
 }
 
@@ -63,17 +63,14 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
 
     scara_arm->mode = ARM_MODE_NO_FORCE;
     scara_arm->last_mode = ARM_MODE_NO_FORCE;
-    scara_arm->is_arm_ready = false;
-    for (uint8_t i = 0; i < 6; i++)
-        scara_arm->is_joints_ready[i] = false;
-    scara_arm->last_mode_control_key_value = 1;
+    resetArmStartUpStatus(scara_arm->start_up_status);
 
     scara_arm->dbus_rc = get_remote_control_point();
     scara_arm->vt_customer_rc = getCustomerControllerData();
     scara_arm->vt_mk = getRemoteControlData();
+    scara_arm->last_mode_control_key_value = 1;
 
-    for (uint8_t i = 0; i < 2; i++)
-        rlfSlidingWindowFilterInit(&scara_arm->encoder_angle_filter, 11, 2);
+    rlfSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
 }
 
 static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
@@ -81,13 +78,15 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
     bool is_error = false;
     float angle_offset = ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET;
 
-    if (scara_arm->encoder_value = MA600_read_with_check(&is_error), is_error == false)
+    if (scara_arm->joint_6_encoder_value = MA600_read_with_check(&is_error), is_error == false)
     {
-        scara_arm->encoder_angle = rlfSlidingWindowFilterCalc(
-            &scara_arm->encoder_angle_filter,
-            rflFloatLoopConstrain(((float)scara_arm->encoder_value * 0.005493248f) - 180.0f - angle_offset, -DEG_PI,
-                                  DEG_PI));
+        scara_arm->joint_6_encoder_angle = rlfSlidingWindowFilterCalc(
+            &scara_arm->joint_6_encoder_angle_filter,
+            rflFloatLoopConstrain(((float)scara_arm->joint_6_encoder_value * 0.005493248f) - 180.0f - angle_offset,
+                                  -DEG_PI, DEG_PI));
     }
+
+    scara_arm->joint_6_encoder_angle = 0.0f; // 还没装磁编，暂时这样，记得删
 }
 
 engineer_scara_arm_s *getArmDataPointer(void)

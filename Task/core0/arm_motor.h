@@ -27,6 +27,6 @@ extern void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm, float max_s
 /**
  * @brief 设置机械臂电机可达角度
  */
-extern void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, arm_mode_e mode);
+extern void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, engineer_scara_arm_mode_e mode);
 
 #endif /* _ARM_MOTOR_H__ */
