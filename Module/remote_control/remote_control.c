@@ -1,8 +1,10 @@
 #include "remote_control.h"
-#include "FreeRTOS.h"
+
 #include "hpm_dma_drv.h"
 #include "hpm_dmamux_drv.h"
 #include "hpm_uart_drv.h"
+
+#include "FreeRTOS.h"
 #include "task.h"
 
 #include "drv_dma.h"
@@ -81,7 +83,6 @@ void dbus_task(void *pvParameters)
 /*遥控器串口初始化**/
 void dbus_uart_init(void)
 {
-    hpm_stat_t stat;
     uart_config_t config = {0}; // 串口配置
     board_init_uart(DBUS_UART);
     uart_default_config(DBUS_UART, &config);                    // 填充默认配置

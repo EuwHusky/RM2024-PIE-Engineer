@@ -8,15 +8,11 @@
 
 #include "algo_data_limiting.h"
 
-static bool joint_5_is_in_home = false;
-
 static void no_force_control(engineer_scara_arm_s *scara_arm);
 static bool starting_control(engineer_scara_arm_s *scara_arm);
 static void joints_control(engineer_scara_arm_s *scara_arm);
 static void pose_control_dbus(engineer_scara_arm_s *scara_arm);
 static void pose_control_customer(engineer_scara_arm_s *scara_arm);
-
-static void record_custom_rc_cmd(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 获取用户输入 更新机械臂控制模式
@@ -25,8 +21,8 @@ void arm_set_mode(engineer_scara_arm_s *scara_arm)
 {
     static uint32_t key_timer = 0;
 
-    char mode_control_key_value = scara_arm->dr16_rc->rc.s[1];
-    int16_t homing_rocker_value = scara_arm->dr16_rc->rc.ch[4];
+    char mode_control_key_value = scara_arm->dbus_rc->rc.s[1];
+    int16_t homing_rocker_value = scara_arm->dbus_rc->rc.ch[4];
 
     // 长拨重新归位
     if (scara_arm->mode == ARM_MODE_NO_FORCE && homing_rocker_value > 600)
@@ -139,8 +135,6 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
     default:
         break;
     }
-
-    record_custom_rc_cmd(scara_arm);
 }
 
 // 机械臂无力，模型的预期关节变量跟随实际关节变量
@@ -281,75 +275,59 @@ static void joints_control(engineer_scara_arm_s *scara_arm)
     }
 
     scara_arm->set_joints_value[0] +=
-        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[3], ARM_RC_DEADLINE)) / 660.0f * JOINT_1_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[3], ARM_RC_DEADLINE)) / 660.0f * JOINT_1_CONTROL_SEN);
 
-    if (scara_arm->dr16_rc->rc.s[0] == 2)
+    if (scara_arm->dbus_rc->rc.s[0] == 2)
         scara_arm->set_joints_value[1] +=
-            ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_2_CONTROL_SEN);
-    else if (scara_arm->dr16_rc->rc.s[0] == 3)
+            ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_2_CONTROL_SEN);
+    else if (scara_arm->dbus_rc->rc.s[0] == 3)
         scara_arm->set_joints_value[2] +=
-            ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_3_CONTROL_SEN);
-    else if (scara_arm->dr16_rc->rc.s[0] == 1)
+            ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_3_CONTROL_SEN);
+    else if (scara_arm->dbus_rc->rc.s[0] == 1)
         scara_arm->set_joints_value[3] +=
-            ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_4_CONTROL_SEN);
+            ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -JOINT_4_CONTROL_SEN);
 
     scara_arm->set_joints_value[4] +=
-        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * -JOINT_5_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * -JOINT_5_CONTROL_SEN);
 
     scara_arm->set_joints_value[5] +=
-        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * JOINT_6_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * JOINT_6_CONTROL_SEN);
 }
 
 static void pose_control_dbus(engineer_scara_arm_s *scara_arm)
 {
     scara_arm->set_pose_6d[0] +=
-        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * POSE_X_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * POSE_X_CONTROL_SEN);
 
     scara_arm->set_pose_6d[1] +=
-        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -POSE_Y_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -POSE_Y_CONTROL_SEN);
 
     scara_arm->set_pose_6d[2] +=
-        ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[3], ARM_RC_DEADLINE)) / 660.0f * POSE_Z_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[3], ARM_RC_DEADLINE)) / 660.0f * POSE_Z_CONTROL_SEN);
 
-    if (scara_arm->dr16_rc->rc.s[0] == 1)
+    if (scara_arm->dbus_rc->rc.s[0] == 1)
         scara_arm->set_pose_6d[3] +=
-            ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * -POSE_AY_CONTROL_SEN);
-    else if (scara_arm->dr16_rc->rc.s[0] == 3)
+            ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * -POSE_AY_CONTROL_SEN);
+    else if (scara_arm->dbus_rc->rc.s[0] == 3)
         scara_arm->set_pose_6d[4] +=
-            ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * -POSE_AP_CONTROL_SEN);
-    else if (scara_arm->dr16_rc->rc.s[0] == 2)
+            ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * -POSE_AP_CONTROL_SEN);
+    else if (scara_arm->dbus_rc->rc.s[0] == 2)
         scara_arm->set_pose_6d[5] +=
-            ((float)(rflDeadZoneZero(scara_arm->dr16_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * POSE_AR_CONTROL_SEN);
+            ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[0], ARM_RC_DEADLINE)) / 660.0f * POSE_AR_CONTROL_SEN);
 }
 
 static void pose_control_customer(engineer_scara_arm_s *scara_arm)
 {
-    scara_arm->set_pose_6d[0] +=
-        ((scara_arm->custom_cmd->x - scara_arm->last_custom_rc_cmd[0]) * CUSTOMER_X_CONTROL_SEN);
+    scara_arm->set_pose_6d[0] += (scara_arm->vt_customer_rc->x * CUSTOMER_X_CONTROL_SEN);
 
-    scara_arm->set_pose_6d[1] +=
-        ((scara_arm->custom_cmd->y - scara_arm->last_custom_rc_cmd[1]) * CUSTOMER_Y_CONTROL_SEN);
+    scara_arm->set_pose_6d[1] += (scara_arm->vt_customer_rc->y * CUSTOMER_Y_CONTROL_SEN);
 
-    scara_arm->set_pose_6d[2] +=
-        ((scara_arm->custom_cmd->z - scara_arm->last_custom_rc_cmd[2]) * CUSTOMER_Z_CONTROL_SEN);
+    scara_arm->set_pose_6d[2] += (scara_arm->vt_customer_rc->z * CUSTOMER_Z_CONTROL_SEN);
 
     scara_arm->set_pose_6d[3] +=
-        (rflFloatLoopConstrain(scara_arm->custom_cmd->yaw - scara_arm->last_custom_rc_cmd[3], -RAD_PI, RAD_PI) *
-         CUSTOMER_AY_CONTROL_SEN);
+        (rflFloatLoopConstrain(scara_arm->vt_customer_rc->yaw, -RAD_PI, RAD_PI) * CUSTOMER_AY_CONTROL_SEN);
     scara_arm->set_pose_6d[4] +=
-        (rflFloatLoopConstrain(scara_arm->custom_cmd->pitch - scara_arm->last_custom_rc_cmd[4], -RAD_PI, RAD_PI) *
-         CUSTOMER_AP_CONTROL_SEN);
+        (rflFloatLoopConstrain(scara_arm->vt_customer_rc->pitch, -RAD_PI, RAD_PI) * CUSTOMER_AP_CONTROL_SEN);
     scara_arm->set_pose_6d[5] +=
-        (rflFloatLoopConstrain(scara_arm->custom_cmd->roll - scara_arm->last_custom_rc_cmd[5], -RAD_PI, RAD_PI) *
-         CUSTOMER_AR_CONTROL_SEN);
-}
-
-static void record_custom_rc_cmd(engineer_scara_arm_s *scara_arm)
-{
-    scara_arm->last_custom_rc_cmd[0] = scara_arm->custom_cmd->x;
-    scara_arm->last_custom_rc_cmd[1] = scara_arm->custom_cmd->y;
-    scara_arm->last_custom_rc_cmd[2] = scara_arm->custom_cmd->z;
-    scara_arm->last_custom_rc_cmd[3] = scara_arm->custom_cmd->yaw;
-    scara_arm->last_custom_rc_cmd[4] = scara_arm->custom_cmd->pitch;
-    scara_arm->last_custom_rc_cmd[5] = scara_arm->custom_cmd->roll;
+        (rflFloatLoopConstrain(scara_arm->vt_customer_rc->roll, -RAD_PI, RAD_PI) * CUSTOMER_AR_CONTROL_SEN);
 }

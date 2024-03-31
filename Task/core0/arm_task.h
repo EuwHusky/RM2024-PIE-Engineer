@@ -80,14 +80,13 @@ typedef struct EngineerScaraArm
 
     /*设备*/
 
-    const RC_ctrl_t *dr16_rc;
-    const custom_robot_data_t *custom_cmd;
-    const remote_control_t *custom_mk;
-    float last_custom_rc_cmd[6];
+    const RC_ctrl_t *dbus_rc;                  // dt7-dr16遥控器链路 数据
+    const custom_robot_data_t *vt_customer_rc; // 图传链路 自定义控制器数据
+    const remote_control_t *vt_mk;             // 图传链路 键鼠数据
 
-    uint16_t encoder_value[2];
-    float encoder_angle[2]; // 磁编获取到的关节4、6的绝对角度，逆时针为正，单位为角度deg
-    sliding_window_filter_s_t encoder_angle_filter[2];
+    uint16_t encoder_value;
+    float encoder_angle; // 磁编获取到的关节4、6的绝对角度，逆时针为正，单位为角度deg
+    sliding_window_filter_s_t encoder_angle_filter;
 
     rfl_motor_s joint_1_motor[2];  // 0-左 1-右
     rfl_motor_s joint_23_motor[2]; // 0-2 1-3
@@ -205,7 +204,6 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_MAX_OUT (10000.0f)
 
 // 磁编码器安装偏差
-#define ENGINEER_ARM_JOINT_4_ENCODER_ANGLE_OFFSET (0.0f)
 #define ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET (0.0f)
 
 #endif /* _ARM_TASK_H__ */

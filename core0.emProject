@@ -85,9 +85,12 @@
         <file file_name="Module/BMI088/BMI088Middleware.c" />
       </folder>
       <folder Name="referee">
-        <file file_name="Module/Referee/CRC8_CRC16.c" />
+        <file file_name="Module/referee/client_ui_plot.c" />
+        <file file_name="Module/referee/crc8_crc16.c" />
         <file file_name="Module/Referee/fifo.c" />
         <file file_name="Module/Referee/referee.c" />
+        <file file_name="Module/referee/referee_frame_process.c" />
+        <file file_name="Module/referee/referee_robot_interaction_manager.c" />
       </folder>
       <folder Name="remote_control">
         <file file_name="Module/remote_control/remote_control.c" />
@@ -112,9 +115,6 @@
         <folder Name="data_structure">
           <file file_name="robofusionlib/algorithm/data_structure/algo_angle.c" />
           <file file_name="robofusionlib/algorithm/data_structure/algo_matrix.c" />
-        </folder>
-        <folder Name="protocol">
-          <file file_name="robofusionlib/algorithm/data_structure/algo_robomaster_referee_protocol.h" />
         </folder>
       </folder>
       <folder Name="bsp">
@@ -300,6 +300,7 @@
       <file file_name="Task/core0/INS_task.c" />
       <file file_name="Task/print_task.c" />
       <file file_name="Task/core0/referee_task.c" />
+      <file file_name="Task/core0/ui_element_builder.c" />
     </folder>
   </project>
 </solution>

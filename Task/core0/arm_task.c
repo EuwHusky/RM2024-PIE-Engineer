@@ -68,37 +68,26 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
         scara_arm->is_joints_ready[i] = false;
     scara_arm->last_mode_control_key_value = 1;
 
-    scara_arm->dr16_rc = get_remote_control_point();
-    scara_arm->custom_cmd = getCustomerControllerData();
-    scara_arm->custom_mk = getRemoteControlData();
-
-    scara_arm->last_custom_rc_cmd[0] = scara_arm->custom_cmd->x;
-    scara_arm->last_custom_rc_cmd[1] = scara_arm->custom_cmd->y;
-    scara_arm->last_custom_rc_cmd[2] = scara_arm->custom_cmd->z;
-    scara_arm->last_custom_rc_cmd[3] = scara_arm->custom_cmd->yaw;
-    scara_arm->last_custom_rc_cmd[4] = scara_arm->custom_cmd->pitch;
-    scara_arm->last_custom_rc_cmd[5] = scara_arm->custom_cmd->roll;
+    scara_arm->dbus_rc = get_remote_control_point();
+    scara_arm->vt_customer_rc = getCustomerControllerData();
+    scara_arm->vt_mk = getRemoteControlData();
 
     for (uint8_t i = 0; i < 2; i++)
-        rlfSlidingWindowFilterInit(scara_arm->encoder_angle_filter + i, 11, 2);
+        rlfSlidingWindowFilterInit(&scara_arm->encoder_angle_filter, 11, 2);
 }
 
 static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
 {
     bool is_error = false;
-    float angle_offset[2] = {ENGINEER_ARM_JOINT_4_ENCODER_ANGLE_OFFSET, ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET};
-    for (uint8_t i = 0; i < 2; i++)
-    {
-        if (scara_arm->encoder_value[i] = MA600_read_with_check(&is_error, i), is_error == false)
-        {
-            scara_arm->encoder_angle[i] = rlfSlidingWindowFilterCalc(
-                scara_arm->encoder_angle_filter + i,
-                rflFloatLoopConstrain(((float)scara_arm->encoder_value[i] * 0.005493248f) - 180.0f - angle_offset[i],
-                                      -DEG_PI, DEG_PI));
-        }
-    }
+    float angle_offset = ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET;
 
-    scara_arm->encoder_angle[3] = 0.0f; // 因为关节6磁编失效临时写的 记得删
+    if (scara_arm->encoder_value = MA600_read_with_check(&is_error), is_error == false)
+    {
+        scara_arm->encoder_angle = rlfSlidingWindowFilterCalc(
+            &scara_arm->encoder_angle_filter,
+            rflFloatLoopConstrain(((float)scara_arm->encoder_value * 0.005493248f) - 180.0f - angle_offset, -DEG_PI,
+                                  DEG_PI));
+    }
 }
 
 engineer_scara_arm_s *getArmDataPointer(void)

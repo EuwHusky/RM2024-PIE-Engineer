@@ -177,6 +177,9 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
 
     // while (can_is_secondary_transmit_buffer_full(BOARD_CAN2)) // 检查发送缓冲区是否已满
     //     ;
+    for (uint16_t i = 0; i < 1000; i++) // 检查发送缓冲区是否已满，满则循环延时
+        if (!can_is_secondary_transmit_buffer_full(BOARD_CAN2))
+            break;
     rflRmMotorControl(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, ENGINEER_ARM_JOINTS_456_RM_MOTORS_CAN_SLAVE_ID,
                       (int16_t)rflMotorGetOutput(scara_arm->joint_4_motor + 0),
                       (int16_t)rflMotorGetOutput(scara_arm->joint_56_motor + 0),

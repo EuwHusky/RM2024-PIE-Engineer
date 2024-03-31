@@ -27,6 +27,7 @@ engineer_scara_arm_s *arm_data;
 engineer_chassis_s *chassis_data;
 
 const game_robot_HP_t *referee_robot_hp;
+const robot_status_t *referee_robot_status;
 
 const custom_robot_data_t *customer_controller;
 
@@ -75,6 +76,7 @@ void print_task(void *pvParameters)
     chassis_data = getChassisDataPointer();
 
     referee_robot_hp = getRobotHp();
+    referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
 
     motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joint_56_motor[1].controller;
@@ -139,15 +141,25 @@ void print_task(void *pvParameters)
             //         motor_controller_test->speed_pid.fdb, motor_controller_test->speed_pid.set,
             //         motor_controller_test->speed_pid.out);
 
-            sprintf((char *)test_txt, "\nrd:\t%d\nmd:\t%d\nm6:\t%d\t%f\t%f\t%f\t\t%f\t%d\n===\n",
-                    arm_data->is_arm_ready, arm_data->mode, arm_data->joint_56_motor[1].mode_,
-                    arm_data->joint_56_motor[1].set_angle_.deg, arm_data->joint_56_motor[1].track_angle.deg,
-                    arm_data->joint_56_motor[1].angle_.deg, motor_driver_test->deg_angle,
-                    motor_driver_test->rotor_turns);
+            // sprintf((char *)test_txt, "\nrd:\t%d\nmd:\t%d\nm6:\t%d\t%f\t%f\t%f\t\t%f\t%d\n===\n",
+            //         arm_data->is_arm_ready, arm_data->mode, arm_data->joint_56_motor[1].mode_,
+            //         arm_data->joint_56_motor[1].set_angle_.deg, arm_data->joint_56_motor[1].track_angle.deg,
+            //         arm_data->joint_56_motor[1].angle_.deg, motor_driver_test->deg_angle,
+            //         motor_driver_test->rotor_turns);
 
-            uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                strlen((char *)test_txt) - 1);
+            // sprintf((char *)test_txt, "%d,%d,%d\r\n ", referee_robot_status->robot_id,
+            // referee_robot_status->current_HP,
+            //         referee_robot_status->maximum_HP);
+
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d\n", referee_robot_hp->blue_1_robot_HP,
+            //         referee_robot_hp->blue_2_robot_HP, referee_robot_hp->blue_3_robot_HP,
+            //         referee_robot_hp->blue_base_HP, referee_robot_hp->red_1_robot_HP,
+            //         referee_robot_hp->red_2_robot_HP, referee_robot_hp->red_3_robot_HP,
+            //         referee_robot_hp->red_base_HP);
+
+            // uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+            //                     strlen((char *)test_txt) - 1);
         }
 
         /**
