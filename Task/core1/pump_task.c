@@ -17,8 +17,11 @@ void pump_task(void *pvParameters)
 {
     vTaskDelay(1000);
 
-    HPM_IOC->PAD[IO01].FUNC_CTL = IOC_PA24_FUNC_CTL_GPIO_A_24;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, GPIO_DO_GPIOA, 24, 0);
+    HPM_IOC->PAD[I2C0_SDA].FUNC_CTL = IOC_PA05_FUNC_CTL_GPIO_A_05;
+    gpio_set_pin_output_with_initial(HPM_GPIO0, GPIO_DO_GPIOA, 5, 0);
+
+    HPM_IOC->PAD[I2C1_SDA].FUNC_CTL = IOC_PA10_FUNC_CTL_GPIO_A_10;
+    gpio_set_pin_output_with_initial(HPM_GPIO0, GPIO_DO_GPIOA, 10, 1);
 
     core0_data_for_pump = get_data_021_point();
 
@@ -39,7 +42,7 @@ void pump_task(void *pvParameters)
             }
         }
 
-        gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOA, 24, sucking ? 1 : 0);
+        gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOA, 5, sucking ? 1 : 0);
 
         vTaskDelay(20);
     }

@@ -79,8 +79,8 @@ void print_task(void *pvParameters)
     referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
 
-    motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].controller;
-    motor_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
+    motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].controller;
+    motor_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
 
     while (true)
     {
@@ -140,10 +140,21 @@ void print_task(void *pvParameters)
             //         arm_data->joints_value[JOINT_1], arm_data->joints_value[JOINT_2],
             //         arm_data->joints_value[JOINT_3], arm_data->joints_value[JOINT_4],
             //         arm_data->joints_value[JOINT_5], arm_data->joints_value[JOINT_6]);
-            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", motor_controller_test->angle_pid.set,
-                    motor_controller_test->angle_pid.fdb, motor_controller_test->angle_pid.out,
-                    motor_controller_test->speed_pid.set, motor_controller_test->speed_pid.fdb,
-                    motor_controller_test->speed_pid.out);
+
+            /**
+             * @brief 自定义控制器
+             */
+            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
+                    customer_controller->z, customer_controller->yaw, customer_controller->pitch,
+                    customer_controller->roll, customer_controller->key);
+
+            /**
+             * @brief 电机PID
+             */
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", motor_controller_test->angle_pid.set,
+            //         motor_controller_test->angle_pid.fdb, motor_controller_test->angle_pid.out,
+            //         motor_controller_test->speed_pid.set, motor_controller_test->speed_pid.fdb,
+            //         motor_controller_test->speed_pid.out);
 
             /**
              * @brief Referee System Comm
@@ -154,7 +165,7 @@ void print_task(void *pvParameters)
 
             uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                strlen((char *)test_txt) - 1);
+                                strlen((char *)test_txt));
         }
 
         /**

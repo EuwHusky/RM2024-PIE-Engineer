@@ -77,7 +77,7 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
 {
     scara_arm->joints_value[JOINT_1] = (scara_arm->joints_motors[MOTOR_JOINT1_LEFT].angle_.deg +
                                         scara_arm->joints_motors[MOTOR_JOINT1_RIGHT].angle_.deg) *
-                                       0.5f / LIFTER_BABOU;
+                                       0.5f / LIFTER_DISTANCE_TO_DEGREE_FACTOR;
     scara_arm->joints_value[JOINT_2] = scara_arm->joints_motors[MOTOR_JOINT23_BACK].angle_.rad / JOINT2_REDUCTION;
     scara_arm->joints_value[JOINT_3] =
         scara_arm->joints_motors[MOTOR_JOINT23_FRONT].angle_.rad - scara_arm->joints_value[JOINT_2];
@@ -113,9 +113,10 @@ void arm_model_update_control(engineer_scara_arm_s *scara_arm)
     scara_arm->set_joints_value[JOINT_2] = rflFloatConstrain(scara_arm->set_joints_value[JOINT_2],
                                                              ENGINEER_ARM_JOINT_2_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
                                                              ENGINEER_ARM_JOINT_2_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-    scara_arm->set_joints_value[JOINT_3] = rflFloatConstrain(scara_arm->set_joints_value[JOINT_3],
-                                                             ENGINEER_ARM_JOINT_3_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                                                             ENGINEER_ARM_JOINT_3_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+    scara_arm->set_joints_value[JOINT_3] = rflFloatConstrain(
+        scara_arm->set_joints_value[JOINT_3],
+        (ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE - scara_arm->set_joints_value[JOINT_2]) * DEGREE_TO_RADIAN_FACTOR,
+        (ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE - scara_arm->set_joints_value[JOINT_2]) * DEGREE_TO_RADIAN_FACTOR);
     scara_arm->set_joints_value[JOINT_4] = rflFloatConstrain(scara_arm->set_joints_value[JOINT_4],
                                                              ENGINEER_ARM_JOINT_4_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
                                                              ENGINEER_ARM_JOINT_4_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);

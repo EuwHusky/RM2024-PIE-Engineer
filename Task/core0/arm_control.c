@@ -50,6 +50,11 @@ void arm_set_mode(engineer_scara_arm_s *scara_arm)
         if (scara_arm->last_mode_control_key_value != ARM_WORK_MODE_RC_KEY_VALUE &&
             mode_control_key_value == ARM_WORK_MODE_RC_KEY_VALUE)
             scara_arm->mode = ARM_MODE_JOINTS;
+        if (scara_arm->last_mode_control_key_value != ARM_WORK_MODE_RC_KEY_VALUE &&
+            mode_control_key_value == ARM_WORK_MODE_RC_KEY_VALUE)
+            scara_arm->mode = ARM_MODE_POSE;
+        else if (scara_arm->last_mode_control_key_value != 2 && mode_control_key_value == 2)
+            scara_arm->mode = ARM_MODE_CUSTOMER;
     }
 
     scara_arm->last_mode_control_key_value = mode_control_key_value;
@@ -170,7 +175,7 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
                   JOINT_2_START_ANGLE) < 1.0f)
         {
             setJointStartUpStateOk(JOINT_2, scara_arm->start_up_status);
-            rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+            // rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
         }
     }
 
@@ -185,7 +190,7 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
                   JOINT_3_START_ANGLE) < 1.0f)
         {
             setJointStartUpStateOk(JOINT_3, scara_arm->start_up_status);
-            rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+            // rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
         }
     }
 
@@ -331,13 +336,13 @@ static void joints_control(engineer_scara_arm_s *scara_arm)
 static void pose_control_dbus(engineer_scara_arm_s *scara_arm)
 {
     scara_arm->set_pose_6d[0] +=
-        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * POSE_X_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[3], ARM_RC_DEADLINE)) / 660.0f * POSE_X_CONTROL_SEN);
 
     scara_arm->set_pose_6d[1] +=
         ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[2], ARM_RC_DEADLINE)) / 660.0f * -POSE_Y_CONTROL_SEN);
 
     scara_arm->set_pose_6d[2] +=
-        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[3], ARM_RC_DEADLINE)) / 660.0f * POSE_Z_CONTROL_SEN);
+        ((float)(rflDeadZoneZero(scara_arm->dbus_rc->rc.ch[1], ARM_RC_DEADLINE)) / 660.0f * POSE_Z_CONTROL_SEN);
 
     if (scara_arm->dbus_rc->rc.s[0] == 1)
         scara_arm->set_pose_6d[3] +=

@@ -50,7 +50,7 @@ static void chassis_set_mode(engineer_chassis_s *chassis)
 {
     if (chassis->rc->rc.s[1] == 2)
     {
-        chassis->mode = CHASSIS_MODE_FOLLOW;
+        // chassis->mode = CHASSIS_MODE_FOLLOW;
     }
     else if (chassis->rc->rc.s[1] != 2)
     {
@@ -98,11 +98,11 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
     for (uint8_t i = 0; i < 4; i++)
     {
         rflMotorUpdateStatus(chassis->motor + i);
-        chassis->wheel_speed[i] = rflMotorGetSpeed(chassis->motor + i) * WHEEL_RADIUS;
+        chassis->wheel_speed[i] = rflMotorGetSpeed(chassis->motor + i) * CHASSIS_WHEEL_RADIUS;
     }
 
     rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
-                   chassis->set_angle.deg + chassis->set_speed_vector[2] * YAW_CONTROL_SEN);
+                   chassis->set_angle.deg + chassis->set_speed_vector[2] * CHASSIS_YAW_CONTROL_SEN);
     rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
                    rflFloatLoopConstrain(chassis->set_angle.deg, -DEG_PI, DEG_PI));
 
@@ -112,19 +112,19 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
 
     for (uint8_t i = 0; i < 4; i++)
     {
-        rflMotorSetSpeed(chassis->motor + i, chassis->wheel_set_speed[i] / WHEEL_RADIUS);
+        rflMotorSetSpeed(chassis->motor + i, chassis->wheel_set_speed[i] / CHASSIS_WHEEL_RADIUS);
         rflMotorUpdateControl(chassis->motor + i);
     }
 
     if (chassis->mode == CHASSIS_MODE_FOLLOW)
     {
-        rflRmMotorControl(MOTORS_CAN_ORDINAL, MOTORS_CAN_SLAVE_ID, rflMotorGetOutput(chassis->motor + 0),
-                          rflMotorGetOutput(chassis->motor + 1), rflMotorGetOutput(chassis->motor + 2),
-                          rflMotorGetOutput(chassis->motor + 3));
+        rflRmMotorControl(CHASSIS_MOTORS_CAN_ORDINAL, CHASSIS_MOTORS_CAN_SLAVE_ID,
+                          rflMotorGetOutput(chassis->motor + 0), rflMotorGetOutput(chassis->motor + 1),
+                          rflMotorGetOutput(chassis->motor + 2), rflMotorGetOutput(chassis->motor + 3));
     }
     else
     {
-        rflRmMotorControl(MOTORS_CAN_ORDINAL, MOTORS_CAN_SLAVE_ID, 0, 0, 0, 0);
+        rflRmMotorControl(CHASSIS_MOTORS_CAN_ORDINAL, CHASSIS_MOTORS_CAN_SLAVE_ID, 0, 0, 0, 0);
     }
 
     // memcpy(feedback, chassis->model.motor_feedback, 4 * sizeof(float));
@@ -168,13 +168,18 @@ static void chassis_init(engineer_chassis_s *chassis)
     // 底盘电机
     rfl_motor_config_s motor_config = {0};
     rflMotorGetDefaultConfig(&motor_config, RFL_MOTOR_RM_M3508, RFL_MOTOR_CONTROLLER_PID);
+    motor_config.speed_pid_kp = ENGINEER_CHASSIS_RM_M3508_SPEED_PID_KP;
+    motor_config.speed_pid_ki = ENGINEER_CHASSIS_RM_M3508_SPEED_PID_KI;
+    motor_config.speed_pid_kd = ENGINEER_CHASSIS_RM_M3508_SPEED_PID_KD;
+    motor_config.speed_pid_max_iout = ENGINEER_CHASSIS_RM_M3508_SPEED_PID_MAX_IOUT;
+    motor_config.speed_pid_max_out = ENGINEER_CHASSIS_RM_M3508_SPEED_PID_MAX_OUT;
     for (uint8_t i = 0; i < 4; i++)
     {
         if (i < 2)
             motor_config.is_reversed = false;
         else
             motor_config.is_reversed = true;
-        motor_config.can_ordinal = MOTORS_CAN_ORDINAL;
+        motor_config.can_ordinal = CHASSIS_MOTORS_CAN_ORDINAL;
         motor_config.master_can_id = 0x201 + i;
         rflMotorInit(chassis->motor + i, &motor_config);
     }
