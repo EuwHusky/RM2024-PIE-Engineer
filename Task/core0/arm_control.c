@@ -47,14 +47,15 @@ void arm_set_mode(engineer_scara_arm_s *scara_arm)
     // 工作模式 关节/位姿控制
     if (scara_arm->start_up_status == ARM_START_UP_OK)
     {
-        if (scara_arm->last_mode_control_key_value != ARM_WORK_MODE_RC_KEY_VALUE &&
-            mode_control_key_value == ARM_WORK_MODE_RC_KEY_VALUE)
-            scara_arm->mode = ARM_MODE_JOINTS;
+        // if (scara_arm->last_mode_control_key_value != ARM_WORK_MODE_RC_KEY_VALUE &&
+        //     mode_control_key_value == ARM_WORK_MODE_RC_KEY_VALUE)
+        //     scara_arm->mode = ARM_MODE_JOINTS;
         if (scara_arm->last_mode_control_key_value != ARM_WORK_MODE_RC_KEY_VALUE &&
             mode_control_key_value == ARM_WORK_MODE_RC_KEY_VALUE)
             scara_arm->mode = ARM_MODE_POSE;
+        // scara_arm->mode = ARM_MODE_CUSTOMER;
         else if (scara_arm->last_mode_control_key_value != 2 && mode_control_key_value == 2)
-            scara_arm->mode = ARM_MODE_CUSTOMER;
+            scara_arm->mode = ARM_MODE_HOLD_ON;
     }
 
     scara_arm->last_mode_control_key_value = mode_control_key_value;
@@ -74,10 +75,7 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
     else if (scara_arm->last_mode == ARM_MODE_NO_FORCE && scara_arm->mode != ARM_MODE_NO_FORCE)
     {
         arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-        if (scara_arm->mode == ARM_MODE_START_UP)
-            arm_motor_set_max_speed(scara_arm, 1.0f);
-        else
-            arm_motor_set_max_speed(scara_arm, 2.0f);
+        arm_motor_set_max_speed(scara_arm, scara_arm->mode, 2.0f);
     }
 
     if (scara_arm->last_mode != ARM_MODE_START_UP && scara_arm->mode == ARM_MODE_START_UP)
@@ -120,6 +118,9 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
     case ARM_MODE_CUSTOMER:
         pose_control_customer(scara_arm);
         break;
+    case ARM_MODE_HOLD_ON:
+        // Not Doing Anything
+        break;
 
     default:
         break;
@@ -155,9 +156,9 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
             rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT]) < -JOINT_1_HOMING_TORQUE_THRESHOLD)
         {
             rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
-                               JOINT_1_HOMING_ANGLE);
+                               JOINT_1_HOMING_ANGLE, false);
             rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
-                               JOINT_1_HOMING_ANGLE);
+                               JOINT_1_HOMING_ANGLE, false);
             setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status);
             rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
             rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
@@ -169,10 +170,11 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     if (checkIfJointNotStartUp(JOINT_2, scara_arm->start_up_status))
     {
         rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_DEGREE, JOINT_2_START_ANGLE);
+        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_DEGREE,
+                         JOINT_2_START_ANGLE * JOINT2_REDUCTION);
 
         if (fabsf(rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_DEGREE) -
-                  JOINT_2_START_ANGLE) < 1.0f)
+                  JOINT_2_START_ANGLE * JOINT2_REDUCTION) < 1.2f)
         {
             setJointStartUpStateOk(JOINT_2, scara_arm->start_up_status);
             // rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
@@ -184,10 +186,16 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     if (checkIfJointNotStartUp(JOINT_3, scara_arm->start_up_status))
     {
         rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_DEGREE, JOINT_3_START_ANGLE);
+        rflMotorSetAngle(
+            &scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_DEGREE,
+            JOINT_3_START_ANGLE -
+                (((JOINT_2_START_ANGLE * JOINT2_REDUCTION) -
+                  rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_DEGREE)) /
+                 (ENGINEER_ARM_MOTOR_JOINT_23_BACK_MAX_ANGLE - ENGINEER_ARM_MOTOR_JOINT_23_BACK_MIN_ANGLE) *
+                 (ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE - ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE)));
 
         if (fabsf(rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_DEGREE) -
-                  JOINT_3_START_ANGLE) < 1.0f)
+                  JOINT_3_START_ANGLE) < 1.2f)
         {
             setJointStartUpStateOk(JOINT_3, scara_arm->start_up_status);
             // rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
@@ -209,7 +217,7 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
             if (rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT4]) < -JOINT_4_HOMING_TORQUE_THRESHOLD)
             {
                 rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_DEGREE,
-                                   JOINT_4_HOMING_ANGLE);
+                                   JOINT_4_HOMING_ANGLE, true);
                 setJointStartUpStateOk(JOINT_4 + JOINT45_START_UP_STEP1_BIT_OFFSET, scara_arm->start_up_status);
             }
         }
@@ -232,10 +240,10 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     {
         rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_DEGREE,
                            /* JOINT_5_HOMING_ANGLE - */
-                           (scara_arm->joint_6_encoder_angle * END_BEVEL_GEAR_SET_REDUCTION));
+                           (scara_arm->joint_6_encoder_angle * END_BEVEL_GEAR_SET_REDUCTION), true);
         rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
                            /* JOINT_5_HOMING_ANGLE + */
-                           (scara_arm->joint_6_encoder_angle * END_BEVEL_GEAR_SET_REDUCTION));
+                           (scara_arm->joint_6_encoder_angle * END_BEVEL_GEAR_SET_REDUCTION), true);
 
         rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
         rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
@@ -274,9 +282,9 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
                 rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT]) > JOINT_1_HOMING_TORQUE_THRESHOLD)
             {
                 rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_DEGREE,
-                                   JOINT_5_HOMING_ANGLE);
+                                   JOINT_5_HOMING_ANGLE, true);
                 rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
-                                   JOINT_5_HOMING_ANGLE);
+                                   JOINT_5_HOMING_ANGLE, true);
                 setJointStartUpStateOk(JOINT_5 + JOINT45_START_UP_STEP1_BIT_OFFSET, scara_arm->start_up_status);
             }
         }
@@ -366,7 +374,7 @@ static void pose_control_customer(engineer_scara_arm_s *scara_arm)
     scara_arm->set_pose_6d[3] +=
         (rflFloatLoopConstrain(scara_arm->vt_customer_rc->yaw, -RAD_PI, RAD_PI) * CUSTOMER_AY_CONTROL_SEN);
     scara_arm->set_pose_6d[4] +=
-        (rflFloatLoopConstrain(scara_arm->vt_customer_rc->pitch, -RAD_PI, RAD_PI) * CUSTOMER_AP_CONTROL_SEN);
+        (rflFloatLoopConstrain(scara_arm->vt_customer_rc->pitch, -RAD_PI, RAD_PI) * -CUSTOMER_AP_CONTROL_SEN);
     scara_arm->set_pose_6d[5] +=
-        (rflFloatLoopConstrain(scara_arm->vt_customer_rc->roll, -RAD_PI, RAD_PI) * CUSTOMER_AR_CONTROL_SEN);
+        (rflFloatLoopConstrain(scara_arm->vt_customer_rc->roll, -RAD_PI, RAD_PI) * -CUSTOMER_AR_CONTROL_SEN);
 }

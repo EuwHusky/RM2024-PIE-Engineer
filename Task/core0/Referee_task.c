@@ -95,21 +95,20 @@ void referee_task(void *pvParameters)
                                 VT_UART_RX_BUF_LENGHT);
         }
 
-        if (pm_uart_tx_dma_done)
-        {
-            pm_uart_tx_dma_done = false;
+        // if (pm_uart_tx_dma_done)
+        // {
+        //     pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
 
-            pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
-
-            if (pm_tx_frame_pointer != NULL)
-            {
-                memcpy(pm_tx_buf, pm_tx_frame_pointer, getRefSentDataLen());
-                uart_tx_trigger_dma(BOARD_HDMA, PM_UART_TX_DMA_CHN, PM_UART,
-                                    core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_tx_buf),
-                                    getRefSentDataLen());
-                refereeRobotInteractionManagerSuccessfullySentHook();
-            }
-        }
+        //     if (pm_tx_frame_pointer != NULL)
+        //     {
+        //         refereeRobotInteractionManagerSuccessfullySentHook();
+        //         memcpy(pm_tx_buf, pm_tx_frame_pointer, getRefSentDataLen());
+        //         uart_tx_trigger_dma(BOARD_HDMA, PM_UART_TX_DMA_CHN, PM_UART,
+        //                             core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_tx_buf),
+        //                             getRefSentDataLen());
+        //         pm_uart_tx_dma_done = false;
+        //     }
+        // }
 
         step_clock++;
         vTaskDelay(20);

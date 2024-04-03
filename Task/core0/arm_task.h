@@ -20,6 +20,7 @@ typedef enum EngineerScaraArmMode
     ARM_MODE_JOINTS,   // 关节控制 既挖掘机式控制
     ARM_MODE_POSE,     // 位姿控制
     ARM_MODE_CUSTOMER, // 自定义控制器控制
+    ARM_MODE_HOLD_ON,  // 保持当前姿态
 } engineer_scara_arm_mode_e;
 
 typedef enum EngineerScaraArmJoints
@@ -162,7 +163,7 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_1_LENGTH (0.276f)  /*第一节小臂臂长*/
 #define ENGINEER_ARM_2_LENGTH (0.3015f) /*第二节小臂臂长*/
 #define ENGINEER_ARM_3_LENGTH (0.07f)   /*第三节小臂臂长*/
-#define ENGINEER_ARM_4_LENGTH (0.058f)  /*第四节小臂臂长*/
+#define ENGINEER_ARM_4_LENGTH (0.055f)  /*第四节小臂臂长*/
 
 /**
  * @brief 抬升链轮半径 单位 mm
@@ -191,13 +192,13 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 // 位姿可达范围
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/
 #define ENGINEER_ARM_XY24_MIN_DISTANCE (0.1f) /*关节2到关节4的最小伸展距离*/
-#define ENGINEER_ARM_PITCH_MAX_ANGLE (60.0f)  /* 末端PITCH最大角度 */
-#define ENGINEER_ARM_PITCH_MIN_ANGLE (-60.0f) /* 末端PITCH最小角度 */
+#define ENGINEER_ARM_PITCH_MAX_ANGLE (85.0f)  /* 末端PITCH最大角度 */
+#define ENGINEER_ARM_PITCH_MIN_ANGLE (-85.0f) /* 末端PITCH最小角度 */
 #define ENGINEER_ARM_ROLL_MAX_ANGLE (180.0f)  /* 末端ROLL最大角度 */
 #define ENGINEER_ARM_ROLL_MIN_ANGLE (-180.0f) /* 末端ROLL最小角度 */
 
 // 正常运行时的关节可达范围
-#define ENGINEER_ARM_JOINT_1_MAX_DISTANCE (0.44f)
+#define ENGINEER_ARM_JOINT_1_MAX_DISTANCE (0.65f)
 #define ENGINEER_ARM_JOINT_1_MIN_DISTANCE (0.0f)
 #define ENGINEER_ARM_JOINT_2_MAX_ANGLE (90.0f)
 #define ENGINEER_ARM_JOINT_2_MIN_ANGLE (-90.0f)
@@ -228,9 +229,9 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_MOTOR_JOINT_23_BACK_MAX_ANGLE (ENGINEER_ARM_JOINT_2_MAX_ANGLE * JOINT2_REDUCTION)
 #define ENGINEER_ARM_MOTOR_JOINT_23_BACK_MIN_ANGLE (ENGINEER_ARM_JOINT_2_MIN_ANGLE * JOINT2_REDUCTION)
 #define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE                                                                    \
-    (165.0f /* ENGINEER_ARM_JOINT_2_MAX_ANGLE + ENGINEER_ARM_JOINT_3_MAX_ANGLE */)
+    (175.0f /* ENGINEER_ARM_JOINT_2_MAX_ANGLE + ENGINEER_ARM_JOINT_3_MAX_ANGLE */)
 #define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE                                                                    \
-    (-165.0f /* ENGINEER_ARM_JOINT_2_MIN_ANGLE + ENGINEER_ARM_JOINT_3_MIN_ANGLE */)
+    (-175.0f /* ENGINEER_ARM_JOINT_2_MIN_ANGLE + ENGINEER_ARM_JOINT_3_MIN_ANGLE */)
 #define ENGINEER_ARM_MOTOR_JOINT_4_MAX_ANGLE (ENGINEER_ARM_JOINT_4_MAX_ANGLE)
 #define ENGINEER_ARM_MOTOR_JOINT_4_MIN_ANGLE (ENGINEER_ARM_JOINT_4_MIN_ANGLE)
 #define ENGINEER_ARM_MOTOR_JOINT_56_MAX_ANGLE                                                                          \
@@ -263,7 +264,7 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KD (0.08f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
-#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KP (1200.0f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KP (800.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (8.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)

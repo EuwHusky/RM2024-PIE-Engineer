@@ -17,9 +17,11 @@ void pump_task(void *pvParameters)
 {
     vTaskDelay(1000);
 
+    // 气泵
     HPM_IOC->PAD[I2C0_SDA].FUNC_CTL = IOC_PA05_FUNC_CTL_GPIO_A_05;
     gpio_set_pin_output_with_initial(HPM_GPIO0, GPIO_DO_GPIOA, 5, 0);
 
+    // 电磁阀
     HPM_IOC->PAD[I2C1_SDA].FUNC_CTL = IOC_PA10_FUNC_CTL_GPIO_A_10;
     gpio_set_pin_output_with_initial(HPM_GPIO0, GPIO_DO_GPIOA, 10, 1);
 
@@ -35,7 +37,7 @@ void pump_task(void *pvParameters)
         if (pump_rocker_value < -600)
         {
             key_timer++;
-            if (key_timer > 70)
+            if (key_timer > 25)
             {
                 sucking = !sucking;
                 key_timer = 0;
@@ -43,6 +45,7 @@ void pump_task(void *pvParameters)
         }
 
         gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOA, 5, sucking ? 1 : 0);
+        gpio_write_pin(HPM_GPIO0, GPIO_DO_GPIOA, 10, !sucking ? 1 : 0);
 
         vTaskDelay(20);
     }

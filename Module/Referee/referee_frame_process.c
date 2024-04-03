@@ -4,13 +4,13 @@
 
 #include "crc8_crc16.h"
 
-fifo_s_t pm_fifo;                        // FIFO结构体
-uint8_t pm_fifo_buf[PM_FIFO_BUF_LENGTH]; // FIFO缓存数组
+static fifo_s_t pm_fifo;                        // FIFO结构体
+static uint8_t pm_fifo_buf[PM_FIFO_BUF_LENGTH]; // FIFO缓存数组
 
-fifo_s_t vt_fifo;                        // FIFO结构体
-uint8_t vt_fifo_buf[VT_FIFO_BUF_LENGTH]; // FIFO缓存数组
+static fifo_s_t vt_fifo;                        // FIFO结构体
+static uint8_t vt_fifo_buf[VT_FIFO_BUF_LENGTH]; // FIFO缓存数组
 
-referee_frame_processer_t referee_frame_processer; // 数据解包结构体
+static referee_frame_processer_t referee_frame_processer; // 数据解包结构体
 
 void refereeInitFrameProcesser(void)
 {
@@ -54,7 +54,6 @@ void refereeUnpackFifoData(referee_link_type_e referee_link_type)
 {
     uint8_t byte = 0;
     uint8_t sof = HEADER_SOF; // 帧头
-    referee_frame_processer_t *processer = &referee_frame_processer;
     fifo_s_t *p_fifo = NULL;
 
     if (referee_link_type == PM_REFEREE_LINK)
@@ -65,92 +64,95 @@ void refereeUnpackFifoData(referee_link_type_e referee_link_type)
     while (fifo_s_used(p_fifo))
     {
         byte = fifo_s_get(p_fifo);
-        switch (processer->unpack_step)
+        switch (referee_frame_processer.unpack_step)
         {
         case STEP_HEADER_SOF: {
             if (byte == sof)
             {
-                processer->unpack_step = STEP_LENGTH_LOW;
-                processer->received_package[processer->unpack_index++] = byte;
+                referee_frame_processer.unpack_step = STEP_LENGTH_LOW;
+                referee_frame_processer.received_package[referee_frame_processer.unpack_index++] = byte;
             }
             else
             {
-                processer->unpack_index = 0;
+                referee_frame_processer.unpack_index = 0;
             }
         }
         break;
 
         case STEP_LENGTH_LOW: {
-            processer->received_data_len = byte;
-            processer->received_package[processer->unpack_index++] = byte;
-            processer->unpack_step = STEP_LENGTH_HIGH;
+            referee_frame_processer.received_data_len = byte;
+            referee_frame_processer.received_package[referee_frame_processer.unpack_index++] = byte;
+            referee_frame_processer.unpack_step = STEP_LENGTH_HIGH;
         }
         break;
 
         case STEP_LENGTH_HIGH: {
-            processer->received_data_len |= (byte << 8);
-            processer->received_package[processer->unpack_index++] = byte;
+            referee_frame_processer.received_data_len |= (byte << 8);
+            referee_frame_processer.received_package[referee_frame_processer.unpack_index++] = byte;
 
-            if (processer->received_data_len < (REF_PROTOCOL_FRAME_MAX_SIZE - REF_HEADER_CRC_CMDID_LEN))
+            if (referee_frame_processer.received_data_len < (REF_PROTOCOL_FRAME_MAX_SIZE - REF_HEADER_CRC_CMDID_LEN))
             {
-                processer->unpack_step = STEP_FRAME_SEQ;
+                referee_frame_processer.unpack_step = STEP_FRAME_SEQ;
             }
             else
             {
-                processer->unpack_step = STEP_HEADER_SOF;
-                processer->unpack_index = 0;
+                referee_frame_processer.unpack_step = STEP_HEADER_SOF;
+                referee_frame_processer.unpack_index = 0;
             }
         }
         break;
         case STEP_FRAME_SEQ: {
-            processer->received_package[processer->unpack_index++] = byte;
-            processer->unpack_step = STEP_HEADER_CRC8;
+            referee_frame_processer.received_package[referee_frame_processer.unpack_index++] = byte;
+            referee_frame_processer.unpack_step = STEP_HEADER_CRC8;
         }
         break;
 
         case STEP_HEADER_CRC8: {
-            processer->received_package[processer->unpack_index++] = byte;
+            referee_frame_processer.received_package[referee_frame_processer.unpack_index++] = byte;
 
-            if (processer->unpack_index == REF_PROTOCOL_HEADER_SIZE)
+            if (referee_frame_processer.unpack_index == REF_PROTOCOL_HEADER_SIZE)
             {
-                if (verify_CRC8_check_sum(processer->received_package, REF_PROTOCOL_HEADER_SIZE))
+                if (verify_CRC8_check_sum(referee_frame_processer.received_package, REF_PROTOCOL_HEADER_SIZE))
                 {
-                    processer->unpack_step = STEP_DATA_CRC16;
+                    referee_frame_processer.unpack_step = STEP_DATA_CRC16;
                 }
                 else
                 {
-                    processer->unpack_step = STEP_HEADER_SOF;
-                    processer->unpack_index = 0;
+                    referee_frame_processer.unpack_step = STEP_HEADER_SOF;
+                    referee_frame_processer.unpack_index = 0;
                 }
             }
         }
         break;
 
         case STEP_DATA_CRC16: {
-            if (processer->unpack_index < (REF_HEADER_CRC_CMDID_LEN + processer->received_data_len))
+            if (referee_frame_processer.unpack_index <
+                (REF_HEADER_CRC_CMDID_LEN + referee_frame_processer.received_data_len))
             {
-                processer->received_package[processer->unpack_index++] = byte;
+                referee_frame_processer.received_package[referee_frame_processer.unpack_index++] = byte;
             }
-            if (processer->unpack_index >= (REF_HEADER_CRC_CMDID_LEN + processer->received_data_len))
+            if (referee_frame_processer.unpack_index >=
+                (REF_HEADER_CRC_CMDID_LEN + referee_frame_processer.received_data_len))
             {
-                processer->unpack_step = STEP_HEADER_SOF;
-                processer->unpack_index = 0;
+                referee_frame_processer.unpack_step = STEP_HEADER_SOF;
+                referee_frame_processer.unpack_index = 0;
 
-                if (verify_CRC16_check_sum(processer->received_package,
-                                           REF_HEADER_CRC_CMDID_LEN + processer->received_data_len))
+                if (verify_CRC16_check_sum(referee_frame_processer.received_package,
+                                           REF_HEADER_CRC_CMDID_LEN + referee_frame_processer.received_data_len))
                 {
                     uint16_t cmd_id = 0;
-                    memcpy(&cmd_id, processer->received_package + REF_PROTOCOL_HEADER_SIZE, REF_PROTOCOL_CMD_SIZE);
+                    memcpy(&cmd_id, referee_frame_processer.received_package + REF_PROTOCOL_HEADER_SIZE,
+                           sizeof(uint16_t));
 
-                    referee_data_decode(processer->received_package, cmd_id);
+                    referee_data_decode(referee_frame_processer.received_package, cmd_id);
                 }
             }
         }
         break;
 
         default: {
-            processer->unpack_step = STEP_HEADER_SOF;
-            processer->unpack_index = 0;
+            referee_frame_processer.unpack_step = STEP_HEADER_SOF;
+            referee_frame_processer.unpack_index = 0;
         }
         break;
         }

@@ -50,7 +50,7 @@ static void chassis_set_mode(engineer_chassis_s *chassis)
 {
     if (chassis->rc->rc.s[1] == 2)
     {
-        // chassis->mode = CHASSIS_MODE_FOLLOW;
+        chassis->mode = CHASSIS_MODE_FOLLOW;
     }
     else if (chassis->rc->rc.s[1] != 2)
     {

@@ -209,15 +209,29 @@ void arm_motor_set_mode(engineer_scara_arm_s *scara_arm, rfl_motor_control_mode_
  * @brief 设置机械臂电机运动速度
  * @note 测试版 后续需要更新为动态速度规划
  */
-void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm, float max_speed)
+void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm, engineer_scara_arm_mode_e mode, float base_speed)
 {
-    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], max_speed * 4.0f);
-    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], max_speed * 4.0f);
-    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], max_speed);
-    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], max_speed / JOINT2_REDUCTION);
-    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], max_speed / 2.0f);
-    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], max_speed * 6.0f);
-    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], max_speed * 6.0f);
+    if (mode == ARM_MODE_START_UP)
+    {
+        base_speed /= 2.0f;
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], base_speed);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], base_speed);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], base_speed);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], base_speed * 2.0f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], base_speed);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], base_speed * 3.0f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], base_speed * 3.0f);
+    }
+    else
+    {
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], base_speed * 3.2f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], base_speed * 3.2f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], base_speed);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], base_speed / JOINT2_REDUCTION);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], base_speed / 2.0f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], base_speed * 6.0f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], base_speed * 6.0f);
+    }
 }
 
 /**

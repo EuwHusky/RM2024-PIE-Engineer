@@ -3,10 +3,10 @@
 
 #include "referee.h"
 
-game_robot_HP_t game_robot_HP;
-robot_status_t robot_status;
-custom_robot_data_t customer_controller_data;
-remote_control_t remote_control;
+static game_robot_HP_t game_robot_HP;
+static robot_status_t robot_status;
+static custom_robot_data_t customer_controller_data;
+static remote_control_t remote_control;
 
 void refereeInitData(void)
 {

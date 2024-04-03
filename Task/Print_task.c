@@ -3,8 +3,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 600   // 输出数据的周期
+#define PRINT_ERROR (true) // 是否输出异常
+#define PRINT_TIME_MS 500  // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -30,6 +30,7 @@ const game_robot_HP_t *referee_robot_hp;
 const robot_status_t *referee_robot_status;
 
 const custom_robot_data_t *customer_controller;
+const remote_control_t *remote_control_mk;
 
 ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[512];
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
@@ -78,6 +79,7 @@ void print_task(void *pvParameters)
     referee_robot_hp = getRobotHp();
     referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
+    remote_control_mk = getRemoteControlData();
 
     motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].controller;
     motor_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
@@ -90,35 +92,43 @@ void print_task(void *pvParameters)
             if (detect_error(i))
                 switch (i)
                 {
-                case DUAL_COMM_DH: // 双核
-                    printf("核间通信异常\n");
-                    break;
+                // case DUAL_COMM_DH: // 双核
+                //     sprintf((char *)test_txt, "核间通信异常\n");
+                //     break;
                 case PM_REFEREE_DH: // 裁判系统
-                    printf("裁判系统串口异常\n");
+                    sprintf((char *)test_txt, "裁判系统串口异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
                     break;
-                case DBUS_DH: // 遥控器
-                    printf("遥控器串口连接异常\n");
-                    break;
+                // case DBUS_DH: // 遥控器
+                //     sprintf((char *)test_txt, "遥控器串口连接异常\n");
+                //     break;
                 case VT_REFEREE_DH: // 图传
-                    printf("图传串口连接异常\n");
+                    sprintf((char *)test_txt, "图传串口连接异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
                     break;
-                case CHASSIS_MOTOR_0_DH: // 驱动1
-                    printf("左前驱动信号异常\n");
-                    break;
-                case CHASSIS_MOTOR_1_DH: // 驱动2
-                    printf("右前驱动信号异常\n");
-                    break;
-                case CHASSIS_MOTOR_2_DH: // 驱动2
-                    printf("左后驱动信号异常\n");
-                    break;
-                case CHASSIS_MOTOR_3_DH: // 驱动4
-                    printf("右后驱动信号异常\n");
-                    break;
+                    // case CHASSIS_MOTOR_0_DH: // 驱动1
+                    //     sprintf((char *)test_txt, "左前驱动信号异常\n");
+                    //     break;
+                    // case CHASSIS_MOTOR_1_DH: // 驱动2
+                    //     sprintf((char *)test_txt, "右前驱动信号异常\n");
+                    //     break;
+                    // case CHASSIS_MOTOR_2_DH: // 驱动2
+                    //     sprintf((char *)test_txt, "左后驱动信号异常\n");
+                    //     break;
+                    // case CHASSIS_MOTOR_3_DH: // 驱动4
+                    //     sprintf((char *)test_txt, "右后驱动信号异常\n");
+                    //     break;
                 }
         }
-        printf("--------------------\n");
-        vTaskDelay(2000);
-#else
+        // printf("--------------------\n");
+        // vTaskDelay(2000);
+#endif
 
         if (print_uart_tx_dma_done)
         {
@@ -142,13 +152,6 @@ void print_task(void *pvParameters)
             //         arm_data->joints_value[JOINT_5], arm_data->joints_value[JOINT_6]);
 
             /**
-             * @brief 自定义控制器
-             */
-            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
-                    customer_controller->z, customer_controller->yaw, customer_controller->pitch,
-                    customer_controller->roll, customer_controller->key);
-
-            /**
              * @brief 电机PID
              */
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", motor_controller_test->angle_pid.set,
@@ -159,9 +162,12 @@ void print_task(void *pvParameters)
             /**
              * @brief Referee System Comm
              */
-            // sprintf((char *)test_txt, "%d,%d,%d\r\n ", referee_robot_status->robot_id,
-            // referee_robot_status->current_HP,
-            //         referee_robot_status->maximum_HP);
+            // sprintf((char *)test_txt, "===\r\n%d,%d,%d\r\n%d,%d\r\n", referee_robot_status->robot_id,
+            //         referee_robot_status->current_HP, referee_robot_status->maximum_HP,
+            //         remote_control_mk->left_button_down, remote_control_mk->right_button_down);
+            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
+                    customer_controller->z, customer_controller->yaw, customer_controller->pitch,
+                    customer_controller->roll, customer_controller->key);
 
             uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
@@ -174,7 +180,6 @@ void print_task(void *pvParameters)
         // printf("%f,%f,%f\n", ins_->Yaw, -ins_->Pitch, ins_->Roll);
 
         vTaskDelay(PRINT_TIME_MS);
-#endif
     }
 }
 
