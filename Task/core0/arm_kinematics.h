@@ -70,6 +70,6 @@ extern void arm_model_update_control(engineer_scara_arm_s *scara_arm);
 #define ARM_JOINT_6_DH_THETA (0.0f)
 #define ARM_JOINT_6_DH_THETA_OFFSET (0.0f)
 
-#define PREVENT_DISTANCE (0.01f)
+#define PREVENT_DISTANCE (0.002f)
 
 #endif /* _ARM_KINEMATICS_H__ */

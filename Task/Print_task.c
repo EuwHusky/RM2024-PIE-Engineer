@@ -3,8 +3,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define PRINT_ERROR (true) // 是否输出异常
-#define PRINT_TIME_MS 500  // 输出数据的周期
+#define PRINT_ERROR (false) // 是否输出异常
+#define PRINT_TIME_MS 500   // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -54,7 +54,7 @@ void print_task(void *pvParameters)
     uart_default_config(BOARD_UART6, &config);                    // 填充默认配置
     config.fifo_enable = true;                                    // 使能FIFO
     config.dma_enable = true;                                     // 使能DMA
-    config.baudrate = 460800;                                     // 设置波特率
+    config.baudrate = 115200;                                     // 设置波特率
     config.src_freq_in_hz = clock_get_frequency(BOARD_UART6_CLK); // 获得时钟频率
     config.tx_fifo_level = uart_tx_fifo_trg_not_full;
     if (uart_init(BOARD_UART6, &config) != status_success)
@@ -150,6 +150,7 @@ void print_task(void *pvParameters)
             //         arm_data->joints_value[JOINT_1], arm_data->joints_value[JOINT_2],
             //         arm_data->joints_value[JOINT_3], arm_data->joints_value[JOINT_4],
             //         arm_data->joints_value[JOINT_5], arm_data->joints_value[JOINT_6]);
+            sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->printer[0], arm_data->printer[1], arm_data->printer[2]);
 
             /**
              * @brief 电机PID
@@ -165,9 +166,9 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "===\r\n%d,%d,%d\r\n%d,%d\r\n", referee_robot_status->robot_id,
             //         referee_robot_status->current_HP, referee_robot_status->maximum_HP,
             //         remote_control_mk->left_button_down, remote_control_mk->right_button_down);
-            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
-                    customer_controller->z, customer_controller->yaw, customer_controller->pitch,
-                    customer_controller->roll, customer_controller->key);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
+            //         customer_controller->z, customer_controller->yaw, customer_controller->pitch,
+            //         customer_controller->roll, customer_controller->key);
 
             uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),

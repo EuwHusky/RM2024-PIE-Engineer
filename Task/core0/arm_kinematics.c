@@ -183,6 +183,10 @@ static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
     float L3 = scara_arm->dh[4][1];
     float L4 = scara_arm->dh[5][2];
 
+    // 检查末端YAW角度是否超限
+    scara_arm->set_pose_6d[3] =
+        rflFloatConstrain(scara_arm->set_pose_6d[3], ENGINEER_ARM_YAW_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+                          ENGINEER_ARM_YAW_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
     // 检查末端PITCH角度是否超限
     scara_arm->set_pose_6d[4] =
         rflFloatConstrain(scara_arm->set_pose_6d[4], ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
@@ -205,23 +209,22 @@ static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
     y45 = L3 * sinf(scara_arm->set_pose_6d[3]);
     x24 = scara_arm->set_pose_6d[0] - x56 - x45;
     y24 = scara_arm->set_pose_6d[1] - y56 - y45;
+    scara_arm->printer[0] = x24;
+    scara_arm->printer[1] = y24;
     xy24 = sqrtf(x24 * x24 + y24 * y24);
+    scara_arm->printer[2] = xy24;
     if (xy24 > (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE))
     {
-        angle_x24 = atan2f(scara_arm->set_pose_6d[1], scara_arm->set_pose_6d[0]);
+        angle_x24 = atan2f(y24, x24);
         scara_arm->set_pose_6d[0] = cosf(angle_x24) * (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE) + x45 + x56;
         scara_arm->set_pose_6d[1] = sinf(angle_x24) * (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE) + y45 + y56;
     }
     else if (xy24 < (ENGINEER_ARM_XY24_MIN_DISTANCE + PREVENT_DISTANCE))
     {
-        angle_x24 = atan2f(scara_arm->set_pose_6d[1], scara_arm->set_pose_6d[0]);
+        angle_x24 = atan2f(y24, x24);
         scara_arm->set_pose_6d[0] = cosf(angle_x24) * (ENGINEER_ARM_XY24_MIN_DISTANCE + PREVENT_DISTANCE) + x45 + x56;
         scara_arm->set_pose_6d[1] = sinf(angle_x24) * (ENGINEER_ARM_XY24_MIN_DISTANCE + PREVENT_DISTANCE) + y45 + y56;
     }
-    // 检查末端YAW轴是否超限
-    // if (xy24 < ENGINEER_ARM_XY24_YAW_LIMITED_DISTANCE)
-    // {
-    // }
 
     float X = scara_arm->set_pose_6d[0];
     float Y = scara_arm->set_pose_6d[1];

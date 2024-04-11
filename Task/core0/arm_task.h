@@ -151,6 +151,8 @@ typedef struct EngineerScaraArm
 
     rfl_motor_s joints_motors[7];
 
+    float printer[6]; // 只是方便把数发出来
+
 } engineer_scara_arm_s;
 
 extern engineer_scara_arm_s scara_arm;
@@ -192,6 +194,8 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 // 位姿可达范围
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/
 #define ENGINEER_ARM_XY24_MIN_DISTANCE (0.1f) /*关节2到关节4的最小伸展距离*/
+#define ENGINEER_ARM_YAW_MAX_ANGLE (165.0f)   /* 末端YAW最大角度 */
+#define ENGINEER_ARM_YAW_MIN_ANGLE (-165.0f)  /* 末端YAW最小角度 */
 #define ENGINEER_ARM_PITCH_MAX_ANGLE (85.0f)  /* 末端PITCH最大角度 */
 #define ENGINEER_ARM_PITCH_MIN_ANGLE (-85.0f) /* 末端PITCH最小角度 */
 #define ENGINEER_ARM_ROLL_MAX_ANGLE (180.0f)  /* 末端ROLL最大角度 */

@@ -93,6 +93,8 @@ static void chassis_set_control(engineer_chassis_s *chassis)
 
 static void chassis_update_and_execute(engineer_chassis_s *chassis)
 {
+    // 更新底盘状态量
+
     rflAngleUpdate(&chassis->yaw, RFL_ANGLE_FORMAT_DEGREE, chassis->ins->Yaw);
 
     for (uint8_t i = 0; i < 4; i++)
@@ -101,14 +103,31 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
         chassis->wheel_speed[i] = rflMotorGetSpeed(chassis->motor + i) * CHASSIS_WHEEL_RADIUS;
     }
 
-    rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
-                   chassis->set_angle.deg + chassis->set_speed_vector[2] * CHASSIS_YAW_CONTROL_SEN);
-    rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
-                   rflFloatLoopConstrain(chassis->set_angle.deg, -DEG_PI, DEG_PI));
+    // 更新底盘控制量
 
-    rflChassisSetSpeedVector(&chassis->model, chassis->set_speed_vector[0], chassis->set_speed_vector[1], 0.0f);
+    if (chassis->mode == CHASSIS_MODE_FOLLOW)
+    {
+        rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
+                       chassis->set_angle.deg + chassis->set_speed_vector[2] * CHASSIS_YAW_CONTROL_SEN);
+        rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
+                       rflFloatLoopConstrain(chassis->set_angle.deg, -DEG_PI, DEG_PI));
+
+        rflChassisSetSpeedVector(&chassis->model, chassis->set_speed_vector[0], chassis->set_speed_vector[1], 0.0f);
+    }
+    else
+    {
+        rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE, chassis->yaw.deg);
+        rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
+                       rflFloatLoopConstrain(chassis->set_angle.deg, -DEG_PI, DEG_PI));
+
+        rflChassisSetSpeedVector(&chassis->model, 0.0f, 0.0f, 0.0f);
+    }
+
+    // 更新底盘模型
 
     rflChassisUpdate(&chassis->model);
+
+    // 应用底盘模型输出
 
     for (uint8_t i = 0; i < 4; i++)
     {
