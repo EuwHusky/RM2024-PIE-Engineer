@@ -17,6 +17,6 @@ extern const uint8_t getRobotStatusId(void);
 extern const game_robot_HP_t *getRobotHp(void);
 
 extern const custom_robot_data_t *getCustomerControllerData(void);
-extern const remote_control_t *getRemoteControlData(void);
+extern const vt_link_remote_control_t *getVtLinkRemoteControlData(void);
 
 #endif

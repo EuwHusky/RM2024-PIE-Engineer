@@ -140,9 +140,8 @@ typedef struct EngineerScaraArm
 
     /*设备*/
 
-    const RC_ctrl_t *dbus_rc;                  // dt7-dr16遥控器链路 数据
-    const custom_robot_data_t *vt_customer_rc; // 图传链路 自定义控制器数据
-    const remote_control_t *vt_mk;             // 图传链路 键鼠数据
+    const remote_control_s *rc;             // 遥控器数据
+    const custom_robot_data_t *customer_rc; // 自定义控制器数据
     char last_mode_control_key_value;
 
     uint16_t joint_6_encoder_value;

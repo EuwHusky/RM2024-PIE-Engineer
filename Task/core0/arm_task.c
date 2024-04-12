@@ -65,9 +65,8 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->last_mode = ARM_MODE_NO_FORCE;
     resetArmStartUpStatus(scara_arm->start_up_status);
 
-    scara_arm->dbus_rc = get_remote_control_point();
-    scara_arm->vt_customer_rc = getCustomerControllerData();
-    scara_arm->vt_mk = getRemoteControlData();
+    scara_arm->rc = getRemoteControlPointer();
+    scara_arm->customer_rc = getCustomerControllerData();
     scara_arm->last_mode_control_key_value = 1;
 
     rlfSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);

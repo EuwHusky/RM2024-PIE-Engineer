@@ -48,11 +48,11 @@ void chassis_task(void *pvParameters)
 
 static void chassis_set_mode(engineer_chassis_s *chassis)
 {
-    if (chassis->rc->rc.s[1] == 2)
+    if (chassis->rc->dt7_dr16_data.rc.s[1] == 2)
     {
         chassis->mode = CHASSIS_MODE_FOLLOW;
     }
-    else if (chassis->rc->rc.s[1] != 2)
+    else if (chassis->rc->dt7_dr16_data.rc.s[1] != 2)
     {
         chassis->mode = CHASSIS_MODE_NO_FORCE;
     }
@@ -79,15 +79,18 @@ static void chassis_set_control(engineer_chassis_s *chassis)
 {
     if (chassis->mode == CHASSIS_MODE_FOLLOW)
     {
-        chassis->set_speed_vector[0] = rlfRampCalc(
-            chassis->speed_ramper + 0, ((float)(rflDeadZoneZero(chassis->rc->rc.ch[3], CHASSIS_RC_DEADLINE)) / 660.0f *
-                                        CHASSIS_VX_RC_CONTROL_MAX));
-        chassis->set_speed_vector[1] = rlfRampCalc(
-            chassis->speed_ramper + 1, -((float)(rflDeadZoneZero(chassis->rc->rc.ch[2], CHASSIS_RC_DEADLINE)) / 660.0f *
-                                         CHASSIS_VY_RC_CONTROL_MAX));
-        chassis->set_speed_vector[2] = rlfRampCalc(
-            chassis->speed_ramper + 2, -((float)(rflDeadZoneZero(chassis->rc->rc.ch[0], CHASSIS_RC_DEADLINE)) / 660.0f *
-                                         CHASSIS_WZ_RC_CONTROL_MAX));
+        chassis->set_speed_vector[0] =
+            rlfRampCalc(chassis->speed_ramper + 0,
+                        ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], CHASSIS_RC_DEADLINE)) / 660.0f *
+                         CHASSIS_VX_RC_CONTROL_MAX));
+        chassis->set_speed_vector[1] =
+            rlfRampCalc(chassis->speed_ramper + 1,
+                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], CHASSIS_RC_DEADLINE)) / 660.0f *
+                          CHASSIS_VY_RC_CONTROL_MAX));
+        chassis->set_speed_vector[2] =
+            rlfRampCalc(chassis->speed_ramper + 2,
+                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], CHASSIS_RC_DEADLINE)) / 660.0f *
+                          CHASSIS_WZ_RC_CONTROL_MAX));
     }
 }
 
@@ -179,7 +182,7 @@ static void chassis_init(engineer_chassis_s *chassis)
     chassis->ins = get_INS_data_point();
 
     // 底盘控制
-    chassis->rc = get_remote_control_point();
+    chassis->rc = getRemoteControlPointer();
     rlfRampInit(chassis->speed_ramper + 0, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);
     rlfRampInit(chassis->speed_ramper + 1, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);
     rlfRampInit(chassis->speed_ramper + 2, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);

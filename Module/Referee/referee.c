@@ -6,7 +6,7 @@
 static game_robot_HP_t game_robot_HP;
 static robot_status_t robot_status;
 static custom_robot_data_t customer_controller_data;
-static remote_control_t remote_control;
+static vt_link_remote_control_t vt_link_remote_control;
 
 void refereeInitData(void)
 {
@@ -14,7 +14,7 @@ void refereeInitData(void)
     memset(&robot_status, 0, sizeof(robot_status_t));
 
     memset(&customer_controller_data, 0, sizeof(custom_robot_data_t));
-    memset(&remote_control, 0, sizeof(remote_control_t));
+    memset(&vt_link_remote_control, 0, sizeof(vt_link_remote_control_t));
 }
 
 void referee_data_decode(uint8_t *frame, uint16_t cmd_id)
@@ -66,7 +66,7 @@ void referee_data_decode(uint8_t *frame, uint16_t cmd_id)
         break;
     }
     case REMOTE_CONTROL_CMD_ID: {
-        memcpy(&remote_control, frame + index, sizeof(remote_control_t));
+        memcpy(&vt_link_remote_control, frame + index, sizeof(vt_link_remote_control_t));
         break;
     }
 
@@ -95,7 +95,7 @@ const custom_robot_data_t *getCustomerControllerData(void)
     return &customer_controller_data;
 }
 
-const remote_control_t *getRemoteControlData(void)
+const vt_link_remote_control_t *getVtLinkRemoteControlData(void)
 {
-    return &remote_control;
+    return &vt_link_remote_control;
 }

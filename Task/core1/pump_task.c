@@ -31,7 +31,7 @@ void pump_task(void *pvParameters)
     int16_t pump_rocker_value = 0;
     while (1)
     {
-        pump_rocker_value = core0_data_for_pump->rc_data_image.rc.ch[4];
+        pump_rocker_value = core0_data_for_pump->rc_data_image.dt7_dr16_data.rc.ch[4];
 
         // 长拨切换吸取状态
         if (pump_rocker_value < -600)

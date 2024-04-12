@@ -25,7 +25,7 @@ static void message_update(void); // 发送&接收标志信号
 /* 此处引用core0的头文件 */
 #include "INS_task.h"
 /* 此处声明core0使用的变量 */
-const RC_ctrl_t *rc_data;
+const remote_control_s *dualcore_rc_pointer;
 
 #else
 /* 此处引用core1的头文件 */
@@ -47,7 +47,7 @@ void dualcore_task(void *pvParameters)
     while (!INS_init_finished)
         vTaskDelay(4);
 
-    rc_data = get_remote_control_point();
+    dualcore_rc_pointer = getRemoteControlPointer();
 
     // 标志位初始值设定
     SET_BIT_0(message_tx, 0); // 0位置0表示core0写入；置1表示core0写入完成
@@ -58,7 +58,7 @@ void dualcore_task(void *pvParameters)
 
         if (GET_BIT_VALUE(message_rx, 0) == 0)
         {
-            memcpy(&data_021.rc_data_image, rc_data, sizeof(RC_ctrl_t));
+            memcpy(&data_021.rc_data_image, dualcore_rc_pointer, sizeof(remote_control_s));
 
             memcpy((void *)shared_address_021, &data_021, sizeof(transmit_data_021)); // 向内存中写入
             SET_BIT_1(message_tx, 0);                                                 // 写入完成，标志位置1

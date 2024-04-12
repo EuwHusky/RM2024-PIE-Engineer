@@ -335,7 +335,7 @@ typedef struct
     int8_t right_button_down;
     uint16_t keyboard_value;
     uint16_t reserved;
-}  remote_control_t;
+} vt_link_remote_control_t;
 
 #pragma pack(pop)
 

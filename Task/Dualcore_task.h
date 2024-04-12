@@ -23,7 +23,7 @@ static volatile bool allow_read = false;
 // 核心0向核心1传输的数据结构体
 typedef struct transmit_021
 {
-    RC_ctrl_t rc_data_image;
+    remote_control_s rc_data_image;
 } transmit_data_021;
 
 // 核心1向核心0传输的数据结构体

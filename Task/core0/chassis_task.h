@@ -29,7 +29,7 @@ typedef struct EngineerChassis
     rfl_angle_s yaw;
     float wheel_speed[4];
 
-    const RC_ctrl_t *rc;                    /*遥控器链路控制数据*/
+    const remote_control_s *rc;             /*遥控器数据*/
     ramp_function_source_t speed_ramper[3]; /*速度斜坡化滤波器*/
     float set_speed_vector[3];              /*底盘预期速度vx vy wz*/
     rfl_angle_s set_angle;
