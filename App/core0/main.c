@@ -16,7 +16,6 @@
 #include "dualcore_task.h"
 #include "print_task.h"
 #include "referee_task.h"
-// #include "remote_control.h"
 #include "rc_task.h"
 
 /* Freertos任务优先级（数字越小优先级越高1-7） */

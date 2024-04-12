@@ -12,10 +12,16 @@
 
 #include "algo_data_limiting.h"
 
+#include "detect_task.h"
+
 static void chassis_init(engineer_chassis_s *chassis);
 static void chassis_set_mode(engineer_chassis_s *chassis);
 static void chassis_set_control(engineer_chassis_s *chassis);
 static void chassis_update_and_execute(engineer_chassis_s *chassis);
+static void chassis_motor_0_can_rx_callback(void);
+static void chassis_motor_1_can_rx_callback(void);
+static void chassis_motor_2_can_rx_callback(void);
+static void chassis_motor_3_can_rx_callback(void);
 
 engineer_chassis_s chassis;
 
@@ -44,6 +50,11 @@ void chassis_task(void *pvParameters)
 
         vTaskDelay(2);
     }
+}
+
+engineer_chassis_s *getChassisDataPointer(void)
+{
+    return &chassis;
 }
 
 static void chassis_set_mode(engineer_chassis_s *chassis)
@@ -205,9 +216,27 @@ static void chassis_init(engineer_chassis_s *chassis)
         motor_config.master_can_id = 0x201 + i;
         rflMotorInit(chassis->motor + i, &motor_config);
     }
+
+    // 底盘电机CAN接收回调配置
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x201, chassis_motor_0_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x202, chassis_motor_1_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x203, chassis_motor_2_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x204, chassis_motor_3_can_rx_callback);
 }
 
-engineer_chassis_s *getChassisDataPointer(void)
+static void chassis_motor_0_can_rx_callback(void)
 {
-    return &chassis;
+    detect_hook(CHASSIS_MOTOR_0_DH);
+}
+static void chassis_motor_1_can_rx_callback(void)
+{
+    detect_hook(CHASSIS_MOTOR_1_DH);
+}
+static void chassis_motor_2_can_rx_callback(void)
+{
+    detect_hook(CHASSIS_MOTOR_2_DH);
+}
+static void chassis_motor_3_can_rx_callback(void)
+{
+    detect_hook(CHASSIS_MOTOR_3_DH);
 }

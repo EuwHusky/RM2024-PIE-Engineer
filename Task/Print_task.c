@@ -5,8 +5,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 50    // 输出数据的周期
+#define PRINT_ERROR (true) // 是否输出异常
+#define PRINT_TIME_MS 500  // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -90,6 +90,11 @@ void print_task(void *pvParameters)
     while (true)
     {
 #if PRINT_ERROR
+        sprintf((char *)test_txt, "========================\n");
+        uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                            core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                            strlen((char *)test_txt));
+        vTaskDelay(5);
         for (uint8_t i = DUAL_COMM_DH; i < DETECT_ERROR_LIST_LENGHT; i++)
         {
             if (detect_error(i))
@@ -102,22 +107,50 @@ void print_task(void *pvParameters)
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
-                case PM_REFEREE_DH: // 裁判系统
-                    sprintf((char *)test_txt, "裁判系统串口异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                        strlen((char *)test_txt));
-                    vTaskDelay(5);
-                    break;
-                case DBUS_DH: // 遥控器
-                    sprintf((char *)test_txt, "遥控器串口连接异常\n");
+                case PM_REFEREE_DH: // 电管
+                    sprintf((char *)test_txt, "电管串口异常\n");
                     uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case VT_REFEREE_DH: // 图传
-                    sprintf((char *)test_txt, "图传串口连接异常\n");
+                    sprintf((char *)test_txt, "图传串口异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case DBUS_DH: // 遥控器
+                    sprintf((char *)test_txt, "遥控器串口异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case CHASSIS_MOTOR_0_DH: // 底盘电机0 - 左前
+                    sprintf((char *)test_txt, "底盘电机0异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case CHASSIS_MOTOR_1_DH: // 底盘电机1 - 左后
+                    sprintf((char *)test_txt, "底盘电机1异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case CHASSIS_MOTOR_2_DH: // 底盘电机2 - 右后
+                    sprintf((char *)test_txt, "底盘电机2异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case CHASSIS_MOTOR_3_DH: // 底盘电机3 - 右前
+                    sprintf((char *)test_txt, "底盘电机3异常\n");
                     uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
@@ -125,7 +158,10 @@ void print_task(void *pvParameters)
                     break;
                 }
         }
-#endif
+
+        vTaskDelay(1000);
+
+#else
 
         if (print_uart_tx_dma_done)
         {
@@ -186,6 +222,7 @@ void print_task(void *pvParameters)
         // printf("%f,%f,%f\n", ins_->Yaw, -ins_->Pitch, ins_->Roll);
 
         vTaskDelay(PRINT_TIME_MS);
+#endif
     }
 }
 
