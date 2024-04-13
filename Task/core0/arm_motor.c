@@ -6,6 +6,8 @@
 #include "drv_can.h"
 #include "drv_delay.h"
 
+#include "behavior_task.h"
+
 // damiao_motor_s *motor_driver_1 = NULL;
 // damiao_motor_s *motor_driver_2 = NULL;
 
@@ -121,7 +123,7 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
 {
     // 设定电机角度
 
-    if (scara_arm->mode != ARM_MODE_START_UP)
+    if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
     {
         rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
                          scara_arm->set_joints_value[JOINT_1] * LIFTER_DISTANCE_TO_DEGREE_FACTOR);
@@ -209,37 +211,23 @@ void arm_motor_set_mode(engineer_scara_arm_s *scara_arm, rfl_motor_control_mode_
  * @brief 设置机械臂电机运动速度
  * @note 测试版 后续需要更新为动态速度规划
  */
-void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm, engineer_scara_arm_mode_e mode, float base_speed)
+void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm, float base_speed)
 {
-    if (mode == ARM_MODE_START_UP)
-    {
-        base_speed /= 2.0f;
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], base_speed);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], base_speed);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], base_speed);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], base_speed * 2.0f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], base_speed);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], base_speed * 3.0f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], base_speed * 3.0f);
-    }
-    else
-    {
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], base_speed * 3.2f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], base_speed * 3.2f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], base_speed);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], base_speed / JOINT2_REDUCTION);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], base_speed / 2.0f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], base_speed * 6.0f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], base_speed * 6.0f);
-    }
+    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], base_speed * 3.2f);
+    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], base_speed * 3.2f);
+    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], base_speed);
+    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], base_speed / JOINT2_REDUCTION);
+    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], base_speed / 2.0f);
+    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], base_speed * 6.0f);
+    rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], base_speed * 6.0f);
 }
 
 /**
  * @brief 设置机械臂电机可达角度
  */
-void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, engineer_scara_arm_mode_e mode)
+void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, bool is_to_reset)
 {
-    if (mode == ARM_MODE_START_UP)
+    if (is_to_reset)
     {
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
                                  ENGINEER_ARM_MOTOR_JOINT_1_INITIAL_MAX_ANGLE,
@@ -248,7 +236,7 @@ void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, engineer_scara_a
                                  ENGINEER_ARM_MOTOR_JOINT_1_INITIAL_MAX_ANGLE,
                                  ENGINEER_ARM_MOTOR_JOINT_1_INITIAL_MIN_ANGLE);
     }
-    else if (mode != ARM_MODE_START_UP)
+    else
     {
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
                                  ENGINEER_ARM_MOTOR_JOINT_1_MAX_ANGLE, ENGINEER_ARM_MOTOR_JOINT_1_MIN_ANGLE);

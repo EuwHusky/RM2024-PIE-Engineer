@@ -5,6 +5,8 @@
 
 #include "algo_data_limiting.h"
 
+#include "behavior_task.h"
+
 static void pose_6d_to_transform_matrix(rfl_matrix_instance *trans_mat, const float pose_6d[6]);
 static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, const float joint_dh[5]);
 static void calc_tool_to_base_transform_matrix(engineer_scara_arm_s *scara_arm);
@@ -104,8 +106,10 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
  */
 void arm_model_update_control(engineer_scara_arm_s *scara_arm)
 {
-    if (scara_arm->mode == ARM_MODE_POSE || scara_arm->mode == ARM_MODE_CUSTOMER)
+#if !USE_JOINTS_CONTROL
+    if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
         solve_inverse_kinematics(scara_arm);
+#endif
 
     // 关节变量限幅
     scara_arm->set_joints_value[JOINT_1] = rflFloatConstrain(

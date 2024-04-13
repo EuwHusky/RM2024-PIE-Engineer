@@ -32,9 +32,7 @@ void arm_task(void *pvParameters)
 
     while (1)
     {
-        // 接收用户输入的模式控制指令 设定机械臂工作模式
-        arm_set_mode(&scara_arm);
-        // 根据工作模式 接收用户输入的关节/位姿操控指令 控制机械臂
+        // 接收行为控制任务的指令 控制机械臂
         arm_mode_control(&scara_arm);
 
         // 更新磁编码器反馈
@@ -51,6 +49,26 @@ void arm_task(void *pvParameters)
     }
 }
 
+bool *getArmResetStatus(void)
+{
+    return &scara_arm.reset_success;
+}
+
+bool *getArmMoveHomingStatue(void)
+{
+    return &scara_arm.move_homing_success;
+}
+
+bool *getArmOperationHomingStatus(void)
+{
+    return &scara_arm.operation_homing_success;
+}
+
+engineer_scara_arm_s *getArmDataPointer(void)
+{
+    return &scara_arm;
+}
+
 static void arm_init(engineer_scara_arm_s *scara_arm)
 {
     memset(scara_arm, 0, sizeof(engineer_scara_arm_s));
@@ -61,13 +79,12 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
 
     MA600_init();
 
-    scara_arm->mode = ARM_MODE_NO_FORCE;
-    scara_arm->last_mode = ARM_MODE_NO_FORCE;
     resetArmStartUpStatus(scara_arm->start_up_status);
+    scara_arm->move_homing_success = false;
+    scara_arm->operation_homing_success = false;
 
     scara_arm->rc = getRemoteControlPointer();
     scara_arm->customer_rc = getCustomerControllerData();
-    scara_arm->last_mode_control_key_value = 1;
 
     rlfSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
 }
@@ -86,9 +103,4 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
     }
 
     scara_arm->joint_6_encoder_angle = 0.0f; // 还没装磁编，暂时这样，记得删
-}
-
-engineer_scara_arm_s *getArmDataPointer(void)
-{
-    return &scara_arm;
 }

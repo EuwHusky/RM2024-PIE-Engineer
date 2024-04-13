@@ -5,8 +5,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define PRINT_ERROR (true) // 是否输出异常
-#define PRINT_TIME_MS 500  // 输出数据的周期
+#define PRINT_ERROR (false) // 是否输出异常
+#define PRINT_TIME_MS 300   // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -20,11 +20,14 @@
 #include "dualcore_task.h"
 
 #include "arm_task.h"
+#include "behavior_task.h"
 #include "chassis_task.h"
 
 INS_t *ins_;
 transmit_data_021 *data_send;
 transmit_data_120 *data_read;
+
+const engineer_behavior_manager_s *print_behavior_manager_pointer;
 
 engineer_scara_arm_s *arm_data;
 engineer_chassis_s *chassis_data;
@@ -75,6 +78,8 @@ void print_task(void *pvParameters)
     ins_ = get_INS_data_point();
     data_read = get_data_120_point();
     data_send = get_data_021_point();
+
+    print_behavior_manager_pointer = getEngineerBehaviorManagerPointer();
 
     arm_data = getArmDataPointer();
     chassis_data = getChassisDataPointer();
@@ -170,24 +175,16 @@ void print_task(void *pvParameters)
             /**
              * @brief Scara Arm
              */
-            // sprintf((char *)test_txt, "\r\n%x,%d,%d\r\n%f,%f,%f,%f,%f,%f,%f\r\n%f,%f,%f,%f,%f,%f\r\n",
-            //         arm_data->start_up_status, arm_data->mode,
-            //         rflMotorGetMode(&arm_data->joints_motors[MOTOR_JOINT4]),
-            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_RADIAN),
-            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_RADIAN),
-            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_RADIAN),
-            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN),
-            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_RADIAN),
-            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_RADIAN),
-            //         rflMotorGetAngle(&arm_data->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_RADIAN),
-            //         arm_data->joints_value[JOINT_1], arm_data->joints_value[JOINT_2],
-            //         arm_data->joints_value[JOINT_3], arm_data->joints_value[JOINT_4],
-            //         arm_data->joints_value[JOINT_5], arm_data->joints_value[JOINT_6]);
-            // sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->printer[0], arm_data->printer[1],
-            // arm_data->printer[2]);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->set_pose_6d[0], arm_data->set_pose_6d[1],
+            //         arm_data->set_pose_6d[2], arm_data->set_pose_6d[3], arm_data->set_pose_6d[4],
+            //         arm_data->set_pose_6d[5]);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d\r\n", arm_data->joints_motors[0].mode_,
+            //         arm_data->joints_motors[1].mode_, arm_data->joints_motors[2].mode_,
+            //         arm_data->joints_motors[3].mode_, arm_data->joints_motors[4].mode_,
+            //         arm_data->joints_motors[5].mode_, arm_data->joints_motors[6].mode_);
 
             /**
-             * @brief 电机PID
+             * @brief Motor PID
              */
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", motor_controller_test->angle_pid.set,
             //         motor_controller_test->angle_pid.fdb, motor_controller_test->angle_pid.out,
@@ -210,6 +207,18 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", getRcMouseX(), getRcMouseY(), getRcMouseZ(),
             //         checkIsRcKeyPressed(RC_LEFT), checkIfRcKeyFallingEdgeDetected(RC_LEFT),
             //         checkIfRcKeyRisingEdgeDetected(RC_LEFT));
+
+            /**
+             * @brief Behavior Manager
+             */
+            sprintf((char *)test_txt, "===\r\n%d,%d,%d,%d,%d\r\n%d,%d,%d,%d,%d,%d,%d\r\n",
+                    print_behavior_manager_pointer->behavior, print_behavior_manager_pointer->last_behavior,
+                    *print_behavior_manager_pointer->arm_reset_success,
+                    *print_behavior_manager_pointer->arm_move_homing_success,
+                    *print_behavior_manager_pointer->arm_operation_homing_success, arm_data->joints_motors[0].mode_,
+                    arm_data->joints_motors[1].mode_, arm_data->joints_motors[2].mode_,
+                    arm_data->joints_motors[3].mode_, arm_data->joints_motors[4].mode_,
+                    arm_data->joints_motors[5].mode_, arm_data->joints_motors[6].mode_);
 
             uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),

@@ -11,18 +11,20 @@
 
 #include "INS_task.h"
 #include "arm_task.h"
+#include "behavior_task.h"
 #include "chassis_task.h"
 #include "detect_task.h"
 #include "dualcore_task.h"
 #include "print_task.h"
-#include "referee_task.h"
 #include "rc_task.h"
+#include "referee_task.h"
 
 /* Freertos任务优先级（数字越小优先级越高1-7） */
 #define INS_TASK_PRIORITY (configMAX_PRIORITIES - 1U)
 #define DUALCORE_TASK_PRIORITY (configMAX_PRIORITIES - 1U)
-#define ARM_TASK_PRIORITY (configMAX_PRIORITIES - 2U)
-#define CHASSIS_TASK_PRIORITY (configMAX_PRIORITIES - 3U)
+#define BEHAVIOR_TASK_PRIORITY (configMAX_PRIORITIES - 2U)
+#define ARM_TASK_PRIORITY (configMAX_PRIORITIES - 3U)
+#define CHASSIS_TASK_PRIORITY (configMAX_PRIORITIES - 4U)
 #define RC_TASK_PRIORITY (configMAX_PRIORITIES - 4U)
 #define DETECT_TASK_PRIORITY (configMAX_PRIORITIES - 5U)
 #define REFEREE_TASK_PRIORITY (configMAX_PRIORITIES - 6U)
@@ -79,6 +81,8 @@ int main(void)
 
     xTaskCreate(referee_task, "referee_task", configMINIMAL_STACK_SIZE, NULL, REFEREE_TASK_PRIORITY, NULL);
     xTaskCreate(rc_task, "rc_task", configMINIMAL_STACK_SIZE + 128U, NULL, RC_TASK_PRIORITY, NULL);
+
+    xTaskCreate(behavior_task, "behavior_task", configMINIMAL_STACK_SIZE, NULL, BEHAVIOR_TASK_PRIORITY, NULL);
 
     xTaskCreate(arm_task, "arm_task", configMINIMAL_STACK_SIZE + 768U, NULL, ARM_TASK_PRIORITY, NULL);
     xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 256U, NULL, CHASSIS_TASK_PRIORITY, NULL);

@@ -8,121 +8,77 @@
 
 #include "algo_data_limiting.h"
 
+#include "behavior_task.h"
+
 static void no_force_control(engineer_scara_arm_s *scara_arm);
 static void starting_control(engineer_scara_arm_s *scara_arm);
 static void joints_control(engineer_scara_arm_s *scara_arm);
-static void pose_control_dbus(engineer_scara_arm_s *scara_arm);
-static void pose_control_customer(engineer_scara_arm_s *scara_arm);
-
-/**
- * @brief 获取用户输入 更新机械臂控制模式
- */
-void arm_set_mode(engineer_scara_arm_s *scara_arm)
-{
-    static uint32_t key_timer = 0;
-
-    char mode_control_key_value = scara_arm->rc->dt7_dr16_data.rc.s[1];
-    int16_t homing_rocker_value = scara_arm->rc->dt7_dr16_data.rc.ch[4];
-
-    // 长拨重新归位
-    if (scara_arm->mode == ARM_MODE_NO_FORCE && homing_rocker_value > 600)
-    {
-        key_timer++;
-        if (key_timer == 240)
-        {
-            scara_arm->mode = ARM_MODE_START_UP;
-            resetArmStartUpStatus(scara_arm->start_up_status);
-        }
-    }
-    else
-    {
-        key_timer = 0;
-    }
-
-    // 无力
-    if (scara_arm->last_mode_control_key_value != ARM_NO_FORCE_MODE_RC_KEY_VALUE &&
-        mode_control_key_value == ARM_NO_FORCE_MODE_RC_KEY_VALUE)
-        scara_arm->mode = ARM_MODE_NO_FORCE;
-
-    // 工作模式 关节/位姿控制
-    if (scara_arm->start_up_status == ARM_START_UP_OK)
-    {
-        // if (scara_arm->last_mode_control_key_value != ARM_WORK_MODE_RC_KEY_VALUE &&
-        //     mode_control_key_value == ARM_WORK_MODE_RC_KEY_VALUE)
-        //     scara_arm->mode = ARM_MODE_JOINTS;
-        if (scara_arm->last_mode_control_key_value != ARM_WORK_MODE_RC_KEY_VALUE &&
-            mode_control_key_value == ARM_WORK_MODE_RC_KEY_VALUE)
-            scara_arm->mode = ARM_MODE_POSE;
-        // scara_arm->mode = ARM_MODE_CUSTOMER;
-        else if (scara_arm->last_mode_control_key_value != 2 && mode_control_key_value == 2)
-            scara_arm->mode = ARM_MODE_HOLD_ON;
-    }
-
-    scara_arm->last_mode_control_key_value = mode_control_key_value;
-}
+static void pose_control(engineer_scara_arm_s *scara_arm);
+static void move_homing_control(engineer_scara_arm_s *scara_arm);
+static void operation_homing_control(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量
  */
 void arm_mode_control(engineer_scara_arm_s *scara_arm)
 {
-    // 模式切换时修改电机控制配置
+    // 模式切换时修改机械臂设定
 
-    if (scara_arm->last_mode != ARM_MODE_NO_FORCE && scara_arm->mode == ARM_MODE_NO_FORCE)
+    if (checkIfEngineerBehaviorChanged())
     {
-        arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
-    }
-    else if (scara_arm->last_mode == ARM_MODE_NO_FORCE && scara_arm->mode != ARM_MODE_NO_FORCE)
-    {
-        arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-        arm_motor_set_max_speed(scara_arm, scara_arm->mode, 2.0f);
+        if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_DISABLE)
+        {
+            arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        }
+        else if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_DISABLE)
+        {
+            arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        }
+
+        if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_RESET)
+        {
+            board_write_led_r(LED_ON);
+            resetArmStartUpStatus(scara_arm->start_up_status);
+            arm_motor_set_angle_limit(scara_arm, true);
+        }
+        else if (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_RESET &&
+                 getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
+        {
+            board_write_led_r(LED_OFF);
+            arm_motor_set_angle_limit(scara_arm, false);
+        }
     }
 
-    if (scara_arm->last_mode != ARM_MODE_START_UP && scara_arm->mode == ARM_MODE_START_UP)
-    {
-        arm_motor_set_angle_limit(scara_arm, scara_arm->mode);
+    // 关节速度控制
 
-        board_write_led_r(LED_ON);
-    }
-    else if (scara_arm->last_mode == ARM_MODE_START_UP && scara_arm->mode != ARM_MODE_START_UP)
-    {
-        arm_motor_set_angle_limit(scara_arm, scara_arm->mode);
-
-        board_write_led_r(LED_OFF);
-    }
-
-    scara_arm->last_mode = scara_arm->mode;
+    arm_motor_set_max_speed(scara_arm, 2.0f);
 
     // 根据不同模式使用不同控制
 
-    switch (scara_arm->mode)
+    switch (getEngineerCurrentBehavior())
     {
-    case ARM_MODE_NO_FORCE:
+    case ENGINEER_BEHAVIOR_DISABLE:
         no_force_control(scara_arm);
         break;
-    case ARM_MODE_START_UP:
-        if (starting_control(scara_arm), scara_arm->start_up_status == ARM_START_UP_OK)
-        {
-            // 启动完自动退出
-            scara_arm->last_mode = ARM_MODE_START_UP;
-            scara_arm->mode = ARM_MODE_NO_FORCE;
-            arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
-        }
+    case ENGINEER_BEHAVIOR_RESET:
+        starting_control(scara_arm);
         break;
-    case ARM_MODE_JOINTS:
+    case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+#if USE_JOINTS_CONTROL
         joints_control(scara_arm);
+#else
+        pose_control(scara_arm);
+#endif
         break;
-    case ARM_MODE_POSE:
-        pose_control_dbus(scara_arm);
+    case ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING:
+        move_homing_control(scara_arm);
         break;
-    case ARM_MODE_CUSTOMER:
-        pose_control_customer(scara_arm);
-        break;
-    case ARM_MODE_HOLD_ON:
-        // Not Doing Anything
+    case ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING:
+        operation_homing_control(scara_arm);
         break;
 
     default:
+        // 其他模式什么都不做 保持不动
         break;
     }
 }
@@ -307,6 +263,8 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
         }
     }
 
+    scara_arm->reset_success = (scara_arm->start_up_status == ARM_START_UP_OK);
+
     for (uint8_t i = 0; i < 6; i++)
     {
         scara_arm->set_joints_value[i] = scara_arm->joints_value[i];
@@ -347,8 +305,9 @@ static void joints_control(engineer_scara_arm_s *scara_arm)
          JOINT_6_CONTROL_SEN);
 }
 
-static void pose_control_dbus(engineer_scara_arm_s *scara_arm)
+static void pose_control(engineer_scara_arm_s *scara_arm)
 {
+    // DT7控制
     scara_arm->set_pose_6d[0] += ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[3], ARM_RC_DEADLINE)) /
                                   660.0f * POSE_X_CONTROL_SEN);
 
@@ -367,10 +326,8 @@ static void pose_control_dbus(engineer_scara_arm_s *scara_arm)
     else if (scara_arm->rc->dt7_dr16_data.rc.s[0] == 2)
         scara_arm->set_pose_6d[5] += ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[0], ARM_RC_DEADLINE)) /
                                       660.0f * POSE_AR_CONTROL_SEN);
-}
 
-static void pose_control_customer(engineer_scara_arm_s *scara_arm)
-{
+    // 自定义控制器控制
     scara_arm->set_pose_6d[0] += (scara_arm->customer_rc->x * CUSTOMER_X_CONTROL_SEN);
 
     scara_arm->set_pose_6d[1] += (scara_arm->customer_rc->y * CUSTOMER_Y_CONTROL_SEN);
@@ -383,4 +340,14 @@ static void pose_control_customer(engineer_scara_arm_s *scara_arm)
         (rflFloatLoopConstrain(scara_arm->customer_rc->pitch, -RAD_PI, RAD_PI) * -CUSTOMER_AP_CONTROL_SEN);
     scara_arm->set_pose_6d[5] +=
         (rflFloatLoopConstrain(scara_arm->customer_rc->roll, -RAD_PI, RAD_PI) * -CUSTOMER_AR_CONTROL_SEN);
+}
+
+static void move_homing_control(engineer_scara_arm_s *scara_arm)
+{
+    scara_arm->move_homing_success = true;
+}
+
+static void operation_homing_control(engineer_scara_arm_s *scara_arm)
+{
+    scara_arm->operation_homing_success = true;
 }

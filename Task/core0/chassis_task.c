@@ -12,10 +12,11 @@
 
 #include "algo_data_limiting.h"
 
+#include "behavior_task.h"
 #include "detect_task.h"
 
 static void chassis_init(engineer_chassis_s *chassis);
-static void chassis_set_mode(engineer_chassis_s *chassis);
+static void chassis_mode_control(engineer_chassis_s *chassis);
 static void chassis_set_control(engineer_chassis_s *chassis);
 static void chassis_update_and_execute(engineer_chassis_s *chassis);
 static void chassis_motor_0_can_rx_callback(void);
@@ -42,7 +43,7 @@ void chassis_task(void *pvParameters)
 
     while (1)
     {
-        chassis_set_mode(&chassis);
+        chassis_mode_control(&chassis);
 
         chassis_set_control(&chassis);
 
@@ -57,26 +58,9 @@ engineer_chassis_s *getChassisDataPointer(void)
     return &chassis;
 }
 
-static void chassis_set_mode(engineer_chassis_s *chassis)
+static void chassis_mode_control(engineer_chassis_s *chassis)
 {
-    if (chassis->rc->dt7_dr16_data.rc.s[1] == 2)
-    {
-        chassis->mode = CHASSIS_MODE_FOLLOW;
-    }
-    else if (chassis->rc->dt7_dr16_data.rc.s[1] != 2)
-    {
-        chassis->mode = CHASSIS_MODE_NO_FORCE;
-    }
-
-    if (chassis->mode == CHASSIS_MODE_NO_FORCE)
-    {
-        rflChassisSetBehavior(&chassis->model, RFL_CHASSIS_BEHAVIOR_NO_FORCE);
-        for (uint8_t i = 0; i < 4; i++)
-        {
-            rflMotorSetMode(chassis->motor + i, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
-        }
-    }
-    else if (chassis->mode == CHASSIS_MODE_FOLLOW)
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE)
     {
         rflChassisSetBehavior(&chassis->model, RFL_CHASSIS_BEHAVIOR_FOLLOW_CONTROL);
         for (uint8_t i = 0; i < 4; i++)
@@ -84,24 +68,54 @@ static void chassis_set_mode(engineer_chassis_s *chassis)
             rflMotorSetMode(chassis->motor + i, RFL_MOTOR_CONTROL_MODE_SPEED);
         }
     }
+    else if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_MOVE)
+    {
+        rflChassisSetBehavior(&chassis->model, RFL_CHASSIS_BEHAVIOR_NO_FORCE);
+        for (uint8_t i = 0; i < 4; i++)
+        {
+            rflMotorSetMode(chassis->motor + i, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        }
+    }
 }
 
 static void chassis_set_control(engineer_chassis_s *chassis)
 {
-    if (chassis->mode == CHASSIS_MODE_FOLLOW)
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE)
     {
-        chassis->set_speed_vector[0] =
-            rlfRampCalc(chassis->speed_ramper + 0,
-                        ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], CHASSIS_RC_DEADLINE)) / 660.0f *
-                         CHASSIS_VX_RC_CONTROL_MAX));
-        chassis->set_speed_vector[1] =
-            rlfRampCalc(chassis->speed_ramper + 1,
-                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], CHASSIS_RC_DEADLINE)) / 660.0f *
-                          CHASSIS_VY_RC_CONTROL_MAX));
-        chassis->set_speed_vector[2] =
-            rlfRampCalc(chassis->speed_ramper + 2,
-                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], CHASSIS_RC_DEADLINE)) / 660.0f *
-                          CHASSIS_WZ_RC_CONTROL_MAX));
+        if ((chassis->rc->dt7_dr16_data.rc.ch[0] + chassis->rc->dt7_dr16_data.rc.ch[2] +
+             chassis->rc->dt7_dr16_data.rc.ch[3]) > 3)
+        {
+            chassis->set_speed_vector[0] =
+                rlfRampCalc(chassis->speed_ramper + 0,
+                            ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], CHASSIS_RC_DEADLINE)) /
+                             660.0f * CHASSIS_VX_RC_CONTROL_MAX));
+            chassis->set_speed_vector[1] =
+                rlfRampCalc(chassis->speed_ramper + 1,
+                            -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], CHASSIS_RC_DEADLINE)) /
+                              660.0f * CHASSIS_VY_RC_CONTROL_MAX));
+            chassis->set_speed_vector[2] =
+                rlfRampCalc(chassis->speed_ramper + 2,
+                            -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], CHASSIS_RC_DEADLINE)) /
+                              660.0f * CHASSIS_WZ_RC_CONTROL_MAX));
+        }
+        else
+        {
+            float km_x = 0;
+            float km_y = 0;
+            if (checkIsRcKeyPressed(RC_W))
+                km_x = 1.0f;
+            if (checkIsRcKeyPressed(RC_S))
+                km_x = -1.0f;
+            if (checkIsRcKeyPressed(RC_A))
+                km_y = 1.0f;
+            if (checkIsRcKeyPressed(RC_D))
+                km_y = -1.0f;
+
+            chassis->set_speed_vector[0] = rlfRampCalc(chassis->speed_ramper + 0, km_x * CHASSIS_VX_RC_CONTROL_MAX);
+            chassis->set_speed_vector[1] = rlfRampCalc(chassis->speed_ramper + 1, km_y * CHASSIS_VY_RC_CONTROL_MAX);
+            chassis->set_speed_vector[2] =
+                rlfRampCalc(chassis->speed_ramper + 2, -((float)(getRcMouseY()) / 20.0f) * CHASSIS_WZ_RC_CONTROL_MAX);
+        }
     }
 }
 
@@ -119,7 +133,7 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
 
     // 更新底盘控制量
 
-    if (chassis->mode == CHASSIS_MODE_FOLLOW)
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE)
     {
         rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
                        chassis->set_angle.deg + chassis->set_speed_vector[2] * CHASSIS_YAW_CONTROL_SEN);
@@ -130,10 +144,6 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
     }
     else
     {
-        rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE, chassis->yaw.deg);
-        rflAngleUpdate(&chassis->set_angle, RFL_ANGLE_FORMAT_DEGREE,
-                       rflFloatLoopConstrain(chassis->set_angle.deg, -DEG_PI, DEG_PI));
-
         rflChassisSetSpeedVector(&chassis->model, 0.0f, 0.0f, 0.0f);
     }
 
@@ -149,7 +159,7 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
         rflMotorUpdateControl(chassis->motor + i);
     }
 
-    if (chassis->mode == CHASSIS_MODE_FOLLOW)
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE)
     {
         rflRmMotorControl(CHASSIS_MOTORS_CAN_ORDINAL, CHASSIS_MOTORS_CAN_SLAVE_ID,
                           rflMotorGetOutput(chassis->motor + 0), rflMotorGetOutput(chassis->motor + 1),
@@ -185,7 +195,6 @@ static void chassis_init(engineer_chassis_s *chassis)
     config.direction_pid_param[4] = 4.0f;
     rflChassisInit(&chassis->model, &config, &chassis->yaw, chassis->wheel_speed);
     chassis->wheel_set_speed = rflChassisGetMotorOutputArray(&chassis->model);
-    chassis->mode = CHASSIS_MODE_NO_FORCE;
 
     // controller = (rfl_chassis_normal_pid_controller_s *)chassis->model.direction_controller;
 

@@ -52,11 +52,6 @@
 #define CUSTOMER_AR_CONTROL_SEN (0.3f)
 
 /**
- * @brief 获取用户输入 更新机械臂控制模式
- */
-extern void arm_set_mode(engineer_scara_arm_s *scara_arm);
-
-/**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量
  */
 extern void arm_mode_control(engineer_scara_arm_s *scara_arm);

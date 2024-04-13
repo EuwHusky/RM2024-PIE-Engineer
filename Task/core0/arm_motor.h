@@ -22,11 +22,11 @@ extern void arm_motor_set_mode(engineer_scara_arm_s *scara_arm, rfl_motor_contro
  * @brief 设置机械臂电机运动速度
  * @note 测试版 后续需要更新为动态速度规划
  */
-extern void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm, engineer_scara_arm_mode_e mode, float base_speed);
+extern void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm, float base_speed);
 
 /**
  * @brief 设置机械臂电机可达角度
  */
-extern void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, engineer_scara_arm_mode_e mode);
+extern void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, bool is_to_reset);
 
 #endif /* _ARM_MOTOR_H__ */

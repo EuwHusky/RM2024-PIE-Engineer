@@ -3,35 +3,27 @@
 
 #include "stdint.h"
 
-#include "remote_control.h"
-
 #include "dev_motor.h"
 
 #include "algo_filter.h"
 
 #include "kine_stable_chassis.h"
 
-#include "INS_task.h"
+#include "remote_control.h"
 
-typedef enum
-{
-    CHASSIS_MODE_NO_FORCE, // 无力, 跟没上电一样
-    CHASSIS_MODE_STOP,     // 待着不动，锁死
-    CHASSIS_MODE_FOLLOW,   // 跟随控制
-} chassis_mode_e;
+#include "INS_task.h"
 
 typedef struct EngineerChassis
 {
     rfl_chassis_s model;
-    chassis_mode_e mode;
 
     const INS_t *ins;
     rfl_angle_s yaw;
     float wheel_speed[4];
 
-    const remote_control_s *rc;             /*遥控器数据*/
-    ramp_function_source_t speed_ramper[3]; /*速度斜坡化滤波器*/
-    float set_speed_vector[3];              /*底盘预期速度vx vy wz*/
+    const remote_control_s *rc;             // 遥控器数据
+    ramp_function_source_t speed_ramper[3]; // 速度斜坡化滤波器
+    float set_speed_vector[3];              // 底盘预期速度vx vy wz
     rfl_angle_s set_angle;
     float *wheel_set_speed;
 

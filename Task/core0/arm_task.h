@@ -1,6 +1,7 @@
 #ifndef _ARM_TASK_H__
 #define _ARM_TASK_H__
 
+#include "stdbool.h"
 #include "stdint.h"
 
 #include "board.h"
@@ -13,15 +14,7 @@
 #include "referee.h"
 #include "remote_control.h"
 
-typedef enum EngineerScaraArmMode
-{
-    ARM_MODE_NO_FORCE, // 无力 跟没上电一样
-    ARM_MODE_START_UP, // 启动 各个关节全部重新获取初始角度
-    ARM_MODE_JOINTS,   // 关节控制 既挖掘机式控制
-    ARM_MODE_POSE,     // 位姿控制
-    ARM_MODE_CUSTOMER, // 自定义控制器控制
-    ARM_MODE_HOLD_ON,  // 保持当前姿态
-} engineer_scara_arm_mode_e;
+#define USE_JOINTS_CONTROL 0
 
 typedef enum EngineerScaraArmJoints
 {
@@ -86,11 +79,12 @@ typedef enum EngineerScaraArmJointsMotorsIndex
 
 typedef struct EngineerScaraArm
 {
-    /*自身属性*/
+    /*基础*/
 
-    engineer_scara_arm_mode_e mode;
-    engineer_scara_arm_mode_e last_mode;
     uint8_t start_up_status;
+    bool reset_success;
+    bool move_homing_success;
+    bool operation_homing_success;
 
     /*运动学模型*/
 
@@ -142,7 +136,7 @@ typedef struct EngineerScaraArm
 
     const remote_control_s *rc;             // 遥控器数据
     const custom_robot_data_t *customer_rc; // 自定义控制器数据
-    char last_mode_control_key_value;
+    // char last_mode_control_key_value;
 
     uint16_t joint_6_encoder_value;
     float joint_6_encoder_angle; // 磁编获取到的关节6的绝对角度，逆时针为正，单位为角度deg
@@ -158,6 +152,11 @@ extern engineer_scara_arm_s scara_arm;
 
 extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
+extern bool checkIfArmStartUp;
+
+extern bool *getArmResetStatus(void);
+extern bool *getArmMoveHomingStatue(void);
+extern bool *getArmOperationHomingStatus(void);
 
 /* 机械臂结构参数 */
 
