@@ -5,8 +5,10 @@
 
 #include "board.h"
 
-#include "FreeRTOS.h"
-#include "task.h"
+// #include "FreeRTOS.h"
+// #include "task.h"
+
+#include "drv_delay.h"
 
 #include "drv_can.h"
 
@@ -36,8 +38,8 @@ engineer_chassis_s chassis;
 void chassis_task(void *pvParameters)
 {
     while (!INS_init_finished)
-        vTaskDelay(2);
-    vTaskDelay(60);
+        rflOsDelayMs(2);
+    rflOsDelayMs(60);
 
     chassis_init(&chassis);
 
@@ -49,7 +51,7 @@ void chassis_task(void *pvParameters)
 
         chassis_update_and_execute(&chassis);
 
-        vTaskDelay(2);
+        rflOsDelayMs(2);
     }
 }
 
@@ -82,8 +84,9 @@ static void chassis_set_control(engineer_chassis_s *chassis)
 {
     if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE)
     {
-        if ((chassis->rc->dt7_dr16_data.rc.ch[0] + chassis->rc->dt7_dr16_data.rc.ch[2] +
-             chassis->rc->dt7_dr16_data.rc.ch[3]) > 3)
+        if (abs(chassis->rc->dt7_dr16_data.rc.ch[0]) + abs(chassis->rc->dt7_dr16_data.rc.ch[2]) +
+                abs(chassis->rc->dt7_dr16_data.rc.ch[3]) >
+            3)
         {
             chassis->set_speed_vector[0] =
                 rlfRampCalc(chassis->speed_ramper + 0,
@@ -207,7 +210,20 @@ static void chassis_init(engineer_chassis_s *chassis)
     rlfRampInit(chassis->speed_ramper + 1, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);
     rlfRampInit(chassis->speed_ramper + 2, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);
 
+    // CAN通信
+    rflCanRxMessageBoxAddId(CHASSIS_MOTORS_CAN_ORDINAL, 0x201);
+    rflCanRxMessageBoxAddId(CHASSIS_MOTORS_CAN_ORDINAL, 0x202);
+    rflCanRxMessageBoxAddId(CHASSIS_MOTORS_CAN_ORDINAL, 0x203);
+    rflCanRxMessageBoxAddId(CHASSIS_MOTORS_CAN_ORDINAL, 0x204);
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x201, chassis_motor_0_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x202, chassis_motor_1_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x203, chassis_motor_2_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x204, chassis_motor_3_can_rx_callback);
+
     // 底盘电机
+    while (detect_error(CHASSIS_MOTOR_0_DH) || detect_error(CHASSIS_MOTOR_1_DH) || detect_error(CHASSIS_MOTOR_2_DH) ||
+           detect_error(CHASSIS_MOTOR_3_DH))
+        rflOsDelayMs(10);
     rfl_motor_config_s motor_config = {0};
     rflMotorGetDefaultConfig(&motor_config, RFL_MOTOR_RM_M3508, RFL_MOTOR_CONTROLLER_PID);
     motor_config.speed_pid_kp = ENGINEER_CHASSIS_RM_M3508_SPEED_PID_KP;
@@ -225,12 +241,6 @@ static void chassis_init(engineer_chassis_s *chassis)
         motor_config.master_can_id = 0x201 + i;
         rflMotorInit(chassis->motor + i, &motor_config);
     }
-
-    // 底盘电机CAN接收回调配置
-    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x201, chassis_motor_0_can_rx_callback);
-    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x202, chassis_motor_1_can_rx_callback);
-    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x203, chassis_motor_2_can_rx_callback);
-    rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x204, chassis_motor_3_can_rx_callback);
 }
 
 static void chassis_motor_0_can_rx_callback(void)

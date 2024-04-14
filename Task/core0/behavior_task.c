@@ -1,5 +1,7 @@
 #include "behavior_task.h"
 
+#include "board.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -115,12 +117,18 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
              (behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)) &&
             behavior_manager->last_dt7_behavior_switch_value != ENGINEER_OPERATE_DT7_SWITCH_VALUE &&
             behavior_manager->dt7_behavior_switch_value == ENGINEER_OPERATE_DT7_SWITCH_VALUE)
+        {
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+            board_write_led_b(LED_OFF);
+        }
         else if ((behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
                   behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION) &&
                  behavior_manager->last_dt7_behavior_switch_value != ENGINEER_MOVE_DT7_SWITCH_VALUE &&
                  behavior_manager->dt7_behavior_switch_value == ENGINEER_MOVE_DT7_SWITCH_VALUE)
+        {
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
+            board_write_led_b(LED_OFF);
+        }
     }
 
     // 键鼠操作
@@ -158,17 +166,24 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
     /**
      * @brief 机动 -> 作业 / 作业 -> 机动
-     * 键鼠 短按G键触发切换
+     * 键鼠 长按G键触发切换
      */
-    if (checkIfRcKeyFallingEdgeDetected(RC_G))
+    if (*behavior_manager->arm_reset_success && checkIsRcKeyPressed(RC_G))
     {
-        if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-            behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
-            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
-        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-                 behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
+        behavior_manager->km_switch_trigger_timer++;
+        if (behavior_manager->km_switch_trigger_timer == 10)
+        {
+            board_write_led_r(LED_ON);
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
+                behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
+                     behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
+        }
     }
+    else
+        behavior_manager->km_switch_trigger_timer = 0;
 }
 
 static void auto_operation(engineer_behavior_manager_s *behavior_manager)

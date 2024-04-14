@@ -41,8 +41,10 @@ const custom_robot_data_t *customer_controller;
 ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[512];
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
 
-rfl_motor_pid_controller_s *motor_controller_test;
-rm_motor_s *motor_driver_test;
+// rfl_motor_pid_controller_s *motor_controller_test;
+rm_motor_s *motor_0_driver_test;
+rm_motor_s *motor_1_driver_test;
+rm_motor_s *motor_2_driver_test;
 
 void print_dma_isr(void)
 {
@@ -89,8 +91,11 @@ void print_task(void *pvParameters)
     referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
 
-    motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].controller;
-    motor_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
+    // motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].controller;
+
+    motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT4].driver;
+    motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
+    motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
 
     while (true)
     {
@@ -133,6 +138,41 @@ void print_task(void *pvParameters)
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
+                case ARM_JOINT_1_L_DH: // 机械臂电机
+                    sprintf((char *)test_txt, "关节1左电机异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case ARM_JOINT_1_R_DH: // 机械臂电机
+                    sprintf((char *)test_txt, "关节1右电机异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case ARM_JOINT_4_DH: // 机械臂电机
+                    sprintf((char *)test_txt, "关节4电机异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case ARM_JOINT_56_L_DH: // 机械臂电机
+                    sprintf((char *)test_txt, "关节56左电机异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case ARM_JOINT_56_R_DH: // 机械臂电机
+                    sprintf((char *)test_txt, "关节56右电机异常\n");
+                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
                 case CHASSIS_MOTOR_0_DH: // 底盘电机0 - 左前
                     sprintf((char *)test_txt, "底盘电机0异常\n");
                     uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
@@ -168,6 +208,10 @@ void print_task(void *pvParameters)
 
 #else
 
+        // motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT4].driver;
+        // motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
+        // motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
+
         if (print_uart_tx_dma_done)
         {
             print_uart_tx_dma_done = false;
@@ -178,10 +222,13 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->set_pose_6d[0], arm_data->set_pose_6d[1],
             //         arm_data->set_pose_6d[2], arm_data->set_pose_6d[3], arm_data->set_pose_6d[4],
             //         arm_data->set_pose_6d[5]);
-            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d\r\n", arm_data->joints_motors[0].mode_,
-            //         arm_data->joints_motors[1].mode_, arm_data->joints_motors[2].mode_,
-            //         arm_data->joints_motors[3].mode_, arm_data->joints_motors[4].mode_,
-            //         arm_data->joints_motors[5].mode_, arm_data->joints_motors[6].mode_);
+            sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
+            // sprintf((char *)test_txt, "%d,%f,%d,%f,%d,%f\r\n", motor_0_driver_test->ecd_angle_offset,
+            //         motor_0_driver_test->deg_angle, motor_1_driver_test->ecd_angle_offset,
+            //         motor_1_driver_test->deg_angle, motor_2_driver_test->ecd_angle_offset,
+            //         motor_2_driver_test->deg_angle);
 
             /**
              * @brief Motor PID
@@ -211,14 +258,11 @@ void print_task(void *pvParameters)
             /**
              * @brief Behavior Manager
              */
-            sprintf((char *)test_txt, "===\r\n%d,%d,%d,%d,%d\r\n%d,%d,%d,%d,%d,%d,%d\r\n",
-                    print_behavior_manager_pointer->behavior, print_behavior_manager_pointer->last_behavior,
-                    *print_behavior_manager_pointer->arm_reset_success,
-                    *print_behavior_manager_pointer->arm_move_homing_success,
-                    *print_behavior_manager_pointer->arm_operation_homing_success, arm_data->joints_motors[0].mode_,
-                    arm_data->joints_motors[1].mode_, arm_data->joints_motors[2].mode_,
-                    arm_data->joints_motors[3].mode_, arm_data->joints_motors[4].mode_,
-                    arm_data->joints_motors[5].mode_, arm_data->joints_motors[6].mode_);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", print_behavior_manager_pointer->behavior,
+            //         print_behavior_manager_pointer->last_behavior,
+            //         *print_behavior_manager_pointer->arm_reset_success,
+            //         *print_behavior_manager_pointer->arm_move_homing_success,
+            //         *print_behavior_manager_pointer->arm_operation_homing_success);
 
             uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),

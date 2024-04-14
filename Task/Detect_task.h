@@ -19,6 +19,12 @@ enum Detect_List
     VT_REFEREE_DH, /* 图传模块 裁判系统数据链路 */
     DBUS_DH,       /* 遥控器接收机 */
 
+    ARM_JOINT_1_L_DH,
+    ARM_JOINT_1_R_DH,
+    ARM_JOINT_4_DH,
+    ARM_JOINT_56_L_DH,
+    ARM_JOINT_56_R_DH,
+
     CHASSIS_MOTOR_0_DH, /* 底盘电机0 - 左前 */
     CHASSIS_MOTOR_1_DH, /* 底盘电机1 - 左后 */
     CHASSIS_MOTOR_2_DH, /* 底盘电机2 - 右后 */

@@ -48,6 +48,7 @@ typedef struct EngineerBehaviorManager
     uint32_t dt7_reset_trigger_timer;  // 使用DT7复位的触发计时器
     uint32_t km_disable_trigger_timer; // 使用键鼠失能的触发计时器
     uint32_t km_reset_trigger_timer;   // 使用键鼠复位的触发计时器
+    uint32_t km_switch_trigger_timer;  // 使用键鼠切换机动/作业行为的触发计时器
 } engineer_behavior_manager_s;
 
 extern void behavior_task(void *pvParameters);

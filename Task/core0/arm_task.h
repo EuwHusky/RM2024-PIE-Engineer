@@ -180,8 +180,9 @@ extern bool *getArmOperationHomingStatus(void);
 #define JOINT2_REDUCTION (1.8f)
 /**
  * @brief 末端传动齿轮减速比
+ * @note 直接在电机初始化时将此减速比置入了 故电机角度并非出轴角度而是减速后的齿轮的角度
  */
-#define END_TRANSMISSION_GEAR_REDUCTION (1.2f)
+#define END_TRANSMISSION_GEAR_REDUCTION (21.0f / 17.0f)
 /**
  * @brief 末端锥型齿轮组减速比
  */

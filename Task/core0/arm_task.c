@@ -7,8 +7,10 @@
 #include "arm_kinematics.h"
 #include "arm_motor.h"
 
-#include "FreeRTOS.h"
-#include "task.h"
+// #include "FreeRTOS.h"
+// #include "task.h"
+
+#include "drv_delay.h"
 
 #include "bsp_ma600.h"
 
@@ -25,8 +27,8 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 void arm_task(void *pvParameters)
 {
     while (!INS_init_finished)
-        vTaskDelay(2);
-    vTaskDelay(30);
+        rflOsDelayMs(2);
+    rflOsDelayMs(30);
 
     arm_init(&scara_arm);
 
@@ -45,7 +47,7 @@ void arm_task(void *pvParameters)
         // 机械臂电机更新与执行
         arm_motor_update_and_execute(&scara_arm);
 
-        vTaskDelay(1);
+        rflOsDelayMs(1);
     }
 }
 
@@ -75,6 +77,10 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
 
     arm_model_init(scara_arm);
 
+    arm_rm_motor_can_init();
+    while (detect_error(ARM_JOINT_1_L_DH) || detect_error(ARM_JOINT_1_R_DH) || detect_error(ARM_JOINT_4_DH) ||
+           detect_error(ARM_JOINT_56_L_DH) || detect_error(ARM_JOINT_56_R_DH))
+        rflOsDelayMs(10);
     arm_motor_init(scara_arm);
 
     MA600_init();

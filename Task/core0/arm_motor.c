@@ -7,9 +7,40 @@
 #include "drv_delay.h"
 
 #include "behavior_task.h"
+#include "detect_task.h"
 
 // damiao_motor_s *motor_driver_1 = NULL;
 // damiao_motor_s *motor_driver_2 = NULL;
+
+static void arm_joint_1_l_can_rx_callback(void);
+static void arm_joint_1_r_can_rx_callback(void);
+static void arm_joint_4_can_rx_callback(void);
+static void arm_joint_56_l_can_rx_callback(void);
+static void arm_joint_56_r_can_rx_callback(void);
+
+/**
+ * @brief 初始化机械臂RM电机CAN通信功能
+ */
+void arm_rm_motor_can_init(void)
+{
+    rflCanRxMessageBoxAddId(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, 0x201);
+    rflCanRxMessageBoxAddId(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, 0x202);
+    rflCanRxMessageBoxAddId(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, 0x201);
+    rflCanRxMessageBoxAddId(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, 0x202);
+    rflCanRxMessageBoxAddId(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, 0x203);
+
+    rflCanRxMessageBoxAddRxCallbackFunc(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, 0x201,
+                                        arm_joint_1_l_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, 0x202,
+                                        arm_joint_1_r_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, 0x201, arm_joint_4_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, 0x202,
+                                        arm_joint_56_l_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, 0x203,
+                                        arm_joint_56_r_can_rx_callback);
+
+    rflOsDelayMs(50);
+}
 
 /**
  * @brief 初始化机械臂电机
@@ -19,6 +50,7 @@ void arm_motor_init(engineer_scara_arm_s *scara_arm)
     rfl_motor_config_s config = {0};
 
     /* 关节1 两个电机 */
+
     rflMotorGetDefaultConfig(&config, RFL_MOTOR_RM_M3508, RFL_MOTOR_CONTROLLER_PID);
     rflAngleUpdate(&config.max_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_ARM_MOTOR_JOINT_1_MAX_ANGLE);
     rflAngleUpdate(&config.min_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_ARM_MOTOR_JOINT_1_MIN_ANGLE);
@@ -67,6 +99,7 @@ void arm_motor_init(engineer_scara_arm_s *scara_arm)
     rflMotorInit(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], &config);
 
     /* 关节4 一个电机 */
+
     rflMotorGetDefaultConfig(&config, RFL_MOTOR_RM_M3508, RFL_MOTOR_CONTROLLER_PID);
     config.control_period_factor = 10.0f;
     config.is_reversed = true;
@@ -87,6 +120,7 @@ void arm_motor_init(engineer_scara_arm_s *scara_arm)
     rflMotorInit(&scara_arm->joints_motors[MOTOR_JOINT4], &config);
 
     /* 关节56 共用两个电机 */
+
     rflMotorGetDefaultConfig(&config, RFL_MOTOR_RM_M2006, RFL_MOTOR_CONTROLLER_PID);
     config.control_period_factor = 4.0f;
     config.effector_transmission_ratio = RM_M2006_REDUCTION_RATIO * END_TRANSMISSION_GEAR_REDUCTION;
@@ -259,4 +293,25 @@ void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, bool is_to_reset
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
                                  ENGINEER_ARM_MOTOR_JOINT_56_MAX_ANGLE, ENGINEER_ARM_MOTOR_JOINT_56_MIN_ANGLE);
     }
+}
+
+static void arm_joint_1_l_can_rx_callback(void)
+{
+    detect_hook(ARM_JOINT_1_L_DH);
+}
+static void arm_joint_1_r_can_rx_callback(void)
+{
+    detect_hook(ARM_JOINT_1_R_DH);
+}
+static void arm_joint_4_can_rx_callback(void)
+{
+    detect_hook(ARM_JOINT_4_DH);
+}
+static void arm_joint_56_l_can_rx_callback(void)
+{
+    detect_hook(ARM_JOINT_56_L_DH);
+}
+static void arm_joint_56_r_can_rx_callback(void)
+{
+    detect_hook(ARM_JOINT_56_R_DH);
 }

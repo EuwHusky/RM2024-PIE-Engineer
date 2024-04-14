@@ -4,6 +4,11 @@
 #include "arm_task.h"
 
 /**
+ * @brief 初始化机械臂RM电机CAN通信功能
+ */
+extern void arm_rm_motor_can_init(void);
+
+/**
  * @brief 初始化机械臂电机
  */
 extern void arm_motor_init(engineer_scara_arm_s *scara_arm);
