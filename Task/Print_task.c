@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 300   // 输出数据的周期
+#define PRINT_TIME_MS 10    // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -204,7 +204,7 @@ void print_task(void *pvParameters)
                 }
         }
 
-        vTaskDelay(1000);
+        vTaskDelay(500);
 
 #else
 
@@ -222,9 +222,9 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->set_pose_6d[0], arm_data->set_pose_6d[1],
             //         arm_data->set_pose_6d[2], arm_data->set_pose_6d[3], arm_data->set_pose_6d[4],
             //         arm_data->set_pose_6d[5]);
-            sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
+            // sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
+            //         arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
+            //         arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
             // sprintf((char *)test_txt, "%d,%f,%d,%f,%d,%f\r\n", motor_0_driver_test->ecd_angle_offset,
             //         motor_0_driver_test->deg_angle, motor_1_driver_test->ecd_angle_offset,
             //         motor_1_driver_test->deg_angle, motor_2_driver_test->ecd_angle_offset,
@@ -252,8 +252,12 @@ void print_task(void *pvParameters)
              * @brief Remote Control
              */
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", getRcMouseX(), getRcMouseY(), getRcMouseZ(),
-            //         checkIsRcKeyPressed(RC_LEFT), checkIfRcKeyFallingEdgeDetected(RC_LEFT),
-            //         checkIfRcKeyRisingEdgeDetected(RC_LEFT));
+            //         checkIsRcKeyPressed(RC_F), checkIfRcKeyFallingEdgeDetected(RC_F),
+            //         checkIfRcKeyRisingEdgeDetected(RC_F));
+
+            sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", print_rc_pointer->vt_link_data->mouse_x,
+                    print_rc_pointer->vt_link_data->mouse_y, print_rc_pointer->vt_link_data->mouse_z, 
+                    print_rc_pointer->vt_link_data->keyboard_value);
 
             /**
              * @brief Behavior Manager

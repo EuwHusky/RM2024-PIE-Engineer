@@ -22,6 +22,7 @@ remote_control_s *rc_pointer;
 
 ATTR_PLACE_AT_NONCACHEABLE uint8_t dbus_rx_buf[DBUS_RX_BUF_NUM]; // 遥控器数据接收缓冲区
 volatile bool dbus_uart_rx_dma_done = true;                      // dma传输完成标志位
+rfl_dt7_dr16_data_s dt7_dr16_prior_data;
 
 void dbus_dma_isr(void)
 {
@@ -30,7 +31,6 @@ void dbus_dma_isr(void)
     // 遍历缓冲区寻找正确数据 当数据有误时偏移一位再次尝试
     // 首先将数据保存至先验量 确认数据无误后再复制到对外可用的位置 以确保外部用到的数据的正确性
 
-    rfl_dt7_dr16_data_s dt7_dr16_prior_data;
     for (uint8_t i = 0; i < (DBUS_RX_BUF_NUM / 2); i++)
     {
         rflDt7Dr16Decode(&dbus_rx_buf[i], &dt7_dr16_prior_data);
@@ -69,7 +69,7 @@ void rc_task(void *pvParameters)
 
         RemoteControlUpdate();
 
-        vTaskDelay(14);
+        vTaskDelay(5);
     }
 }
 

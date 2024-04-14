@@ -17,6 +17,8 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager);
 
 void behavior_task(void *pvParameters)
 {
+    vTaskDelay(1200);
+
     while (!INS_init_finished)
         vTaskDelay(2);
     vTaskDelay(10);
@@ -166,24 +168,17 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
     /**
      * @brief 机动 -> 作业 / 作业 -> 机动
-     * 键鼠 长按G键触发切换
+     * 键鼠 短按G键触发切换
      */
-    if (*behavior_manager->arm_reset_success && checkIsRcKeyPressed(RC_G))
+    if (*behavior_manager->arm_reset_success && checkIfRcKeyFallingEdgeDetected(RC_G))
     {
-        behavior_manager->km_switch_trigger_timer++;
-        if (behavior_manager->km_switch_trigger_timer == 10)
-        {
-            board_write_led_r(LED_ON);
-            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-                behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
-                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
-            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-                     behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
-        }
+        if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
+            behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
+                 behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
     }
-    else
-        behavior_manager->km_switch_trigger_timer = 0;
 }
 
 static void auto_operation(engineer_behavior_manager_s *behavior_manager)

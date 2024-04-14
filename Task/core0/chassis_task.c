@@ -5,9 +5,6 @@
 
 #include "board.h"
 
-// #include "FreeRTOS.h"
-// #include "task.h"
-
 #include "drv_delay.h"
 
 #include "drv_can.h"
@@ -37,6 +34,8 @@ engineer_chassis_s chassis;
 
 void chassis_task(void *pvParameters)
 {
+    vTaskDelay(1000);
+
     while (!INS_init_finished)
         rflOsDelayMs(2);
     rflOsDelayMs(60);
@@ -90,34 +89,38 @@ static void chassis_set_control(engineer_chassis_s *chassis)
         {
             chassis->set_speed_vector[0] =
                 rlfRampCalc(chassis->speed_ramper + 0,
-                            ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], CHASSIS_RC_DEADLINE)) /
-                             660.0f * CHASSIS_VX_RC_CONTROL_MAX));
+                            ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], CHASSIS_DT7_DEADLINE)) /
+                             660.0f * CHASSIS_VX_DT7_CONTROL_MAX));
             chassis->set_speed_vector[1] =
                 rlfRampCalc(chassis->speed_ramper + 1,
-                            -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], CHASSIS_RC_DEADLINE)) /
-                              660.0f * CHASSIS_VY_RC_CONTROL_MAX));
+                            -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], CHASSIS_DT7_DEADLINE)) /
+                              660.0f * CHASSIS_VY_DT7_CONTROL_MAX));
             chassis->set_speed_vector[2] =
                 rlfRampCalc(chassis->speed_ramper + 2,
-                            -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], CHASSIS_RC_DEADLINE)) /
-                              660.0f * CHASSIS_WZ_RC_CONTROL_MAX));
+                            -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], CHASSIS_DT7_DEADLINE)) /
+                              660.0f * CHASSIS_WZ_DT7_CONTROL_MAX));
         }
         else
         {
-            float km_x = 0;
-            float km_y = 0;
+            float km_x = 0.0f;
+            float km_y = 0.0f;
             if (checkIsRcKeyPressed(RC_W))
                 km_x = 1.0f;
-            if (checkIsRcKeyPressed(RC_S))
+            else if (checkIsRcKeyPressed(RC_S))
                 km_x = -1.0f;
+            else
+                km_x = 0.0f;
             if (checkIsRcKeyPressed(RC_A))
                 km_y = 1.0f;
-            if (checkIsRcKeyPressed(RC_D))
+            else if (checkIsRcKeyPressed(RC_D))
                 km_y = -1.0f;
+            else
+                km_y = 0.0f;
 
-            chassis->set_speed_vector[0] = rlfRampCalc(chassis->speed_ramper + 0, km_x * CHASSIS_VX_RC_CONTROL_MAX);
-            chassis->set_speed_vector[1] = rlfRampCalc(chassis->speed_ramper + 1, km_y * CHASSIS_VY_RC_CONTROL_MAX);
+            chassis->set_speed_vector[0] = rlfRampCalc(chassis->speed_ramper + 0, km_x * CHASSIS_VX_KM_CONTROL_MAX);
+            chassis->set_speed_vector[1] = rlfRampCalc(chassis->speed_ramper + 1, km_y * CHASSIS_VY_KM_CONTROL_MAX);
             chassis->set_speed_vector[2] =
-                rlfRampCalc(chassis->speed_ramper + 2, -((float)(getRcMouseY()) / 20.0f) * CHASSIS_WZ_RC_CONTROL_MAX);
+                rlfRampCalc(chassis->speed_ramper + 2, -((float)(getRcMouseX()) / 20.0f) * CHASSIS_WZ_KM_CONTROL_MAX);
         }
     }
 }
@@ -206,9 +209,9 @@ static void chassis_init(engineer_chassis_s *chassis)
 
     // 底盘控制
     chassis->rc = getRemoteControlPointer();
-    rlfRampInit(chassis->speed_ramper + 0, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);
-    rlfRampInit(chassis->speed_ramper + 1, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);
-    rlfRampInit(chassis->speed_ramper + 2, 0.005f, CHASSIS_WZ_RC_CONTROL_MAX, -CHASSIS_WZ_RC_CONTROL_MAX);
+    rlfRampInit(chassis->speed_ramper + 0, 0.008f, CHASSIS_WZ_DT7_CONTROL_MAX, -CHASSIS_WZ_DT7_CONTROL_MAX);
+    rlfRampInit(chassis->speed_ramper + 1, 0.008f, CHASSIS_WZ_DT7_CONTROL_MAX, -CHASSIS_WZ_DT7_CONTROL_MAX);
+    rlfRampInit(chassis->speed_ramper + 2, 0.05f, CHASSIS_WZ_DT7_CONTROL_MAX, -CHASSIS_WZ_DT7_CONTROL_MAX);
 
     // CAN通信
     rflCanRxMessageBoxAddId(CHASSIS_MOTORS_CAN_ORDINAL, 0x201);

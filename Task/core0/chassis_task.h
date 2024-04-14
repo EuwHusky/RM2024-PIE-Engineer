@@ -35,10 +35,14 @@ extern void chassis_task(void *pvParameters);
 
 extern engineer_chassis_s *getChassisDataPointer(void);
 
-#define CHASSIS_RC_DEADLINE (3)
-#define CHASSIS_VX_RC_CONTROL_MAX (3.0f)
-#define CHASSIS_VY_RC_CONTROL_MAX (3.0f)
-#define CHASSIS_WZ_RC_CONTROL_MAX (3.0f)
+#define CHASSIS_DT7_DEADLINE (3)
+#define CHASSIS_VX_DT7_CONTROL_MAX (3.0f)
+#define CHASSIS_VY_DT7_CONTROL_MAX (3.0f)
+#define CHASSIS_WZ_DT7_CONTROL_MAX (3.0f)
+
+#define CHASSIS_VX_KM_CONTROL_MAX (1.0f)
+#define CHASSIS_VY_KM_CONTROL_MAX (1.0f)
+#define CHASSIS_WZ_KM_CONTROL_MAX (3.0f)
 
 #define CHASSIS_WHEEL_RADIUS (0.0765f)
 

@@ -7,9 +7,6 @@
 #include "arm_kinematics.h"
 #include "arm_motor.h"
 
-// #include "FreeRTOS.h"
-// #include "task.h"
-
 #include "drv_delay.h"
 
 #include "bsp_ma600.h"
@@ -26,6 +23,8 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 
 void arm_task(void *pvParameters)
 {
+    vTaskDelay(800);
+
     while (!INS_init_finished)
         rflOsDelayMs(2);
     rflOsDelayMs(30);
