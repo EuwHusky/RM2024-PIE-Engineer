@@ -5,12 +5,15 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "referee.h"
+
 #include "INS_task.h"
 #include "arm_task.h"
 
 engineer_behavior_manager_s behavior_manager;
 
 static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager);
+static void update_robot_status(engineer_behavior_manager_s *behavior_manager);
 static void update_behavior(engineer_behavior_manager_s *behavior_manager, engineer_behavior_e new_behavior);
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager);
 static void auto_operation(engineer_behavior_manager_s *behavior_manager);
@@ -27,6 +30,8 @@ void behavior_task(void *pvParameters)
 
     while (1)
     {
+        update_robot_status(&behavior_manager);
+
         operator_manual_operation(&behavior_manager);
         auto_operation(&behavior_manager);
 
@@ -68,6 +73,12 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_reset_success = getArmResetStatus();
     behavior_manager->arm_move_homing_success = getArmMoveHomingStatue();
     behavior_manager->arm_operation_homing_success = getArmOperationHomingStatus();
+}
+
+static void update_robot_status(engineer_behavior_manager_s *behavior_manager)
+{
+    behavior_manager->last_robot_survival_status = behavior_manager->robot_survival_status;
+    behavior_manager->robot_survival_status = (getRobotCurrentHp() == 0) ? false : true;
 }
 
 static void update_behavior(engineer_behavior_manager_s *behavior_manager, engineer_behavior_e new_behavior)
@@ -121,7 +132,6 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             behavior_manager->dt7_behavior_switch_value == ENGINEER_OPERATE_DT7_SWITCH_VALUE)
         {
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
-            board_write_led_b(LED_OFF);
         }
         else if ((behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
                   behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION) &&
@@ -129,7 +139,6 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
                  behavior_manager->dt7_behavior_switch_value == ENGINEER_MOVE_DT7_SWITCH_VALUE)
         {
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
-            board_write_led_b(LED_OFF);
         }
     }
 
@@ -197,5 +206,16 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     {
         *behavior_manager->arm_operation_homing_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    }
+
+    if (behavior_manager->robot_survival_status == false && behavior_manager->last_robot_survival_status == true)
+    {
+        board_write_led_r(LED_ON);
+        *behavior_manager->arm_reset_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
+    }
+    else if (behavior_manager->robot_survival_status == true && behavior_manager->last_robot_survival_status == false)
+    {
+        board_write_led_r(LED_OFF);
     }
 }

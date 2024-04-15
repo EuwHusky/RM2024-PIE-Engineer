@@ -73,7 +73,7 @@ void referee_task(void *pvParameters)
     refereeInitFrameProcesser();
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
-    refereeInitRobotInteractionManager(&step_clock, 20, 1, 0);
+    refereeInitRobotInteractionManager(&step_clock, 5, 1, 0);
 
     refereeSetRobotInteractionFigureBuilder(0, uiPumpIndicatorBuilder);
 
@@ -99,22 +99,22 @@ void referee_task(void *pvParameters)
                                 VT_UART_RX_BUF_LENGHT);
         }
 
-        // if (pm_uart_tx_dma_done)
+        step_clock++;
+        // if (pm_uart_tx_dma_done && !detect_error(VT_REFEREE_DH))
         // {
         //     pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
 
         //     if (pm_tx_frame_pointer != NULL)
         //     {
-        //         refereeRobotInteractionManagerSuccessfullySentHook();
         //         memcpy(pm_tx_buf, pm_tx_frame_pointer, getRefSentDataLen());
         //         uart_tx_trigger_dma(BOARD_HDMA, PM_UART_TX_DMA_CHN, PM_UART,
         //                             core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_tx_buf),
         //                             getRefSentDataLen());
+        //         refereeRobotInteractionManagerSuccessfullySentHook();
         //         pm_uart_tx_dma_done = false;
         //     }
         // }
 
-        step_clock++;
         vTaskDelay(5);
     }
 }

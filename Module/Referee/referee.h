@@ -13,6 +13,7 @@ extern void referee_data_decode(uint8_t *frame, uint16_t cmd_id);
 extern const game_robot_HP_t *getRobotHp(void);
 extern const robot_status_t *getRobotStatus(void);
 extern const uint8_t getRobotStatusId(void);
+extern const uint16_t getRobotCurrentHp(void);
 
 extern const game_robot_HP_t *getRobotHp(void);
 

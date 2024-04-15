@@ -90,6 +90,11 @@ const uint8_t getRobotStatusId(void)
     return robot_status.robot_id;
 }
 
+const uint16_t getRobotCurrentHp(void)
+{
+    return robot_status.current_HP;
+}
+
 const custom_robot_data_t *getCustomerControllerData(void)
 {
     return &customer_controller_data;

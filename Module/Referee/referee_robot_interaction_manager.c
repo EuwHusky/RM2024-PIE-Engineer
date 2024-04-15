@@ -48,7 +48,7 @@ uint8_t *refereeEncodeRobotInteractionData(robot_interaction_type_e robot_intera
 {
     uint8_t *sub_data = NULL;
 
-    if ((*manager.step_clock - manager.last_successful_send_time) <
+    if ((*manager.step_clock - manager.last_successful_send_time) >
         (ROBOT_INTERACTION_COMM_TIME_MS / manager.step_time))
     {
         switch (robot_interaction_type)

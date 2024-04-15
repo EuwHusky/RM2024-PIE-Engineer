@@ -31,6 +31,11 @@ typedef struct EngineerBehaviorManager
     engineer_behavior_e last_behavior;
     bool behavior_changed; // 状态改变时置为真 外部读取后置为假
 
+    /* 机器人状态 */
+
+    bool robot_survival_status; // 存活为真
+    bool last_robot_survival_status;
+
     /* 获取其他模块的状态 */
 
     bool *arm_reset_success;

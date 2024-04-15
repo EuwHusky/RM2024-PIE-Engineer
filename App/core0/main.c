@@ -51,6 +51,8 @@ void test_task(void *pvParameters)
                               gpio_interrupt_trigger_edge_falling);
     intc_m_enable_irq_with_priority(BOARD_KEY_GPIO_IRQ, 1);
 
+    board_write_led_b(LED_OFF);
+
     while (1)
     {
         board_write_led_g(LED_ON);
