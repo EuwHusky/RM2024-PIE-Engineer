@@ -155,35 +155,31 @@ void arm_motor_init(engineer_scara_arm_s *scara_arm)
  */
 void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
 {
-    // 设定电机角度
+    // 关节角度转换到电机角度
 
-    if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
-    {
-        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
-                         scara_arm->set_joints_value[JOINT_1] * LIFTER_DISTANCE_TO_DEGREE_FACTOR);
-        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
-                         scara_arm->set_joints_value[JOINT_1] * LIFTER_DISTANCE_TO_DEGREE_FACTOR);
+    // if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
+    // {
+    rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
+                     scara_arm->set_joints_value[JOINT_1] * LIFTER_DISTANCE_TO_DEGREE_FACTOR);
+    rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
+                     scara_arm->set_joints_value[JOINT_1] * LIFTER_DISTANCE_TO_DEGREE_FACTOR);
 
-        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_RADIAN,
-                         scara_arm->set_joints_value[JOINT_2] * JOINT2_REDUCTION);
+    rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_RADIAN,
+                     scara_arm->set_joints_value[JOINT_2] * JOINT2_REDUCTION);
 
-        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN,
-                         scara_arm->set_joints_value[JOINT_2] + scara_arm->set_joints_value[JOINT_3]);
+    rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN,
+                     scara_arm->set_joints_value[JOINT_2] + scara_arm->set_joints_value[JOINT_3]);
 
-        rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_RADIAN,
-                         scara_arm->set_joints_value[JOINT_4]);
+    rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_RADIAN,
+                     scara_arm->set_joints_value[JOINT_4]);
 
-        rflMotorSetAngle(
-            &scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_RADIAN,
-            ((scara_arm->set_joints_value[JOINT_5] * END_TRANSMISSION_GEAR_REDUCTION) -
-             (scara_arm->set_joints_value[JOINT_6] * END_TRANSMISSION_GEAR_REDUCTION * END_BEVEL_GEAR_SET_REDUCTION)) *
-                0.5f);
-        rflMotorSetAngle(
-            &scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_RADIAN,
-            ((scara_arm->set_joints_value[JOINT_5] * END_TRANSMISSION_GEAR_REDUCTION) +
-             (scara_arm->set_joints_value[JOINT_6] * END_TRANSMISSION_GEAR_REDUCTION * END_BEVEL_GEAR_SET_REDUCTION)) *
-                0.5f);
-    }
+    rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_RADIAN,
+                     scara_arm->set_joints_value[JOINT_5] -
+                         scara_arm->set_joints_value[JOINT_6] * END_BEVEL_GEAR_SET_REDUCTION);
+    rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_RADIAN,
+                     scara_arm->set_joints_value[JOINT_5] +
+                         scara_arm->set_joints_value[JOINT_6] * END_BEVEL_GEAR_SET_REDUCTION);
+    // }
 
     // 电机更新&执行
 
@@ -264,11 +260,22 @@ void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, bool is_to_reset
     if (is_to_reset)
     {
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
-                                 ENGINEER_ARM_MOTOR_JOINT_1_INITIAL_MAX_ANGLE,
-                                 ENGINEER_ARM_MOTOR_JOINT_1_INITIAL_MIN_ANGLE);
+                                 ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MAX_ANGLE,
+                                 ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MIN_ANGLE);
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
-                                 ENGINEER_ARM_MOTOR_JOINT_1_INITIAL_MAX_ANGLE,
-                                 ENGINEER_ARM_MOTOR_JOINT_1_INITIAL_MIN_ANGLE);
+                                 ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MAX_ANGLE,
+                                 ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MIN_ANGLE);
+
+        rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_DEGREE,
+                                 ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MAX_ANGLE,
+                                 ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MIN_ANGLE);
+
+        rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_DEGREE,
+                                 ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MAX_ANGLE,
+                                 ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MIN_ANGLE);
+        rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
+                                 ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MAX_ANGLE,
+                                 ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MIN_ANGLE);
     }
     else
     {

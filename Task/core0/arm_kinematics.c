@@ -69,7 +69,8 @@ void arm_model_init(engineer_scara_arm_s *scara_arm)
     memset(&scara_arm->tool_to_base_tmat_data, 0, 16 * sizeof(float));
     rflMatrixInit(&scara_arm->tool_to_base_tmat, 4, 4, scara_arm->tool_to_base_tmat_data);
 
-    scara_arm->use_normal_solution = true;
+    // scara_arm->use_normal_solution = true;
+    scara_arm->use_normal_solution = false;
 }
 
 /**
@@ -106,30 +107,35 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
  */
 void arm_model_update_control(engineer_scara_arm_s *scara_arm)
 {
-#if !USE_JOINTS_CONTROL
     if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
+    {
+#if !USE_JOINTS_CONTROL
         solve_inverse_kinematics(scara_arm);
 #endif
 
-    // 关节变量限幅
-    scara_arm->set_joints_value[JOINT_1] = rflFloatConstrain(
-        scara_arm->set_joints_value[JOINT_1], ENGINEER_ARM_JOINT_1_MIN_DISTANCE, ENGINEER_ARM_JOINT_1_MAX_DISTANCE);
-    scara_arm->set_joints_value[JOINT_2] = rflFloatConstrain(scara_arm->set_joints_value[JOINT_2],
-                                                             ENGINEER_ARM_JOINT_2_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                                                             ENGINEER_ARM_JOINT_2_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-    scara_arm->set_joints_value[JOINT_3] = rflFloatConstrain(
-        scara_arm->set_joints_value[JOINT_3],
-        (ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE - scara_arm->set_joints_value[JOINT_2]) * DEGREE_TO_RADIAN_FACTOR,
-        (ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE - scara_arm->set_joints_value[JOINT_2]) * DEGREE_TO_RADIAN_FACTOR);
-    scara_arm->set_joints_value[JOINT_4] = rflFloatConstrain(scara_arm->set_joints_value[JOINT_4],
-                                                             ENGINEER_ARM_JOINT_4_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                                                             ENGINEER_ARM_JOINT_4_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-    scara_arm->set_joints_value[JOINT_5] = rflFloatConstrain(scara_arm->set_joints_value[JOINT_5],
-                                                             ENGINEER_ARM_JOINT_5_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                                                             ENGINEER_ARM_JOINT_5_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-    scara_arm->set_joints_value[JOINT_6] = rflFloatConstrain(scara_arm->set_joints_value[JOINT_6],
-                                                             ENGINEER_ARM_JOINT_6_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                                                             ENGINEER_ARM_JOINT_6_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+        scara_arm->set_joints_value[JOINT_1] = rflFloatConstrain(
+            scara_arm->set_joints_value[JOINT_1], ENGINEER_ARM_JOINT_1_MIN_DISTANCE, ENGINEER_ARM_JOINT_1_MAX_DISTANCE);
+        scara_arm->set_joints_value[JOINT_2] = rflFloatConstrain(
+            scara_arm->set_joints_value[JOINT_2], ENGINEER_ARM_JOINT_2_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+            ENGINEER_ARM_JOINT_2_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+        scara_arm->set_joints_value[JOINT_3] =
+            rflFloatConstrain(scara_arm->set_joints_value[JOINT_3],
+                              (ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE -
+                               scara_arm->set_joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR) *
+                                  DEGREE_TO_RADIAN_FACTOR,
+                              (ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE -
+                               scara_arm->set_joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR) *
+                                  DEGREE_TO_RADIAN_FACTOR);
+        scara_arm->set_joints_value[JOINT_4] = rflFloatConstrain(
+            scara_arm->set_joints_value[JOINT_4], ENGINEER_ARM_JOINT_4_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+            ENGINEER_ARM_JOINT_4_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+        scara_arm->set_joints_value[JOINT_5] = rflFloatConstrain(
+            scara_arm->set_joints_value[JOINT_5], ENGINEER_ARM_JOINT_5_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+            ENGINEER_ARM_JOINT_5_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+        scara_arm->set_joints_value[JOINT_6] = rflFloatConstrain(
+            scara_arm->set_joints_value[JOINT_6], ENGINEER_ARM_JOINT_6_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+            ENGINEER_ARM_JOINT_6_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+    }
 }
 
 static void pose_6d_to_transform_matrix(rfl_matrix_instance *trans_mat, const float pose_6d[6])

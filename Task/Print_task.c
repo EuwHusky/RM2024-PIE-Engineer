@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 10    // 输出数据的周期
+#define PRINT_TIME_MS 5     // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -214,8 +214,8 @@ void print_task(void *pvParameters)
 #else
 
         // motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT4].driver;
-        // motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
-        // motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
+        motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
+        motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
 
         if (print_uart_tx_dma_done)
         {
@@ -224,16 +224,29 @@ void print_task(void *pvParameters)
             /**
              * @brief Scara Arm
              */
+            // sprintf((char *)test_txt, "%d\r\n", arm_data->start_up_status);
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->set_pose_6d[0], arm_data->set_pose_6d[1],
             //         arm_data->set_pose_6d[2], arm_data->set_pose_6d[3], arm_data->set_pose_6d[4],
             //         arm_data->set_pose_6d[5]);
-            // sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
+            // sprintf((char *)test_txt, "%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_data->start_up_status, arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
-            // sprintf((char *)test_txt, "%d,%f,%d,%f,%d,%f\r\n", motor_0_driver_test->ecd_angle_offset,
-            //         motor_0_driver_test->deg_angle, motor_1_driver_test->ecd_angle_offset,
-            //         motor_1_driver_test->deg_angle, motor_2_driver_test->ecd_angle_offset,
-            //         motor_2_driver_test->deg_angle);
+            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].control_output_,
+            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].torque_,
+            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].set_speed_,
+            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].speed_,
+            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].control_output_,
+            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].torque_,
+            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].set_speed_,
+            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].speed_);
+            sprintf((char *)test_txt, "%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+                    arm_data->start_up_status, arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_data->joints_motors[MOTOR_JOINT56_LEFT].angle_.deg,
+                    arm_data->joints_motors[MOTOR_JOINT56_RIGHT].angle_.deg);
+            // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", motor_1_driver_test->feedback_.ecd,
+            //         motor_1_driver_test->feedback_.given_current, motor_1_driver_test->torque,
+            //         motor_1_driver_test->torque_factor);
 
             /**
              * @brief Motor PID
@@ -246,14 +259,14 @@ void print_task(void *pvParameters)
             /**
              * @brief Referee System Comm
              */
-            sprintf((char *)test_txt, "===\r\n%d,%d,%d\r\n%d,%d\r\n", referee_robot_status->robot_id,
-                    referee_robot_status->current_HP, referee_robot_status->maximum_HP, vt_link_rc_p->left_button_down,
-                    vt_link_rc_p->right_button_down);
+            // sprintf((char *)test_txt, "===\r\n%d,%d,%d\r\n%d,%d\r\n", referee_robot_status->robot_id,
+            //         referee_robot_status->current_HP, referee_robot_status->maximum_HP,
+            //         vt_link_rc_p->left_button_down, vt_link_rc_p->right_button_down);
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
             //         customer_controller->z, customer_controller->yaw, customer_controller->pitch,
             //         customer_controller->roll, customer_controller->key);
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", fuck_pm, fuck_vt, vt_link_rc_p->mouse_x,
-            //         vt_link_rc_p->mouse_x, vt_link_rc_p->keyboard_value);
+            //         vt_link_rc_p->mouse_y, vt_link_rc_p->keyboard_value);
 
             /**
              * @brief Remote Control

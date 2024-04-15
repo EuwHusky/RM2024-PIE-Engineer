@@ -88,7 +88,7 @@ int main(void)
     xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 256U, NULL, CHASSIS_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);
-    xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE, NULL, PRINT_TASK_PRIORITY, NULL);
+    xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE + 128U, NULL, PRINT_TASK_PRIORITY, NULL);
 
     // 启动freertos
     vTaskStartScheduler();

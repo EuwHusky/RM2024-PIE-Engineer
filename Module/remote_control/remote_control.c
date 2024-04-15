@@ -28,12 +28,15 @@ void RemoteControlUpdate(void)
     remote_control.mouse_y = remote_control.dt7_dr16_data.mouse.y;
     remote_control.mouse_z = remote_control.dt7_dr16_data.mouse.z;
 
-    remote_control.keys[RC_LEFT].is_pressed =
-        (temp_value = remote_control.dt7_dr16_data.mouse.press_l,
-         temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->left_button_down));
-    remote_control.keys[RC_RIGHT].is_pressed =
-        (temp_value = remote_control.dt7_dr16_data.mouse.press_r,
-         temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->right_button_down));
+    // remote_control.keys[RC_LEFT].is_pressed =
+    //     (temp_value = remote_control.dt7_dr16_data.mouse.press_l,
+    //      temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->left_button_down));
+    // remote_control.keys[RC_RIGHT].is_pressed =
+    //     (temp_value = remote_control.dt7_dr16_data.mouse.press_r,
+    //      temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->right_button_down));
+
+    remote_control.keys[RC_LEFT].is_pressed = remote_control.dt7_dr16_data.mouse.press_l;
+    remote_control.keys[RC_RIGHT].is_pressed = remote_control.dt7_dr16_data.mouse.press_r;
 
     for (uint8_t i = RC_W; i <= RC_B; i++)
     {
