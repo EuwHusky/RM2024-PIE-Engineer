@@ -37,6 +37,8 @@ volatile bool vt_uart_rx_dma_done = true;                            // dmaä¼ è¾
 fifo_s_t *vt_uart_fifo = NULL;
 
 static uint32_t step_clock = 0;
+uint32_t fuck_pm = 0;
+uint32_t fuck_vt = 0;
 
 void pm_rx_referee_dma_isr(void)
 {
@@ -79,6 +81,7 @@ void referee_task(void *pvParameters)
     {
         if (pm_uart_rx_dma_done)
         {
+            fuck_pm++;
             pm_uart_rx_dma_done = false;
             refereeUnpackFifoData(PM_REFEREE_LINK);
             uart_rx_trigger_dma(BOARD_HDMA, PM_UART_RX_DMA_CHN, PM_UART,
@@ -88,6 +91,7 @@ void referee_task(void *pvParameters)
 
         if (vt_uart_rx_dma_done)
         {
+            fuck_vt++;
             vt_uart_rx_dma_done = false;
             refereeUnpackFifoData(VT_REFEREE_LINK);
             uart_rx_trigger_dma(BOARD_HDMA, VT_UART_RX_DMA_CHN, VT_UART,
@@ -111,7 +115,7 @@ void referee_task(void *pvParameters)
         // }
 
         step_clock++;
-        vTaskDelay(20);
+        vTaskDelay(5);
     }
 }
 

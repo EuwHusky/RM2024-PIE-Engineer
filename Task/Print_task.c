@@ -37,6 +37,7 @@ const remote_control_s *print_rc_pointer;
 const game_robot_HP_t *referee_robot_hp;
 const robot_status_t *referee_robot_status;
 const custom_robot_data_t *customer_controller;
+const vt_link_remote_control_t *vt_link_rc_p;
 
 ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[512];
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
@@ -45,6 +46,9 @@ volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
 rm_motor_s *motor_0_driver_test;
 rm_motor_s *motor_1_driver_test;
 rm_motor_s *motor_2_driver_test;
+
+extern uint32_t fuck_pm;
+extern uint32_t fuck_vt;
 
 void print_dma_isr(void)
 {
@@ -72,10 +76,10 @@ void print_task(void *pvParameters)
         {
         }
     }
-    intc_m_enable_irq_with_priority(BOARD_HDMA_IRQ, 1);
+    intc_m_enable_irq_with_priority(BOARD_XDMA_IRQ, 1);
     dmamux_config(BOARD_DMAMUX, BOARD_UART6_TX_DMAMUX_CHN, BOARD_UART6_TX_DMA_REQ, true);
 
-    rflDmaAddCallbackFunction(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, print_dma_isr);
+    rflDmaAddCallbackFunction(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, print_dma_isr);
 
     ins_ = get_INS_data_point();
     data_read = get_data_120_point();
@@ -90,6 +94,7 @@ void print_task(void *pvParameters)
     referee_robot_hp = getRobotHp();
     referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
+    vt_link_rc_p = getVtLinkRemoteControlData();
 
     // motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].controller;
 
@@ -101,7 +106,7 @@ void print_task(void *pvParameters)
     {
 #if PRINT_ERROR
         sprintf((char *)test_txt, "========================\n");
-        uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+        uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                             core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                             strlen((char *)test_txt));
         vTaskDelay(5);
@@ -112,91 +117,91 @@ void print_task(void *pvParameters)
                 {
                 case DUAL_COMM_DH: // 双核
                     sprintf((char *)test_txt, "核间通信异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case PM_REFEREE_DH: // 电管
                     sprintf((char *)test_txt, "电管串口异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case VT_REFEREE_DH: // 图传
                     sprintf((char *)test_txt, "图传串口异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case DBUS_DH: // 遥控器
                     sprintf((char *)test_txt, "遥控器串口异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case ARM_JOINT_1_L_DH: // 机械臂电机
                     sprintf((char *)test_txt, "关节1左电机异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case ARM_JOINT_1_R_DH: // 机械臂电机
                     sprintf((char *)test_txt, "关节1右电机异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case ARM_JOINT_4_DH: // 机械臂电机
                     sprintf((char *)test_txt, "关节4电机异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case ARM_JOINT_56_L_DH: // 机械臂电机
                     sprintf((char *)test_txt, "关节56左电机异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case ARM_JOINT_56_R_DH: // 机械臂电机
                     sprintf((char *)test_txt, "关节56右电机异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case CHASSIS_MOTOR_0_DH: // 底盘电机0 - 左前
                     sprintf((char *)test_txt, "底盘电机0异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case CHASSIS_MOTOR_1_DH: // 底盘电机1 - 左后
                     sprintf((char *)test_txt, "底盘电机1异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case CHASSIS_MOTOR_2_DH: // 底盘电机2 - 右后
                     sprintf((char *)test_txt, "底盘电机2异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
                     break;
                 case CHASSIS_MOTOR_3_DH: // 底盘电机3 - 右前
                     sprintf((char *)test_txt, "底盘电机3异常\n");
-                    uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
                     vTaskDelay(5);
@@ -241,12 +246,14 @@ void print_task(void *pvParameters)
             /**
              * @brief Referee System Comm
              */
-            // sprintf((char *)test_txt, "===\r\n%d,%d,%d\r\n%d,%d\r\n", referee_robot_status->robot_id,
-            //         referee_robot_status->current_HP, referee_robot_status->maximum_HP,
-            //         remote_control_mk->left_button_down, remote_control_mk->right_button_down);
+            sprintf((char *)test_txt, "===\r\n%d,%d,%d\r\n%d,%d\r\n", referee_robot_status->robot_id,
+                    referee_robot_status->current_HP, referee_robot_status->maximum_HP, vt_link_rc_p->left_button_down,
+                    vt_link_rc_p->right_button_down);
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
             //         customer_controller->z, customer_controller->yaw, customer_controller->pitch,
             //         customer_controller->roll, customer_controller->key);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", fuck_pm, fuck_vt, vt_link_rc_p->mouse_x,
+            //         vt_link_rc_p->mouse_x, vt_link_rc_p->keyboard_value);
 
             /**
              * @brief Remote Control
@@ -254,10 +261,6 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", getRcMouseX(), getRcMouseY(), getRcMouseZ(),
             //         checkIsRcKeyPressed(RC_F), checkIfRcKeyFallingEdgeDetected(RC_F),
             //         checkIfRcKeyRisingEdgeDetected(RC_F));
-
-            sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", print_rc_pointer->vt_link_data->mouse_x,
-                    print_rc_pointer->vt_link_data->mouse_y, print_rc_pointer->vt_link_data->mouse_z, 
-                    print_rc_pointer->vt_link_data->keyboard_value);
 
             /**
              * @brief Behavior Manager
@@ -268,7 +271,7 @@ void print_task(void *pvParameters)
             //         *print_behavior_manager_pointer->arm_move_homing_success,
             //         *print_behavior_manager_pointer->arm_operation_homing_success);
 
-            uart_tx_trigger_dma(BOARD_HDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                 strlen((char *)test_txt));
         }

@@ -34,7 +34,7 @@ engineer_chassis_s chassis;
 
 void chassis_task(void *pvParameters)
 {
-    vTaskDelay(1000);
+    rflOsDelayMs(1000);
 
     while (!INS_init_finished)
         rflOsDelayMs(2);

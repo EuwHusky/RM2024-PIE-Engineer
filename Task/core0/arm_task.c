@@ -23,7 +23,7 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 
 void arm_task(void *pvParameters)
 {
-    vTaskDelay(800);
+    rflOsDelayMs(800);
 
     while (!INS_init_finished)
         rflOsDelayMs(2);
