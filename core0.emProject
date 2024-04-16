@@ -93,6 +93,7 @@
         <file file_name="Module/referee/referee_robot_interaction_manager.c" />
       </folder>
       <folder Name="remote_control">
+        <file file_name="Module/remote_control/customer_controller.c" />
         <file file_name="Module/remote_control/remote_control.c" />
       </folder>
     </folder>

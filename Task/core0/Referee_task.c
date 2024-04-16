@@ -73,7 +73,7 @@ void referee_task(void *pvParameters)
     refereeInitFrameProcesser();
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
-    refereeInitRobotInteractionManager(&step_clock, 5, 1, 0);
+    refereeInitRobotInteractionManager(&step_clock, 20, 1, 0);
 
     refereeSetRobotInteractionFigureBuilder(0, uiPumpIndicatorBuilder);
 
@@ -115,7 +115,7 @@ void referee_task(void *pvParameters)
         //     }
         // }
 
-        vTaskDelay(5);
+        vTaskDelay(20);
     }
 }
 

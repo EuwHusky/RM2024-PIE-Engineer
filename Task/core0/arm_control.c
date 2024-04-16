@@ -8,7 +8,11 @@
 
 #include "algo_data_limiting.h"
 
+#include "customer_controller.h"
+
 #include "behavior_task.h"
+
+static void control_value_process(engineer_scara_arm_s *scara_arm);
 
 static void no_force_control(engineer_scara_arm_s *scara_arm);
 static void starting_control(engineer_scara_arm_s *scara_arm);
@@ -24,6 +28,10 @@ static void operation_homing_control(engineer_scara_arm_s *scara_arm);
  */
 void arm_mode_control(engineer_scara_arm_s *scara_arm)
 {
+    // 处理控制量
+
+    control_value_process(scara_arm);
+
     // 模式切换时修改机械臂设定
 
     if (checkIfEngineerBehaviorChanged())
@@ -306,18 +314,17 @@ static void pose_control(engineer_scara_arm_s *scara_arm)
                                       660.0f * POSE_AR_CONTROL_SEN);
 
     // 自定义控制器控制
-    scara_arm->set_pose_6d[0] += (scara_arm->customer_rc->x * CUSTOMER_X_CONTROL_SEN);
-
-    scara_arm->set_pose_6d[1] += (scara_arm->customer_rc->y * CUSTOMER_Y_CONTROL_SEN);
-
-    scara_arm->set_pose_6d[2] += (scara_arm->customer_rc->z * CUSTOMER_Z_CONTROL_SEN);
-
-    scara_arm->set_pose_6d[3] +=
-        (rflFloatLoopConstrain(scara_arm->customer_rc->yaw, -RAD_PI, RAD_PI) * CUSTOMER_AY_CONTROL_SEN);
-    scara_arm->set_pose_6d[4] +=
-        (rflFloatLoopConstrain(scara_arm->customer_rc->pitch, -RAD_PI, RAD_PI) * -CUSTOMER_AP_CONTROL_SEN);
-    scara_arm->set_pose_6d[5] +=
-        (rflFloatLoopConstrain(scara_arm->customer_rc->roll, -RAD_PI, RAD_PI) * -CUSTOMER_AR_CONTROL_SEN);
+    if (checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, ROUGHLY_KEY))
+    {
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            if (i < 3)
+                scara_arm->set_pose_6d[i] =
+                    scara_arm->local_pos_memory[i] + (scara_arm->cc_pose_6d[i] - scara_arm->cc_pos_memory[i]);
+            else
+                scara_arm->set_pose_6d[i] = scara_arm->cc_pose_6d[i];
+        }
+    }
 }
 
 static void move_homing_control(engineer_scara_arm_s *scara_arm)
@@ -328,4 +335,27 @@ static void move_homing_control(engineer_scara_arm_s *scara_arm)
 static void operation_homing_control(engineer_scara_arm_s *scara_arm)
 {
     scara_arm->operation_homing_success = true;
+}
+
+static void control_value_process(engineer_scara_arm_s *scara_arm)
+{
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        if (i < 3)
+            scara_arm->cc_pose_6d[i] = scara_arm->customer_controller->pose[i];
+        else
+            scara_arm->cc_pose_6d[i] = rflFloatLoopConstrain(scara_arm->customer_controller->pose[i], -RAD_PI, RAD_PI);
+
+        rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->cc_pose_6d[i]);
+        scara_arm->cc_pose_6d[i] = scara_arm->cc_pose_filter[i].out;
+    }
+
+    if (!checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, ROUGHLY_KEY))
+    {
+        for (uint8_t i = 0; i < 3; i++)
+        {
+            scara_arm->local_pos_memory[i] = scara_arm->set_pose_6d[i];
+            scara_arm->cc_pos_memory[i] = scara_arm->cc_pose_6d[i];
+        }
+    }
 }

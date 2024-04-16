@@ -309,12 +309,7 @@ typedef struct
  */
 typedef struct
 {
-    float x;
-    float y;
-    float z;
-    float yaw;
-    float pitch;
-    float roll;
+    float pose[6]; // X Y Z YAW PITCH ROLL
     uint8_t key;
     uint8_t reserved[5];
 } custom_robot_data_t;

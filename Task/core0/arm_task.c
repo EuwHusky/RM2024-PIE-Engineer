@@ -89,9 +89,16 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->operation_homing_success = false;
 
     scara_arm->rc = getRemoteControlPointer();
-    scara_arm->customer_rc = getCustomerControllerData();
 
-    // rlfSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
+    scara_arm->customer_controller = getCustomerControllerData();
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[0], 0.15f, 0.85f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[1], 0.15f, 0.85f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[2], 0.01f, 0.99f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[3], 0.15f, 0.85f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[4], 0.15f, 0.85f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[5], 0.15f, 0.85f);
+
+    // rflSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
 }
 
 // static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
@@ -101,7 +108,7 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
 
 //     if (scara_arm->joint_6_encoder_value = MA600_read_with_check(&is_error), is_error == false)
 //     {
-//         scara_arm->joint_6_encoder_angle = rlfSlidingWindowFilterCalc(
+//         scara_arm->joint_6_encoder_angle = rflSlidingWindowFilterCalc(
 //             &scara_arm->joint_6_encoder_angle_filter,
 //             rflFloatLoopConstrain(((float)scara_arm->joint_6_encoder_value * 0.005493248f) - 180.0f - angle_offset,
 //                                   -DEG_PI, DEG_PI));

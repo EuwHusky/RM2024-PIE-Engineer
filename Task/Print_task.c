@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 5     // 输出数据的周期
+#define PRINT_TIME_MS 4     // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -224,10 +224,15 @@ void print_task(void *pvParameters)
             /**
              * @brief Scara Arm
              */
-            // sprintf((char *)test_txt, "%d\r\n", arm_data->start_up_status);
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->set_pose_6d[0], arm_data->set_pose_6d[1],
             //         arm_data->set_pose_6d[2], arm_data->set_pose_6d[3], arm_data->set_pose_6d[4],
             //         arm_data->set_pose_6d[5]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[0],
+            //         arm_data->cc_pose_6d[1], arm_data->cc_pose_6d[2], arm_data->customer_controller->pose[0],
+            //         arm_data->customer_controller->pose[1], arm_data->customer_controller->pose[2]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[3],
+            //         arm_data->cc_pose_6d[4], arm_data->cc_pose_6d[5], arm_data->customer_controller->pose[3],
+            //         arm_data->customer_controller->pose[4], arm_data->customer_controller->pose[5]);
             // sprintf((char *)test_txt, "%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
             //         arm_data->start_up_status, arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
@@ -239,11 +244,13 @@ void print_task(void *pvParameters)
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].torque_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].set_speed_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].speed_);
-            sprintf((char *)test_txt, "%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-                    arm_data->start_up_status, arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_data->joints_motors[MOTOR_JOINT56_LEFT].angle_.deg,
-                    arm_data->joints_motors[MOTOR_JOINT56_RIGHT].angle_.deg);
+            // sprintf((char *)test_txt, "%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_data->start_up_status, arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
+            //         arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
+            //         arm_data->set_joints_value[5] * RADIAN_TO_DEGREE_FACTOR,
+            //         arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR,
+            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].angle_.deg,
+            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].angle_.deg);
             // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", motor_1_driver_test->feedback_.ecd,
             //         motor_1_driver_test->feedback_.given_current, motor_1_driver_test->torque,
             //         motor_1_driver_test->torque_factor);
@@ -262,9 +269,9 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "===\r\n%d,%d,%d\r\n%d,%d\r\n", referee_robot_status->robot_id,
             //         referee_robot_status->current_HP, referee_robot_status->maximum_HP,
             //         vt_link_rc_p->left_button_down, vt_link_rc_p->right_button_down);
-            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->x, customer_controller->y,
-            //         customer_controller->z, customer_controller->yaw, customer_controller->pitch,
-            //         customer_controller->roll, customer_controller->key);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->pose[0],
+            //         customer_controller->pose[1], customer_controller->pose[2], customer_controller->pose[3],
+            //         customer_controller->pose[4], customer_controller->pose[5], customer_controller->key);
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", fuck_pm, fuck_vt, vt_link_rc_p->mouse_x,
             //         vt_link_rc_p->mouse_y, vt_link_rc_p->keyboard_value);
 

@@ -134,9 +134,13 @@ typedef struct EngineerScaraArm
 
     /*设备*/
 
-    const remote_control_s *rc;             // 遥控器数据
-    const custom_robot_data_t *customer_rc; // 自定义控制器数据
-    // char last_mode_control_key_value;
+    const remote_control_s *rc; // 遥控器数据
+
+    const custom_robot_data_t *customer_controller; // 自定义控制器数据
+    float cc_pose_6d[6];
+    first_order_filter_type_t cc_pose_filter[6];
+    float local_pos_memory[3]; // 机械臂位置记忆
+    float cc_pos_memory[3];    // 自定义控制器位置记忆
 
     // uint16_t joint_6_encoder_value;
     // float joint_6_encoder_angle; // 磁编获取到的关节6的绝对角度，逆时针为正，单位为角度deg

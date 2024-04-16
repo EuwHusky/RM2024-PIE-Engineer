@@ -44,13 +44,6 @@
 #define POSE_AP_CONTROL_SEN (0.005f)
 #define POSE_AR_CONTROL_SEN (0.005f)
 
-#define CUSTOMER_X_CONTROL_SEN (0.2f)
-#define CUSTOMER_Y_CONTROL_SEN (0.2f)
-#define CUSTOMER_Z_CONTROL_SEN (0.1f)
-#define CUSTOMER_AY_CONTROL_SEN (0.2f)
-#define CUSTOMER_AP_CONTROL_SEN (0.2f)
-#define CUSTOMER_AR_CONTROL_SEN (0.3f)
-
 /**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量
  */

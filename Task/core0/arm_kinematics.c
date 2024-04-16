@@ -88,7 +88,7 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
     scara_arm->joints_value[JOINT_5] = (scara_arm->joints_motors[MOTOR_JOINT56_LEFT].angle_.rad +
                                         scara_arm->joints_motors[MOTOR_JOINT56_RIGHT].angle_.rad) /
                                        2.0f;
-    scara_arm->joints_value[JOINT_6] = (-scara_arm->joints_motors[MOTOR_JOINT56_LEFT].angle_.rad +
+    scara_arm->joints_value[JOINT_6] = (scara_arm->joints_motors[MOTOR_JOINT56_LEFT].angle_.rad -
                                         scara_arm->joints_motors[MOTOR_JOINT56_RIGHT].angle_.rad) /
                                        2.0f / END_BEVEL_GEAR_SET_REDUCTION;
 
