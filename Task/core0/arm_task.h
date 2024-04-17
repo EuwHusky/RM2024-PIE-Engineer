@@ -195,18 +195,19 @@ extern bool *getArmOperationHomingStatus(void);
 /* 机械臂模型参数 */
 
 // 位姿可达范围相关参数
+#define ENGINEER_ARM_Z_MAX_DISTANCE (0.65f)                                            /*关节1的最大伸展距离*/
+#define ENGINEER_ARM_Z_MIN_DISTANCE (0.0f)                                             /*关节1最小伸展距离*/
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/
-#define ENGINEER_ARM_XY24_MIN_DISTANCE (0.1f) /*关节2到关节4的最小伸展距离*/
-#define ENGINEER_ARM_YAW_MAX_ANGLE (165.0f)   /* 末端YAW最大角度 */
-#define ENGINEER_ARM_YAW_MIN_ANGLE (-165.0f)  /* 末端YAW最小角度 */
-#define ENGINEER_ARM_PITCH_MAX_ANGLE (48.0f)  /* 末端PITCH最大角度 */
-#define ENGINEER_ARM_PITCH_MIN_ANGLE (-75.0f) /* 末端PITCH最小角度 */
-#define ENGINEER_ARM_ROLL_MAX_ANGLE (720.0f)  /* 末端ROLL最大角度 */
-#define ENGINEER_ARM_ROLL_MIN_ANGLE (-720.0f) /* 末端ROLL最小角度 */
+#define ENGINEER_ARM_YAW_MAX_ANGLE (180.0f)                                            /* 末端YAW最大角度 */
+#define ENGINEER_ARM_YAW_MIN_ANGLE (-180.0f)                                           /* 末端YAW最小角度 */
+#define ENGINEER_ARM_PITCH_MAX_ANGLE (48.0f)                                           /* 末端PITCH最大角度 */
+#define ENGINEER_ARM_PITCH_MIN_ANGLE (-75.0f)                                          /* 末端PITCH最小角度 */
+#define ENGINEER_ARM_ROLL_MAX_ANGLE (720.0f)                                           /* 末端ROLL最大角度 */
+#define ENGINEER_ARM_ROLL_MIN_ANGLE (-720.0f)                                          /* 末端ROLL最小角度 */
 
 // 正常运行时的关节可达范围
-#define ENGINEER_ARM_JOINT_1_MAX_DISTANCE (0.65f)
-#define ENGINEER_ARM_JOINT_1_MIN_DISTANCE (0.0f)
+#define ENGINEER_ARM_JOINT_1_MAX_DISTANCE (ENGINEER_ARM_Z_MAX_DISTANCE)
+#define ENGINEER_ARM_JOINT_1_MIN_DISTANCE (ENGINEER_ARM_Z_MIN_DISTANCE)
 #define ENGINEER_ARM_JOINT_2_MAX_ANGLE (90.0f)
 #define ENGINEER_ARM_JOINT_2_MIN_ANGLE (-90.0f)
 #define ENGINEER_ARM_JOINT_3_MAX_ANGLE (160.0f)
@@ -233,10 +234,8 @@ extern bool *getArmOperationHomingStatus(void);
 #define ENGINEER_ARM_MOTOR_JOINT_1_MIN_ANGLE (ENGINEER_ARM_JOINT_1_MIN_DISTANCE * LIFTER_DISTANCE_TO_DEGREE_FACTOR)
 #define ENGINEER_ARM_MOTOR_JOINT_23_BACK_MAX_ANGLE (ENGINEER_ARM_JOINT_2_MAX_ANGLE * JOINT2_REDUCTION)
 #define ENGINEER_ARM_MOTOR_JOINT_23_BACK_MIN_ANGLE (ENGINEER_ARM_JOINT_2_MIN_ANGLE * JOINT2_REDUCTION)
-#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE                                                                    \
-    (175.0f /* ENGINEER_ARM_JOINT_2_MAX_ANGLE + ENGINEER_ARM_JOINT_3_MAX_ANGLE */)
-#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE                                                                    \
-    (-175.0f /* ENGINEER_ARM_JOINT_2_MIN_ANGLE + ENGINEER_ARM_JOINT_3_MIN_ANGLE */)
+#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE (173.0f)
+#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE (-173.0f)
 #define ENGINEER_ARM_MOTOR_JOINT_4_MAX_ANGLE (ENGINEER_ARM_JOINT_4_MAX_ANGLE)
 #define ENGINEER_ARM_MOTOR_JOINT_4_MIN_ANGLE (ENGINEER_ARM_JOINT_4_MIN_ANGLE)
 #define ENGINEER_ARM_MOTOR_JOINT_56_MAX_ANGLE                                                                          \
@@ -255,13 +254,13 @@ extern bool *getArmOperationHomingStatus(void);
 #define ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_5_INITIAL_MIN_ANGLE * 2.0f)
 
 // 电机控制器参数
-#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (1.2f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (1.4f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KI (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KD (0.02f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KP (1000.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KI (10.0f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KI (6.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)

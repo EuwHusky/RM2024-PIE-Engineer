@@ -361,20 +361,20 @@ static void operation_homing_control(engineer_scara_arm_s *scara_arm)
         scara_arm->set_pose_6d[i] = scara_arm->pose_6d[i];
     }
 
-    scara_arm->set_joints_value[JOINT_1] = ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 2.0f;
-    scara_arm->set_joints_value[JOINT_2] = 80.0f * DEGREE_TO_RADIAN_FACTOR;
+    scara_arm->set_joints_value[JOINT_1] = ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 4.0f;
+    scara_arm->set_joints_value[JOINT_2] = 70.0f * DEGREE_TO_RADIAN_FACTOR;
     if (scara_arm->joints_value[JOINT_2] < 0.0f)
         scara_arm->set_joints_value[JOINT_3] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
     else
-        scara_arm->set_joints_value[JOINT_3] = -150.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_joints_value[JOINT_3] = -140.0f * DEGREE_TO_RADIAN_FACTOR;
     if (scara_arm->pose_6d[3] < (90 * DEGREE_TO_RADIAN_FACTOR))
         scara_arm->set_joints_value[JOINT_4] = 70.0f * DEGREE_TO_RADIAN_FACTOR;
     scara_arm->set_joints_value[JOINT_5] = 0.0f;
     scara_arm->set_joints_value[JOINT_6] = 0.0f;
 
-    if ((fabsf(scara_arm->joints_value[JOINT_1] - ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 2.0f) < 0.04f) &&
-        (fabsf(scara_arm->joints_value[JOINT_2] - 80.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
-        (fabsf(scara_arm->joints_value[JOINT_3] + 150.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
+    if ((fabsf(scara_arm->joints_value[JOINT_1] - ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 4.0f) < 0.04f) &&
+        (fabsf(scara_arm->joints_value[JOINT_2] - 70.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
+        (fabsf(scara_arm->joints_value[JOINT_3] + 140.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_4] - 70.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_5] - 0.0f) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_6] - 0.0f) < 0.04f))
@@ -398,7 +398,7 @@ static void control_value_process(engineer_scara_arm_s *scara_arm)
     {
         for (uint8_t i = 0; i < 3; i++)
         {
-            scara_arm->local_pos_memory[i] = scara_arm->set_pose_6d[i];
+            scara_arm->local_pos_memory[i] = scara_arm->pose_6d[i];
             scara_arm->cc_pos_memory[i] = scara_arm->cc_pose_6d[i];
         }
     }

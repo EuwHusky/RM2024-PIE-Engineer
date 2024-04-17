@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 4     // 输出数据的周期
+#define PRINT_TIME_MS 10    // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -224,9 +224,11 @@ void print_task(void *pvParameters)
             /**
              * @brief Scara Arm
              */
-            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->set_pose_6d[0], arm_data->set_pose_6d[1],
-            //         arm_data->set_pose_6d[2], arm_data->set_pose_6d[3], arm_data->set_pose_6d[4],
-            //         arm_data->set_pose_6d[5]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_data->set_pose_6d[0], arm_data->set_pose_6d[1], arm_data->set_pose_6d[2],
+            //         arm_data->set_pose_6d[3], arm_data->set_pose_6d[4], arm_data->set_pose_6d[5],
+            //         arm_data->pose_6d[0], arm_data->pose_6d[1], arm_data->pose_6d[2], arm_data->pose_6d[3],
+            //         arm_data->pose_6d[4], arm_data->pose_6d[5]);
             // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[0],
             //         arm_data->cc_pose_6d[1], arm_data->cc_pose_6d[2], arm_data->customer_controller->pose[0],
             //         arm_data->customer_controller->pose[1], arm_data->customer_controller->pose[2]);
@@ -251,9 +253,7 @@ void print_task(void *pvParameters)
             //         arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].angle_.deg,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].angle_.deg);
-            // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", motor_1_driver_test->feedback_.ecd,
-            //         motor_1_driver_test->feedback_.given_current, motor_1_driver_test->torque,
-            //         motor_1_driver_test->torque_factor);
+            sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->printer[0], arm_data->printer[1], arm_data->printer[2]);
 
             /**
              * @brief Motor PID
@@ -291,9 +291,9 @@ void print_task(void *pvParameters)
             //         *print_behavior_manager_pointer->arm_move_homing_success,
             //         *print_behavior_manager_pointer->arm_operation_homing_success);
 
-            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-            //                     strlen((char *)test_txt));
+            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                strlen((char *)test_txt));
         }
 
         /**

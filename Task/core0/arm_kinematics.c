@@ -11,6 +11,7 @@ static void pose_6d_to_transform_matrix(rfl_matrix_instance *trans_mat, const fl
 static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, const float joint_dh[5]);
 static void calc_tool_to_base_transform_matrix(engineer_scara_arm_s *scara_arm);
 static void solve_forward_kinematics(engineer_scara_arm_s *scara_arm);
+static void set_pose_limiting(engineer_scara_arm_s *scara_arm);
 static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm);
 
 /**
@@ -185,100 +186,6 @@ static void solve_forward_kinematics(engineer_scara_arm_s *scara_arm)
     scara_arm->pose_6d[5] = scara_arm->joints_value[5];
 }
 
-static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
-{
-    float xy56 = 0.0f, x56 = 0.0f, y56 = 0.0f, x45 = 0.0f, y45 = 0.0f, z56 = 0.0f, x24 = 0.0f, y24 = 0.0f, xy24 = 0.0f,
-          angle_x24 = 0.0f, angle_324 = 0.0f;
-
-    float L1 = scara_arm->dh[2][1];
-    float L2 = scara_arm->dh[3][1];
-    float L3 = scara_arm->dh[4][1];
-    float L4 = scara_arm->dh[5][2];
-
-    // 检查末端YAW角度是否超限
-    scara_arm->set_pose_6d[3] =
-        rflFloatConstrain(scara_arm->set_pose_6d[3], ENGINEER_ARM_YAW_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                          ENGINEER_ARM_YAW_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-    // 检查末端PITCH角度是否超限
-    scara_arm->set_pose_6d[4] =
-        rflFloatConstrain(scara_arm->set_pose_6d[4], ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                          ENGINEER_ARM_PITCH_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-    // 检查末端ROLL角度是否超限
-    scara_arm->set_pose_6d[5] =
-        rflFloatConstrain(scara_arm->set_pose_6d[5], ENGINEER_ARM_ROLL_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                          ENGINEER_ARM_ROLL_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-    // 检查末端在Z轴上是否超限
-    z56 = L4 * sinf(scara_arm->set_pose_6d[4]);
-    if (scara_arm->set_pose_6d[2] > (ENGINEER_ARM_JOINT_1_MAX_DISTANCE + z56))
-        scara_arm->set_pose_6d[2] = ENGINEER_ARM_JOINT_1_MAX_DISTANCE + z56;
-    else if (scara_arm->set_pose_6d[2] < (ENGINEER_ARM_JOINT_1_MIN_DISTANCE + z56))
-        scara_arm->set_pose_6d[2] = ENGINEER_ARM_JOINT_1_MIN_DISTANCE + z56;
-    // 检查关节4在XY平面上的位置是否超限
-    xy56 = L4 * cosf(scara_arm->set_pose_6d[4]);
-    x56 = xy56 * cosf(scara_arm->set_pose_6d[3]);
-    y56 = xy56 * sinf(scara_arm->set_pose_6d[3]);
-    x45 = L3 * cosf(scara_arm->set_pose_6d[3]);
-    y45 = L3 * sinf(scara_arm->set_pose_6d[3]);
-    x24 = scara_arm->set_pose_6d[0] - x56 - x45;
-    y24 = scara_arm->set_pose_6d[1] - y56 - y45;
-    scara_arm->printer[0] = x24;
-    scara_arm->printer[1] = y24;
-    xy24 = sqrtf(x24 * x24 + y24 * y24);
-    scara_arm->printer[2] = xy24;
-    if (xy24 > (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE))
-    {
-        angle_x24 = atan2f(y24, x24);
-        scara_arm->set_pose_6d[0] = cosf(angle_x24) * (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE) + x45 + x56;
-        scara_arm->set_pose_6d[1] = sinf(angle_x24) * (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE) + y45 + y56;
-    }
-    else if (xy24 < (ENGINEER_ARM_XY24_MIN_DISTANCE + PREVENT_DISTANCE))
-    {
-        angle_x24 = atan2f(y24, x24);
-        scara_arm->set_pose_6d[0] = cosf(angle_x24) * (ENGINEER_ARM_XY24_MIN_DISTANCE + PREVENT_DISTANCE) + x45 + x56;
-        scara_arm->set_pose_6d[1] = sinf(angle_x24) * (ENGINEER_ARM_XY24_MIN_DISTANCE + PREVENT_DISTANCE) + y45 + y56;
-    }
-
-    float X = scara_arm->set_pose_6d[0];
-    float Y = scara_arm->set_pose_6d[1];
-    float Z = scara_arm->set_pose_6d[2];
-    float aY = scara_arm->set_pose_6d[3];
-    float aP = scara_arm->set_pose_6d[4];
-    float aR = scara_arm->set_pose_6d[5];
-    float d1 = 0.0f, t2 = 0.0f, t3 = 0.0f, t4 = 0.0f, t5 = 0.0f, t6 = 0.0f;
-
-    z56 = L4 * sinf(aP);
-    d1 = Z - z56;
-    xy56 = L4 * cosf(aP);
-    x56 = xy56 * cosf(aY);
-    y56 = xy56 * sinf(aY);
-    x45 = L3 * cosf(aY);
-    y45 = L3 * sinf(aY);
-    x24 = X - x56 - x45;
-    y24 = Y - y56 - y45;
-    xy24 = sqrtf(x24 * x24 + y24 * y24);
-    t3 = (scara_arm->use_normal_solution ? 1.0f : -1.0f) *
-         (RAD_PI - acosf((L1 * L1 + L2 * L2 - xy24 * xy24) / (2 * L1 * L2)));
-    angle_x24 = atan2f(y24, x24);
-    angle_324 = acosf((L1 * L1 + xy24 * xy24 - L2 * L2) / (2 * L1 * xy24));
-    t2 = angle_x24 - (scara_arm->use_normal_solution ? 1.0f : -1.0f) * angle_324;
-    t4 = aY - t2 - t3;
-    t5 = aP;
-    t6 = aR;
-
-    if (isnormal(d1) || d1 == 0)
-        scara_arm->set_joints_value[JOINT_1] = d1;
-    if (isnormal(t2) || t2 == 0)
-        scara_arm->set_joints_value[JOINT_2] = t2;
-    if (isnormal(t3) || t3 == 0)
-        scara_arm->set_joints_value[JOINT_3] = t3;
-    if (isnormal(t4) || t4 == 0)
-        scara_arm->set_joints_value[JOINT_4] = t4;
-    if (isnormal(t5) || t5 == 0)
-        scara_arm->set_joints_value[JOINT_5] = t5;
-    if (isnormal(t6) || t6 == 0)
-        scara_arm->set_joints_value[JOINT_6] = t6;
-}
-
 static void calc_tool_to_base_transform_matrix(engineer_scara_arm_s *scara_arm)
 {
     // 缓存
@@ -307,6 +214,7 @@ static void calc_tool_to_base_transform_matrix(engineer_scara_arm_s *scara_arm)
     rflMatrixMult(&calc_temp_mat_2, &calc_temp_mat_1, &calc_temp_mat_3);                         // j6 to base
     rflMatrixMult(&calc_temp_mat_3, &scara_arm->tool_to_j6_tmat, &scara_arm->tool_to_base_tmat); // tool to base
 }
+
 static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, const float joint_dh[5])
 {
     if (trans_mat->numCols != 4 || trans_mat->numRows != 4)
@@ -336,4 +244,226 @@ static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, co
     trans_mat->pData[13] = 0.0f;
     trans_mat->pData[14] = 0.0f;
     trans_mat->pData[15] = 1.0f;
+}
+
+#define X scara_arm->set_pose_6d[0]
+#define Y scara_arm->set_pose_6d[1]
+#define Z scara_arm->set_pose_6d[2]
+#define Yaw scara_arm->set_pose_6d[3]
+#define Pitch scara_arm->set_pose_6d[4]
+#define Roll scara_arm->set_pose_6d[5]
+
+#define L1 ENGINEER_ARM_1_LENGTH
+#define L2 ENGINEER_ARM_2_LENGTH
+#define L3 ENGINEER_ARM_3_LENGTH
+#define L4 ENGINEER_ARM_4_LENGTH
+
+#define X_L (-0.3f)
+
+#define X_B (-0.3f)
+#define Y_B (0.044f)
+#define Y_B_ (-0.044f)
+
+#define X_GH (0.115f)
+
+#define K_GK (-0.14666667f)
+#define B_GK (0.24686667f)
+#define K_HM (0.14666667f)
+#define B_HM (-0.24686667f)
+
+#define Y_C (ENGINEER_ARM_1_LENGTH)
+#define Y_C_ (-ENGINEER_ARM_1_LENGTH)
+
+/**
+ * @brief 期望位姿限幅
+ * @note 难以用良好的程序呈现出逻辑，请阅读README文档来理解
+ *
+ * @param scara_arm
+ */
+static void set_pose_limiting(engineer_scara_arm_s *scara_arm)
+{
+    // 检查关节4在XY平面上的位置是否超限
+
+    float xy_56 = L4 * cosf(Pitch);
+    float x_56 = xy_56 * cosf(Yaw);
+    float y_56 = xy_56 * sinf(Yaw);
+    float x_45 = L3 * cosf(Yaw);
+    float y_45 = L3 * sinf(Yaw);
+    float x_24 = X - x_56 - x_45;
+    float y_24 = Y - y_56 - y_45;
+    scara_arm->printer[0] = x_24;
+    scara_arm->printer[1] = y_24;
+    float xy_24 = sqrtf(x_24 * x_24 + y_24 * y_24);
+    scara_arm->printer[2] = xy_24;
+
+    if (x_24 < X_L)
+        x_24 = X_L;
+
+    if (y_24 >= 0.0f)
+    {
+        float x_B_4 = x_24 - X_B;
+        float y_B_4 = y_24 - Y_B;
+        float xy_B_4 = sqrtf(x_B_4 * x_B_4 + y_B_4 * y_B_4);
+        if (xy_B_4 < L1)
+        {
+            float t_x_B_4 = atan2f(y_B_4, x_B_4);
+            x_24 = cosf(t_x_B_4) * L1 + X_B;
+            y_24 = sinf(t_x_B_4) * L1 + Y_B;
+        }
+
+        float GK_y_4 = K_GK * x_24 + B_GK; // 经过关节4且平行与Y轴的直线与直线GK的交点Y坐标
+        if (x_24 < X_GH && y_24 < GK_y_4)
+        {
+            float xy_4_GK = fabsf(K_GK * x_24 - y_24 + B_GK) / sqrtf(1 + K_GK * K_GK);
+            float x_4_GH = X_GH - x_24;
+            if (xy_4_GK < x_4_GH)
+            {
+                y_24 = GK_y_4;
+                // float temp_x_24 = x_24;
+                // float temp_y_24 = y_24;
+                // x_24 = (temp_x_24 - K_GK * B_GK + K_GK * temp_y_24) / (1 + K_GK * K_GK);
+                // y_24 = (K_GK * temp_x_24 + K_GK * K_GK * temp_y_24 + B_GK) / (1 + K_GK * K_GK);
+            }
+            else
+            {
+                x_24 = X_GH;
+            }
+        }
+
+        else if (x_24 < 0.0f)
+        {
+            float y_C_4 = y_24 - Y_C;
+            float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
+            if (xy_C_4 > L2)
+            {
+                float t_x_C_4 = atan2f(y_C_4, x_24);
+                x_24 = cosf(t_x_C_4) * L2;
+                y_24 = sinf(t_x_C_4) * L2 + Y_C;
+            }
+        }
+    }
+    else
+    {
+        float x_B_4 = x_24 - X_B;
+        float y_B_4 = y_24 - Y_B_;
+        float xy_B_4 = sqrtf(x_B_4 * x_B_4 + y_B_4 * y_B_4);
+        if (xy_B_4 < L1)
+        {
+            float t_x_B_4 = atan2f(y_B_4, x_B_4);
+            x_24 = cosf(t_x_B_4) * L1 + X_B;
+            y_24 = sinf(t_x_B_4) * L1 + Y_B_;
+        }
+
+        float HM_y_4 = K_HM * x_24 + B_HM; // 经过关节4且平行与Y轴的直线与直线HM的交点Y坐标
+        if (x_24 < X_GH && y_24 > HM_y_4)
+        {
+            float xy_4_HM = fabsf(K_HM * x_24 - y_24 + B_HM) / sqrtf(1 + K_HM * K_HM);
+            float x_4_GH = X_GH - x_24;
+            if (xy_4_HM < x_4_GH)
+            {
+                y_24 = HM_y_4;
+                // float temp_x_24 = x_24;
+                // float temp_y_24 = y_24;
+                // x_24 = (temp_x_24 - K_HM * B_HM + K_HM * temp_y_24) / (1 + K_HM * K_HM);
+                // y_24 = (K_HM * temp_x_24 + K_HM * K_HM * temp_y_24 + B_GK) / (1 + K_HM * K_HM);
+            }
+            else
+            {
+                x_24 = X_GH;
+            }
+        }
+
+        else if (x_24 < 0.0f)
+        {
+            float y_C_4 = y_24 - Y_C_;
+            float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
+            if (xy_C_4 > L2)
+            {
+                float t_x_C_4 = atan2f(y_C_4, x_24);
+                x_24 = cosf(t_x_C_4) * L2;
+                y_24 = sinf(t_x_C_4) * L2 + Y_C_;
+            }
+        }
+    }
+
+    if (x_24 >= 0.0f && xy_24 > (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE))
+    {
+        float t_x24 = atan2f(y_24, x_24);
+        x_24 = cosf(t_x24) * (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE);
+        y_24 = sinf(t_x24) * (ENGINEER_ARM_XY24_MAX_DISTANCE - PREVENT_DISTANCE);
+    }
+
+    X = x_24 + x_45 + x_56;
+    Y = y_24 + y_45 + y_56;
+
+    // 检查末端在Z轴上是否超限
+
+    float z_56 = L4 * sinf(Pitch);
+    if (Z > (ENGINEER_ARM_JOINT_1_MAX_DISTANCE + z_56))
+        Z = ENGINEER_ARM_JOINT_1_MAX_DISTANCE + z_56;
+    else if (Z < (ENGINEER_ARM_JOINT_1_MIN_DISTANCE + z_56))
+        Z = ENGINEER_ARM_JOINT_1_MIN_DISTANCE + z_56;
+
+    // 检查末端YAW角度是否超限
+
+    Yaw = rflFloatConstrain(Yaw, ENGINEER_ARM_YAW_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+                            ENGINEER_ARM_YAW_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+
+    // 检查末端PITCH角度是否超限
+
+    Pitch = rflFloatConstrain(Pitch, ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+                              ENGINEER_ARM_PITCH_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+
+    // 检查末端ROLL角度是否超限
+
+    Roll = rflFloatConstrain(Roll, ENGINEER_ARM_ROLL_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+                             ENGINEER_ARM_ROLL_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+}
+
+/**
+ * @brief 位姿逆解算到关节空间
+ * @note 难以用良好的程序呈现出逻辑，请阅读README文档来理解
+ *
+ * @param scara_arm
+ */
+static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
+{
+    set_pose_limiting(scara_arm);
+
+    float xy56 = 0.0f, x56 = 0.0f, y56 = 0.0f, x45 = 0.0f, y45 = 0.0f, z56 = 0.0f, x24 = 0.0f, y24 = 0.0f, xy24 = 0.0f,
+          angle_x24 = 0.0f, angle_324 = 0.0f;
+
+    float d1 = 0.0f, t2 = 0.0f, t3 = 0.0f, t4 = 0.0f, t5 = 0.0f, t6 = 0.0f;
+
+    z56 = L4 * sinf(Pitch);
+    d1 = Z - z56;
+    xy56 = L4 * cosf(Pitch);
+    x56 = xy56 * cosf(Yaw);
+    y56 = xy56 * sinf(Yaw);
+    x45 = L3 * cosf(Yaw);
+    y45 = L3 * sinf(Yaw);
+    x24 = X - x56 - x45;
+    y24 = Y - y56 - y45;
+    xy24 = sqrtf(x24 * x24 + y24 * y24);
+    t3 = (scara_arm->use_normal_solution ? 1.0f : -1.0f) *
+         (RAD_PI - acosf((L1 * L1 + L2 * L2 - xy24 * xy24) / (2 * L1 * L2)));
+    angle_x24 = atan2f(y24, x24);
+    angle_324 = acosf((L1 * L1 + xy24 * xy24 - L2 * L2) / (2 * L1 * xy24));
+    t2 = angle_x24 - (scara_arm->use_normal_solution ? 1.0f : -1.0f) * angle_324;
+    t4 = Yaw - t2 - t3;
+    t5 = Pitch;
+    t6 = Roll;
+
+    if (isnormal(d1) || d1 == 0)
+        scara_arm->set_joints_value[JOINT_1] = d1;
+    if (isnormal(t2) || t2 == 0)
+        scara_arm->set_joints_value[JOINT_2] = t2;
+    if (isnormal(t3) || t3 == 0)
+        scara_arm->set_joints_value[JOINT_3] = t3;
+    if (isnormal(t4) || t4 == 0)
+        scara_arm->set_joints_value[JOINT_4] = t4;
+    if (isnormal(t5) || t5 == 0)
+        scara_arm->set_joints_value[JOINT_5] = t5;
+    if (isnormal(t6) || t6 == 0)
+        scara_arm->set_joints_value[JOINT_6] = t6;
 }
