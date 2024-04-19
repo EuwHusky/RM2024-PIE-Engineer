@@ -14,32 +14,57 @@
 
 #define REFEREE_SYSTEM_SERVER_ID 0x8080
 
+typedef enum ClientUiOperationType
+{
+    UI_RESET_ALL,
+    UI_RESET_ALL_FIGURES,
+    UI_RESET_ALL_CHARACTERS,
+    UI_RESET_FIGURE,
+    UI_RESET_CHARACTER,
+
+    UI_HIDE_ALL,
+    UI_HIDE_ALL_FIGURES,
+    UI_HIDE_ALL_CHARACTERS,
+    UI_HIDE_FIGURE,
+    UI_HIDE_CHARACTER,
+
+    UI_DISPLAY_ALL,
+    UI_DISPLAY_ALL_FIGURES,
+    UI_DISPLAY_ALL_CHARACTERS,
+    UI_DISPLAY_FIGURE,
+    UI_DISPLAY_CHARACTER,
+
+} client_ui_operation_type_e;
+
 typedef enum RobotInteractionType
 {
     // ROBOT_TO_ROBOT_INTERACTION = 0,
     CLIENT_UI_PLOT,
-    CLIENT_UI_CLEAN,
     SENTRY_CMD,
     RADAR_CMD,
 
 } robot_interaction_type_e;
 
-typedef struct InteractionMessageFactory
-{
-    uint8_t *message;
-    void (*builder)(uint8_t target_id, uint8_t *);
-} interaction_message_factory_t;
+// typedef struct InteractionMessageFactory
+// {
+//     uint8_t *message;
+//     void (*builder)(uint8_t target_id, uint8_t *);
+// } interaction_message_factory_t;
 
 typedef struct InteractionFigureFactory
 {
     interaction_figure_t figure;
-    void (*builder)(interaction_figure_t *);
+    bool is_plotted;
+    bool is_hidden;
+    void (*builder)(interaction_figure_t *, figure_operation_type_e);
 } interaction_figure_factory_t;
 
 typedef struct InteractionCharacterFactory
 {
     interaction_character_t character;
-    void (*builder)(interaction_character_t *);
+    bool is_plotted;
+    bool is_hidden;
+    void (*builder)(interaction_character_t *, figure_operation_type_e);
 } interaction_character_factory_t;
 
 typedef struct RobotInteractionManager
@@ -84,7 +109,11 @@ extern void refereeRobotInteractionManagerSuccessfullySentHook(void);
 // extern void refereeSetRobotInteractionMessageBuilder(uint8_t index, void (*builder)(interaction_figure_t *));
 
 extern void refereeSetRobotInteractionLayerDeleterBuilder(void (*builder)(interaction_layer_delete_t *));
-extern void refereeSetRobotInteractionFigureBuilder(uint8_t index, void (*builder)(interaction_figure_t *));
-extern void refereeSetRobotInteractionCharacterBuilder(uint8_t index, void (*builder)(interaction_character_t *));
+extern void refereeSetRobotInteractionFigureBuilder(uint8_t index,
+                                                    void (*builder)(interaction_figure_t *, figure_operation_type_e));
+extern void refereeSetRobotInteractionCharacterBuilder(uint8_t index, void (*builder)(interaction_character_t *,
+                                                                                      figure_operation_type_e));
+
+extern void refereeClientUiOperate(client_ui_operation_type_e operation_type, uint8_t index);
 
 #endif /* _REFEREE_ROBOT_INTERACTION_MANAGER_H__ */

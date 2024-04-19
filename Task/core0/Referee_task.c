@@ -16,6 +16,7 @@
 #include "ui_element_builder.h"
 
 #include "INS_task.h"
+#include "behavior_task.h"
 #include "detect_task.h"
 
 // 裁判系统串口初始化
@@ -74,8 +75,15 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 20, 1, 0);
-    refereeSetRobotInteractionFigureBuilder(0, uiPumpIndicatorBuilder);
+    refereeInitRobotInteractionManager(&step_clock, 20, 8, 0);
+    refereeSetRobotInteractionFigureBuilder(0, ui0Builder);
+    refereeSetRobotInteractionFigureBuilder(1, ui1Builder);
+    refereeSetRobotInteractionFigureBuilder(2, ui2Builder);
+    refereeSetRobotInteractionFigureBuilder(3, ui3Builder);
+    refereeSetRobotInteractionFigureBuilder(7, uiPumpIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(4, ui4Builder);
+    refereeSetRobotInteractionFigureBuilder(5, ui5Builder);
+    refereeSetRobotInteractionFigureBuilder(6, ui6Builder);
 
     while (1)
     {
@@ -99,21 +107,34 @@ void referee_task(void *pvParameters)
                                 VT_UART_RX_BUF_LENGHT);
         }
 
-        step_clock++;
-        // if (pm_uart_tx_dma_done && !detect_error(VT_REFEREE_DH))
-        // {
-        //     pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
+        if (checkIfNeedResetUi())
+        {
+            refereeClientUiOperate(UI_RESET_ALL, 0);
+        }
+        if (getUiHideMode())
+        {
+            refereeClientUiOperate(UI_HIDE_ALL, 0);
+        }
+        else
+        {
+            refereeClientUiOperate(UI_DISPLAY_ALL, 0);
+        }
 
-        //     if (pm_tx_frame_pointer != NULL)
-        //     {
-        //         memcpy(pm_tx_buf, pm_tx_frame_pointer, getRefSentDataLen());
-        //         uart_tx_trigger_dma(BOARD_HDMA, PM_UART_TX_DMA_CHN, PM_UART,
-        //                             core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_tx_buf),
-        //                             getRefSentDataLen());
-        //         refereeRobotInteractionManagerSuccessfullySentHook();
-        //         pm_uart_tx_dma_done = false;
-        //     }
-        // }
+        step_clock++;
+        if (pm_uart_tx_dma_done)
+        {
+            pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
+
+            if (pm_tx_frame_pointer != NULL)
+            {
+                memcpy(pm_tx_buf, pm_tx_frame_pointer, getRefSentDataLen());
+                uart_tx_trigger_dma(BOARD_HDMA, PM_UART_TX_DMA_CHN, PM_UART,
+                                    core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_tx_buf),
+                                    getRefSentDataLen());
+                refereeRobotInteractionManagerSuccessfullySentHook();
+                pm_uart_tx_dma_done = false;
+            }
+        }
 
         vTaskDelay(20);
     }

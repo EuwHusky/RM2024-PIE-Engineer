@@ -36,13 +36,18 @@ typedef struct EngineerBehaviorManager
     bool robot_survival_status; // 存活为真
     bool last_robot_survival_status;
 
-    /* 获取其他模块的状态 */
+    /* 模块状态输入 */
 
     bool *arm_reset_success;
     bool *arm_move_homing_success;
     bool *arm_operation_homing_success;
     bool *chassis_move_homing_successfully;
     bool *chassis_operation_homing_successfully;
+
+    /* 模块状态输出 */
+    bool arm_grab;
+    bool reset_ui;
+    bool hide_ui;
 
     /* 设备 */
 
@@ -56,9 +61,12 @@ typedef struct EngineerBehaviorManager
 } engineer_behavior_manager_s;
 
 extern void behavior_task(void *pvParameters);
+extern const engineer_behavior_manager_s *getEngineerBehaviorManagerPointer(void);
 extern bool checkIfEngineerBehaviorChanged(void);
 extern engineer_behavior_e getEngineerCurrentBehavior(void);
 extern engineer_behavior_e getEngineerLastBehavior(void);
-extern const engineer_behavior_manager_s *getEngineerBehaviorManagerPointer(void);
+extern bool getArmGrabMode(void);
+extern bool checkIfNeedResetUi(void);
+extern bool getUiHideMode(void);
 
 #endif /* _BEHAVIOR_TASK_H__ */

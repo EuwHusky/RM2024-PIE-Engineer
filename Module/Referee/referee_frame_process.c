@@ -20,13 +20,14 @@ void refereeInitFrameProcesser(void)
     fifo_s_init(&vt_fifo, vt_fifo_buf, VT_FIFO_BUF_LENGTH);
 }
 
-uint8_t *referee_pack_data(uint16_t cmd_id, uint8_t data_len, uint8_t *data)
+uint8_t *referee_pack_data(uint16_t cmd_id, uint8_t *data, uint16_t data_len)
 {
     referee_frame_processer.sent_data_len = REF_HEADER_CRC_CMDID_LEN + data_len;
 
     memset(referee_frame_processer.sent_package, 0, REF_PROTOCOL_FRAME_MAX_SIZE);
 
     referee_frame_processer.sent_frame_header.SOF = HEADER_SOF;
+
     referee_frame_processer.sent_frame_header.data_length[0] = data_len;
     referee_frame_processer.sent_frame_header.data_length[1] = 0x00;
 

@@ -17,6 +17,7 @@ static void update_robot_status(engineer_behavior_manager_s *behavior_manager);
 static void update_behavior(engineer_behavior_manager_s *behavior_manager, engineer_behavior_e new_behavior);
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager);
 static void auto_operation(engineer_behavior_manager_s *behavior_manager);
+static void module_operation(engineer_behavior_manager_s *behavior_manager);
 
 void behavior_task(void *pvParameters)
 {
@@ -35,8 +36,15 @@ void behavior_task(void *pvParameters)
         operator_manual_operation(&behavior_manager);
         auto_operation(&behavior_manager);
 
+        module_operation(&behavior_manager);
+
         vTaskDelay(10);
     }
+}
+
+const engineer_behavior_manager_s *getEngineerBehaviorManagerPointer(void)
+{
+    return &behavior_manager;
 }
 
 bool checkIfEngineerBehaviorChanged(void)
@@ -57,9 +65,18 @@ engineer_behavior_e getEngineerLastBehavior(void)
     return behavior_manager.last_behavior;
 }
 
-const engineer_behavior_manager_s *getEngineerBehaviorManagerPointer(void)
+bool getArmGrabMode(void)
 {
-    return &behavior_manager;
+    return behavior_manager.arm_grab;
+}
+
+bool checkIfNeedResetUi(void)
+{
+    return behavior_manager.reset_ui;
+}
+bool getUiHideMode(void)
+{
+    return behavior_manager.hide_ui;
 }
 
 static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
@@ -73,6 +90,10 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_reset_success = getArmResetStatus();
     behavior_manager->arm_move_homing_success = getArmMoveHomingStatue();
     behavior_manager->arm_operation_homing_success = getArmOperationHomingStatus();
+
+    behavior_manager->arm_grab = false;
+    behavior_manager->reset_ui = false;
+    behavior_manager->hide_ui = false;
 }
 
 static void update_robot_status(engineer_behavior_manager_s *behavior_manager)
@@ -217,5 +238,35 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     else if (behavior_manager->robot_survival_status == true && behavior_manager->last_robot_survival_status == false)
     {
         board_write_led_r(LED_OFF);
+    }
+}
+
+static void module_operation(engineer_behavior_manager_s *behavior_manager)
+{
+    /**
+     * @brief 机械臂吸盘模式切换
+     * 键鼠 短按R键触发切换
+     */
+    if (checkIfRcKeyFallingEdgeDetected(RC_R))
+    {
+        behavior_manager->arm_grab = !behavior_manager->arm_grab;
+    }
+
+    /**
+     * @brief 重置UI
+     * 键鼠 按下B键触发
+     */
+    if (checkIsRcKeyPressed(RC_B))
+    {
+        behavior_manager->reset_ui = true;
+    }
+    else
+    {
+        behavior_manager->reset_ui = false;
+    }
+
+    if (checkIfRcKeyFallingEdgeDetected(RC_F))
+    {
+        behavior_manager->hide_ui = !behavior_manager->hide_ui;
     }
 }
