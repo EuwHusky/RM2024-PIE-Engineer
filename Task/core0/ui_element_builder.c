@@ -4,50 +4,27 @@
 
 #include "behavior_task.h"
 
+// 屏幕左下角坐标为 0,0
+// 屏幕右上角坐标为 1920,1080
+// 屏幕中心点坐标为 960,540
+
 void uiPumpIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotRectangle(figure, "pum", figure_operation_type, 9, getArmGrabMode() ? FIGURE_GREEN : FIGURE_MAGENTA, 9, 768,
-                    968, 532, 732);
+    uiPlotRectangle(figure, "pum", figure_operation_type, 9, getArmGrabMode() ? FIGURE_GREEN : FIGURE_MAGENTA, 32, 1664,
+                    1694, 784, 814);
 }
 
-void ui0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+void uiAutoGrabCalibrationLine0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotRectangle(figure, "000", figure_operation_type, 9, getArmGrabMode() ? FIGURE_MAGENTA : FIGURE_GREEN, 5, 768,
-                    968, 632, 832);
+    uiPlotLine(figure, "ag0", figure_operation_type, 9, FIGURE_CYAN, 3, 620, 1300, 832, 832);
 }
 
-void ui1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+void uiAutoGrabCalibrationLine1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotRectangle(figure, "001", figure_operation_type, 9, getArmGrabMode() ? FIGURE_MAGENTA : FIGURE_GREEN, 5, 868,
-                    1068, 532, 732);
+    uiPlotRectangle(figure, "ag1", figure_operation_type, 9, FIGURE_CYAN, 3, 620, 620, 432, 832);
 }
 
-void ui2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+void uiAutoGrabCalibrationLine2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotRectangle(figure, "002", figure_operation_type, 9, getArmGrabMode() ? FIGURE_MAGENTA : FIGURE_GREEN, 5, 500,
-                    530, 320, 330);
-}
-
-void ui3Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
-{
-    uiPlotRectangle(figure, "003", figure_operation_type, 9, getArmGrabMode() ? FIGURE_MAGENTA : FIGURE_GREEN, 5, 600,
-                    640, 320, 330);
-}
-
-void ui4Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
-{
-    uiPlotRectangle(figure, "004", figure_operation_type, 9, getArmGrabMode() ? FIGURE_MAGENTA : FIGURE_GREEN, 5, 700,
-                    750, 320, 330);
-}
-
-void ui5Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
-{
-    uiPlotRectangle(figure, "005", figure_operation_type, 9, getArmGrabMode() ? FIGURE_MAGENTA : FIGURE_GREEN, 5, 800,
-                    860, 320, 330);
-}
-
-void ui6Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
-{
-    uiPlotRectangle(figure, "006", figure_operation_type, 9, getArmGrabMode() ? FIGURE_MAGENTA : FIGURE_GREEN, 5, 900,
-                    970, 320, 330);
+    uiPlotRectangle(figure, "ag2", figure_operation_type, 9, FIGURE_CYAN, 3, 1300, 1300, 432, 832);
 }

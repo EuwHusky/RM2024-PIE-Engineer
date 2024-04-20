@@ -24,6 +24,8 @@ static void pm_uart_init(void);
 // 图传链路串口初始化
 static void vt_uart_init(void);
 
+static void client_ui(void);
+
 // 电管链路裁判系统数据相关变量和结构
 ATTR_PLACE_AT_NONCACHEABLE uint8_t pm_rx_buf[PM_UART_RX_BUF_LENGHT]; // 接收原始数据
 ATTR_PLACE_AT_NONCACHEABLE uint8_t pm_tx_buf[REF_PROTOCOL_FRAME_MAX_SIZE];
@@ -75,15 +77,11 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 20, 8, 0);
-    refereeSetRobotInteractionFigureBuilder(0, ui0Builder);
-    refereeSetRobotInteractionFigureBuilder(1, ui1Builder);
-    refereeSetRobotInteractionFigureBuilder(2, ui2Builder);
-    refereeSetRobotInteractionFigureBuilder(3, ui3Builder);
-    refereeSetRobotInteractionFigureBuilder(7, uiPumpIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(4, ui4Builder);
-    refereeSetRobotInteractionFigureBuilder(5, ui5Builder);
-    refereeSetRobotInteractionFigureBuilder(6, ui6Builder);
+    refereeInitRobotInteractionManager(&step_clock, 20, 4, 0);
+    refereeSetRobotInteractionFigureBuilder(0, uiPumpIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(1, uiAutoGrabCalibrationLine0Builder);
+    refereeSetRobotInteractionFigureBuilder(2, uiAutoGrabCalibrationLine1Builder);
+    refereeSetRobotInteractionFigureBuilder(3, uiAutoGrabCalibrationLine2Builder);
 
     while (1)
     {
@@ -107,18 +105,7 @@ void referee_task(void *pvParameters)
                                 VT_UART_RX_BUF_LENGHT);
         }
 
-        if (checkIfNeedResetUi())
-        {
-            refereeClientUiOperate(UI_RESET_ALL, 0);
-        }
-        if (getUiHideMode())
-        {
-            refereeClientUiOperate(UI_HIDE_ALL, 0);
-        }
-        else
-        {
-            refereeClientUiOperate(UI_DISPLAY_ALL, 0);
-        }
+        client_ui();
 
         step_clock++;
         if (pm_uart_tx_dma_done)
@@ -137,6 +124,27 @@ void referee_task(void *pvParameters)
         }
 
         vTaskDelay(20);
+    }
+}
+
+static void client_ui(void)
+{
+    if (checkIfNeedResetUi())
+    {
+        refereeClientUiOperate(UI_RESET_ALL, 0);
+    }
+
+    if (getUiHideMode())
+    {
+        refereeClientUiOperate(UI_HIDE_FIGURE, 1);
+        refereeClientUiOperate(UI_HIDE_FIGURE, 2);
+        refereeClientUiOperate(UI_HIDE_FIGURE, 3);
+    }
+    else
+    {
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, 1);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, 2);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, 3);
     }
 }
 
