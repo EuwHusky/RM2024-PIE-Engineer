@@ -16,10 +16,10 @@
 #include "INS_task.h"
 #include "detect_task.h"
 
-engineer_scara_arm_s scara_arm;
-
 static void arm_init(engineer_scara_arm_s *scara_arm);
 // static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
+
+static engineer_scara_arm_s scara_arm;
 
 void arm_task(void *pvParameters)
 {
@@ -50,6 +50,11 @@ void arm_task(void *pvParameters)
     }
 }
 
+engineer_scara_arm_s *getArmDataPointer(void)
+{
+    return &scara_arm;
+}
+
 bool *getArmResetStatus(void)
 {
     return &scara_arm.reset_success;
@@ -65,14 +70,12 @@ bool *getArmOperationHomingStatus(void)
     return &scara_arm.operation_homing_success;
 }
 
-engineer_scara_arm_s *getArmDataPointer(void)
-{
-    return &scara_arm;
-}
-
 static void arm_init(engineer_scara_arm_s *scara_arm)
 {
     memset(scara_arm, 0, sizeof(engineer_scara_arm_s));
+
+    scara_arm->behavior = ENGINEER_BEHAVIOR_DISABLE;
+    scara_arm->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
 
     arm_model_init(scara_arm);
 

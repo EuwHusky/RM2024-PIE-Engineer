@@ -302,6 +302,7 @@
       <file file_name="Task/core0/chassis_task.c" />
       <file file_name="Task/detect_task.c" />
       <file file_name="Task/dualcore_task.c" />
+      <file file_name="Task/core0/gimbal_task.c" />
       <file file_name="Task/core0/INS_task.c" />
       <file file_name="Task/print_task.c" />
       <file file_name="Task/core0/rc_task.c" />

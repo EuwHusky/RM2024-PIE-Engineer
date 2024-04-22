@@ -15,6 +15,7 @@
 #include "chassis_task.h"
 #include "detect_task.h"
 #include "dualcore_task.h"
+#include "gimbal_task.h"
 #include "print_task.h"
 #include "rc_task.h"
 #include "referee_task.h"
@@ -28,28 +29,29 @@
 #define CHASSIS_TASK_PRIORITY (configMAX_PRIORITIES - 2U)
 #define RC_TASK_PRIORITY (configMAX_PRIORITIES - 3U)
 #define REFEREE_TASK_PRIORITY (configMAX_PRIORITIES - 4U)
+#define GIMBAL_TASK_PRIORITY (configMAX_PRIORITIES - 5U)
 #define PRINT_TASK_PRIORITY (configMAX_PRIORITIES - 7U)
 #define TEST_TASK_PRIORITY (configMAX_PRIORITIES - 7U)
 
-// 按键中断服务函数
-void isr_gpio(void)
-{
-    gpio_clear_pin_interrupt_flag(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN);
+// // 按键中断服务函数
+// void isr_gpio(void)
+// {
+//     gpio_clear_pin_interrupt_flag(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN);
 
-    printf("KEY DOWN!\n");
-}
-SDK_DECLARE_EXT_ISR_M(BOARD_KEY_GPIO_IRQ, isr_gpio)
+//     printf("KEY DOWN!\n");
+// }
+// SDK_DECLARE_EXT_ISR_M(BOARD_KEY_GPIO_IRQ, isr_gpio)
 
 void test_task(void *pvParameters)
 {
-    // 配置按键0中断
-    HPM_IOC->PAD[KEY_0].FUNC_CTL = IOC_PA00_FUNC_CTL_GPIO_A_00;
-    gpiom_set_pin_controller(HPM_GPIOM, GPIOM_ASSIGN_GPIOA, BOARD_KEY0_GPIO_PIN, gpiom_soc_gpio0);
-    gpio_set_pin_input(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN);
-    gpio_enable_pin_interrupt(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN);
-    gpio_config_pin_interrupt(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN,
-                              gpio_interrupt_trigger_edge_falling);
-    intc_m_enable_irq_with_priority(BOARD_KEY_GPIO_IRQ, 1);
+    // // 配置按键0中断
+    // HPM_IOC->PAD[KEY_0].FUNC_CTL = IOC_PA00_FUNC_CTL_GPIO_A_00;
+    // gpiom_set_pin_controller(HPM_GPIOM, GPIOM_ASSIGN_GPIOA, BOARD_KEY0_GPIO_PIN, gpiom_soc_gpio0);
+    // gpio_set_pin_input(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN);
+    // gpio_enable_pin_interrupt(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN);
+    // gpio_config_pin_interrupt(BOARD_KEY_GPIO_CTRL, BOARD_KEY_GPIO_INDEX, BOARD_KEY0_GPIO_PIN,
+    //                           gpio_interrupt_trigger_edge_falling);
+    // intc_m_enable_irq_with_priority(BOARD_KEY_GPIO_IRQ, 1);
 
     board_write_led_b(LED_OFF);
 
@@ -87,7 +89,9 @@ int main(void)
     xTaskCreate(behavior_task, "behavior_task", configMINIMAL_STACK_SIZE, NULL, BEHAVIOR_TASK_PRIORITY, NULL);
 
     xTaskCreate(arm_task, "arm_task", configMINIMAL_STACK_SIZE + 768U, NULL, ARM_TASK_PRIORITY, NULL);
-    xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 256U, NULL, CHASSIS_TASK_PRIORITY, NULL);
+    xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 512U, NULL, CHASSIS_TASK_PRIORITY, NULL);
+
+    xTaskCreate(gimbal_task, "gimbal_task", configMINIMAL_STACK_SIZE + 256U, NULL, GIMBAL_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);
     xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE + 128U, NULL, PRINT_TASK_PRIORITY, NULL);

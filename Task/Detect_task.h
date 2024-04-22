@@ -30,6 +30,8 @@ enum Detect_List
     CHASSIS_MOTOR_2_DH, /* 底盘电机2 - 右后 */
     CHASSIS_MOTOR_3_DH, /* 底盘电机3 - 右前 */
 
+    GIMBAL_MOTOR_YAW_DH, /* 云台YAW轴电机 */
+
 #else
     DUAL_COMM_DH = 0, /* 双核通信 */
 

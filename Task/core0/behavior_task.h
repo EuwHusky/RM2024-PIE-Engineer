@@ -14,9 +14,9 @@ typedef enum EngineerBehavior
     ENGINEER_BEHAVIOR_DISABLE, // 失能
     ENGINEER_BEHAVIOR_RESET,   // 复位
 
-    ENGINEER_BEHAVIOR_MOVE, // 机动
+    ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING, // 自动归位 到机动模式默认位置
+    ENGINEER_BEHAVIOR_MOVE,             // 机动
 
-    ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING,      // 自动归位 到机动模式默认位置
     ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING, // 自动归位 到作业模式默认位置
     ENGINEER_BEHAVIOR_AUTO_SILVER_MINING,    // 自动作业 取银矿
     // ENGINEER_BEHAVIOR_AUTO_GOLD_MINING,      // 自动作业 取中央金矿
@@ -29,7 +29,6 @@ typedef struct EngineerBehaviorManager
 
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
-    bool behavior_changed; // 状态改变时置为真 外部读取后置为假
 
     /* 机器人状态 */
 
@@ -41,8 +40,7 @@ typedef struct EngineerBehaviorManager
     bool *arm_reset_success;
     bool *arm_move_homing_success;
     bool *arm_operation_homing_success;
-    bool *chassis_move_homing_successfully;
-    bool *chassis_operation_homing_successfully;
+    bool *gimbal_reset_success;
 
     /* 模块状态输出 */
     bool arm_grab;
@@ -58,11 +56,12 @@ typedef struct EngineerBehaviorManager
     uint32_t dt7_reset_trigger_timer;  // 使用DT7复位的触发计时器
     uint32_t km_disable_trigger_timer; // 使用键鼠失能的触发计时器
     uint32_t km_reset_trigger_timer;   // 使用键鼠复位的触发计时器
+    int16_t dt7_arm_grab_trigger_value;
+    uint32_t dt7_arm_grab_trigger_timer;
 } engineer_behavior_manager_s;
 
 extern void behavior_task(void *pvParameters);
 extern const engineer_behavior_manager_s *getEngineerBehaviorManagerPointer(void);
-extern bool checkIfEngineerBehaviorChanged(void);
 extern engineer_behavior_e getEngineerCurrentBehavior(void);
 extern engineer_behavior_e getEngineerLastBehavior(void);
 extern bool getArmGrabMode(void);

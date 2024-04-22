@@ -108,11 +108,11 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
  */
 void arm_model_update_control(engineer_scara_arm_s *scara_arm)
 {
-    if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
+    if (scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
     {
 #if !USE_JOINTS_CONTROL
-        if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING &&
-            getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING)
+        if (scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING &&
+            scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING)
             solve_inverse_kinematics(scara_arm);
 #endif
 

@@ -14,6 +14,8 @@
 #include "referee.h"
 #include "remote_control.h"
 
+#include "behavior_task.h"
+
 #define USE_JOINTS_CONTROL 0
 
 typedef enum EngineerScaraArmJoints
@@ -80,6 +82,9 @@ typedef enum EngineerScaraArmJointsMotorsIndex
 typedef struct EngineerScaraArm
 {
     /*基础*/
+
+    engineer_behavior_e behavior;
+    engineer_behavior_e last_behavior;
 
     uint8_t start_up_status;
     bool reset_success;
@@ -152,11 +157,8 @@ typedef struct EngineerScaraArm
 
 } engineer_scara_arm_s;
 
-extern engineer_scara_arm_s scara_arm;
-
 extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
-extern bool checkIfArmStartUp;
 
 extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);
@@ -254,15 +256,15 @@ extern bool *getArmOperationHomingStatus(void);
 #define ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_5_INITIAL_MIN_ANGLE * 2.0f)
 
 // 电机控制器参数
-#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (1.4f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (1.35f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KI (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KD (0.02f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KP (1000.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KI (6.0f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KI (0.8f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KD (0.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_IOUT (6000.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
 
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KP (0.4f)
@@ -271,7 +273,7 @@ extern bool *getArmOperationHomingStatus(void);
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KP (800.0f)
-#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (2.0f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (0.8f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)

@@ -4,7 +4,7 @@
 
 #define PRESS_SEN 5
 
-remote_control_s remote_control;
+static remote_control_s remote_control;
 
 void RemoteControlInit(void)
 {

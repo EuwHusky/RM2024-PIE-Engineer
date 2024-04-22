@@ -12,9 +12,13 @@
 #include "remote_control.h"
 
 #include "INS_task.h"
+#include "behavior_task.h"
 
 typedef struct EngineerChassis
 {
+    engineer_behavior_e behavior;
+    engineer_behavior_e last_behavior;
+
     rfl_chassis_s model;
 
     const INS_t *ins;
@@ -24,16 +28,18 @@ typedef struct EngineerChassis
     const remote_control_s *rc;             // 遥控器数据
     ramp_function_source_t speed_ramper[3]; // 速度斜坡化滤波器
     float set_speed_vector[3];              // 底盘预期速度vx vy wz
-    rfl_angle_s set_angle;
+    rfl_angle_s set_control_angle;
     float *wheel_set_speed;
+    float follow_offset;
 
     rfl_motor_s motor[4];
 
 } engineer_chassis_s;
 
 extern void chassis_task(void *pvParameters);
-
 extern engineer_chassis_s *getChassisDataPointer(void);
+
+extern float getChassisFollowOffsetMemory(void);
 
 #define CHASSIS_DT7_DEADLINE (3)
 #define CHASSIS_VX_DT7_CONTROL_MAX (3.0f)

@@ -9,6 +9,7 @@
 
 #include "INS_task.h"
 #include "arm_task.h"
+#include "gimbal_task.h"
 
 engineer_behavior_manager_s behavior_manager;
 
@@ -47,14 +48,6 @@ const engineer_behavior_manager_s *getEngineerBehaviorManagerPointer(void)
     return &behavior_manager;
 }
 
-bool checkIfEngineerBehaviorChanged(void)
-{
-    if (behavior_manager.behavior_changed)
-        return behavior_manager.behavior_changed = false, true;
-
-    return false;
-}
-
 engineer_behavior_e getEngineerCurrentBehavior(void)
 {
     return behavior_manager.behavior;
@@ -85,11 +78,11 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
 
     behavior_manager->behavior = ENGINEER_BEHAVIOR_DISABLE;
     behavior_manager->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
-    behavior_manager->behavior_changed = false;
 
     behavior_manager->arm_reset_success = getArmResetStatus();
     behavior_manager->arm_move_homing_success = getArmMoveHomingStatue();
     behavior_manager->arm_operation_homing_success = getArmOperationHomingStatus();
+    behavior_manager->gimbal_reset_success = getGimbalResetStatus();
 
     behavior_manager->arm_grab = false;
     behavior_manager->reset_ui = false;
@@ -106,7 +99,6 @@ static void update_behavior(engineer_behavior_manager_s *behavior_manager, engin
 {
     behavior_manager->last_behavior = behavior_manager->behavior;
     behavior_manager->behavior = new_behavior;
-    behavior_manager->behavior_changed = true;
 }
 
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager)
@@ -127,6 +119,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         if (behavior_manager->dt7_reset_trigger_timer == 20)
         {
             *behavior_manager->arm_reset_success = false;
+            *behavior_manager->gimbal_reset_success = false;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_RESET);
         }
     }
@@ -145,7 +138,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 机动 -> 作业 / 作业 -> 机动
      * DT7 拨拨杆触发
      */
-    if (*behavior_manager->arm_reset_success)
+    if (*behavior_manager->arm_reset_success && *behavior_manager->gimbal_reset_success)
     {
         if ((behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
              (behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)) &&
@@ -175,6 +168,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         if (behavior_manager->km_reset_trigger_timer == 20)
         {
             *behavior_manager->arm_reset_success = false;
+            *behavior_manager->gimbal_reset_success = false;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_RESET);
         }
     }
@@ -200,7 +194,8 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 机动 -> 作业 / 作业 -> 机动
      * 键鼠 短按G键触发切换
      */
-    if (*behavior_manager->arm_reset_success && checkIfRcKeyFallingEdgeDetected(RC_G))
+    if (*behavior_manager->arm_reset_success && *behavior_manager->gimbal_reset_success &&
+        checkIfRcKeyFallingEdgeDetected(RC_G))
     {
         if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
             behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
@@ -213,17 +208,17 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
 static void auto_operation(engineer_behavior_manager_s *behavior_manager)
 {
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_RESET && *behavior_manager->arm_reset_success)
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_RESET && *behavior_manager->arm_reset_success &&
+        *behavior_manager->gimbal_reset_success)
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
     else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING &&
-             *behavior_manager->arm_move_homing_success /*  && *behavior_manager->chassis_move_homing_successfully */)
+             *behavior_manager->arm_move_homing_success)
     {
         *behavior_manager->arm_move_homing_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
     }
     else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
-             *behavior_manager
-                  ->arm_operation_homing_success /*  && *behavior_manager->chassis_operation_homing_successfully */)
+             *behavior_manager->arm_operation_homing_success)
     {
         *behavior_manager->arm_operation_homing_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
@@ -233,6 +228,7 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     {
         board_write_led_r(LED_ON);
         *behavior_manager->arm_reset_success = false;
+        *behavior_manager->gimbal_reset_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
     }
     else if (behavior_manager->robot_survival_status == true && behavior_manager->last_robot_survival_status == false)
@@ -244,7 +240,23 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
 static void module_operation(engineer_behavior_manager_s *behavior_manager)
 {
     /**
-     * @brief 机械臂吸盘模式切换
+     * @brief 机械臂吸取工作模式切换
+     * DT7 长拨拨轮触发切换
+     */
+    behavior_manager->dt7_arm_grab_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    if (behavior_manager->dt7_arm_grab_trigger_value < -600)
+    {
+        behavior_manager->dt7_arm_grab_trigger_timer++;
+        if (behavior_manager->dt7_arm_grab_trigger_timer == 20)
+        {
+            behavior_manager->arm_grab = !behavior_manager->arm_grab;
+        }
+    }
+    else
+        behavior_manager->dt7_arm_grab_trigger_timer = 0;
+
+    /**
+     * @brief 机械臂吸取工作模式切换
      * 键鼠 短按R键触发切换
      */
     if (checkIfRcKeyFallingEdgeDetected(RC_R))

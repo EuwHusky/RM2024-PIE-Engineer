@@ -22,15 +22,17 @@
 #include "arm_task.h"
 #include "behavior_task.h"
 #include "chassis_task.h"
+#include "gimbal_task.h"
 
 INS_t *ins_;
 transmit_data_021 *data_send;
 transmit_data_120 *data_read;
 
-const engineer_behavior_manager_s *print_behavior_manager_pointer;
+const engineer_behavior_manager_s *behavior_print;
 
 engineer_scara_arm_s *arm_data;
 engineer_chassis_s *chassis_data;
+const engineer_gimbal_s *gimbal_print;
 
 const remote_control_s *print_rc_pointer;
 
@@ -85,10 +87,11 @@ void print_task(void *pvParameters)
     data_read = get_data_120_point();
     data_send = get_data_021_point();
 
-    print_behavior_manager_pointer = getEngineerBehaviorManagerPointer();
+    behavior_print = getEngineerBehaviorManagerPointer();
 
     arm_data = getArmDataPointer();
     chassis_data = getChassisDataPointer();
+    gimbal_print = getGimbalDataPointer();
     print_rc_pointer = getRemoteControlPointer();
 
     referee_robot_hp = getRobotHp();
@@ -213,13 +216,28 @@ void print_task(void *pvParameters)
 
 #else
 
-        // motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT4].driver;
-        motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
-        motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
+        // motor_0_driver_test = (rm_motor_s *)gimbal_print->yaw_motor.driver;
+        // motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
+        // motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
 
         if (print_uart_tx_dma_done)
         {
             print_uart_tx_dma_done = false;
+
+            /**
+             * @brief Chassis
+             */
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f\r\n", chassis_data->follow_offset,
+            //         chassis_data->set_control_angle.deg, chassis_data->model.control_vector.deg,
+            //         chassis_data->model.set_forward_vector.deg, chassis_data->model.forward_vector_->deg,
+            //         chassis_data->model.speed_vector_[0], chassis_data->model.speed_vector_[1],
+            //         chassis_data->model.speed_vector_[2]);
+
+            /**
+             * @brief Gimbal
+             */
+            sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", gimbal_print->pitch_pwm_clk_freq, gimbal_print->pitch_pwm_freq,
+                    gimbal_print->pitch_pwm_reload, gimbal_print->pitch_pwm_compare);
 
             /**
              * @brief Scara Arm
@@ -253,7 +271,8 @@ void print_task(void *pvParameters)
             //         arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].angle_.deg,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].angle_.deg);
-            sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->printer[0], arm_data->printer[1], arm_data->printer[2]);
+            // sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->printer[0], arm_data->printer[1],
+            // arm_data->printer[2]);
 
             /**
              * @brief Motor PID
@@ -285,11 +304,10 @@ void print_task(void *pvParameters)
             /**
              * @brief Behavior Manager
              */
-            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", print_behavior_manager_pointer->behavior,
-            //         print_behavior_manager_pointer->last_behavior,
-            //         *print_behavior_manager_pointer->arm_reset_success,
-            //         *print_behavior_manager_pointer->arm_move_homing_success,
-            //         *print_behavior_manager_pointer->arm_operation_homing_success);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", behavior_print->behavior,
+            // behavior_print->last_behavior,
+            //         *behavior_print->arm_reset_success, *behavior_print->gimbal_reset_success,
+            //         *behavior_print->arm_move_homing_success, *behavior_print->arm_operation_homing_success);
 
             uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
@@ -338,11 +356,11 @@ void print_task(void *pvParameters)
         // vTaskDelay(2000);
 #else
 
-        printf("%d,%d,%d,%d,%d\r\n", core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[0],
-               core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[1],
-               core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[2],
-               core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[3],
-               core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[4]);
+        // printf("%d,%d,%d,%d,%d\r\n", core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[0],
+        //        core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[1],
+        //        core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[2],
+        //        core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[3],
+        //        core0_data_print->rc_data_image.dt7_dr16_data.rc.ch[4]);
 
         vTaskDelay(PRINT_TIME_MS);
 #endif

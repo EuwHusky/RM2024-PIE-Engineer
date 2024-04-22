@@ -10,8 +10,6 @@
 
 #include "customer_controller.h"
 
-#include "behavior_task.h"
-
 static void control_value_process(engineer_scara_arm_s *scara_arm);
 
 static void no_force_control(engineer_scara_arm_s *scara_arm);
@@ -34,25 +32,27 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
 
     // 模式切换时修改机械臂设定
 
-    if (checkIfEngineerBehaviorChanged())
+    scara_arm->last_behavior = scara_arm->behavior;
+    scara_arm->behavior = getEngineerCurrentBehavior();
+
+    if (scara_arm->last_behavior != scara_arm->behavior)
     {
-        if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_DISABLE)
+        if (scara_arm->behavior == ENGINEER_BEHAVIOR_DISABLE)
         {
             arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
         }
-        else if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_DISABLE)
+        else if (scara_arm->behavior != ENGINEER_BEHAVIOR_DISABLE)
         {
             arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
         }
 
-        if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_RESET)
+        if (scara_arm->behavior == ENGINEER_BEHAVIOR_RESET)
         {
             board_write_led_r(LED_ON);
             resetArmStartUpStatus(scara_arm->start_up_status);
             arm_motor_set_angle_limit(scara_arm, true);
         }
-        else if (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_RESET &&
-                 getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_RESET)
+        else if (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_RESET && scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
         {
             board_write_led_r(LED_OFF);
             arm_motor_set_angle_limit(scara_arm, false);
@@ -65,7 +65,7 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
 
     // 根据不同模式使用不同控制
 
-    switch (getEngineerCurrentBehavior())
+    switch (scara_arm->behavior)
     {
     case ENGINEER_BEHAVIOR_DISABLE:
         no_force_control(scara_arm);
