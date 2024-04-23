@@ -61,7 +61,7 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
 
     // 关节速度控制
 
-    arm_motor_set_max_speed(scara_arm, 2.0f);
+    arm_motor_set_max_speed(scara_arm);
 
     // 根据不同模式使用不同控制
 
@@ -106,21 +106,39 @@ static void no_force_control(engineer_scara_arm_s *scara_arm)
 static void starting_control(engineer_scara_arm_s *scara_arm)
 {
     /* 关节1 向固定方向运动通过机械限位触发角度获取 */
-    setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status); // 只是测试时用来关掉这个关节的归中
+    // setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status); // 只是测试时用来关掉这个关节的归中
     if (checkIfJointNotStartUp(JOINT_1, scara_arm->start_up_status))
     {
-        scara_arm->set_joints_value[0] -= JOINT_1_HOMING_STEP_ANGLE;
+        // scara_arm->set_joints_value[0] -= JOINT_1_HOMING_STEP_ANGLE;
 
-        if ((rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT]) < -JOINT_1_HOMING_TORQUE_THRESHOLD ||
-             rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT]) < -JOINT_1_HOMING_TORQUE_THRESHOLD) &&
-            ((fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT])) < 0.1f) ||
-             (fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT])) < 0.1f)))
+        // if ((rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT]) < -JOINT_1_HOMING_TORQUE_THRESHOLD ||
+        //      rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT]) < -JOINT_1_HOMING_TORQUE_THRESHOLD) &&
+        //     ((fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT])) < 0.1f) ||
+        //      (fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT])) < 0.1f)))
+
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+
+        if (fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT])) < 0.02f)
         {
-            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
-                               JOINT_1_HOMING_ANGLE, false);
-            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
-                               JOINT_1_HOMING_ANGLE, false);
-            setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status);
+            scara_arm->joint_1_homing_timer =
+                scara_arm->joint_1_homing_timer > 254 ? 255 : scara_arm->joint_1_homing_timer + 1;
+
+            if (scara_arm->joint_1_homing_timer == 255)
+            {
+                rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
+                                   JOINT_1_HOMING_ANGLE, false);
+                rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
+                                   JOINT_1_HOMING_ANGLE, false);
+                rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+                rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+                scara_arm->joint_1_homing_timer = 0;
+                setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status);
+            }
+        }
+        else
+        {
+            scara_arm->joint_1_homing_timer = 0;
         }
     }
 
@@ -361,7 +379,7 @@ static void operation_homing_control(engineer_scara_arm_s *scara_arm)
         scara_arm->set_pose_6d[i] = scara_arm->pose_6d[i];
     }
 
-    scara_arm->set_joints_value[JOINT_1] = ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 4.0f;
+    scara_arm->set_joints_value[JOINT_1] = ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 5.0f;
     scara_arm->set_joints_value[JOINT_2] = 70.0f * DEGREE_TO_RADIAN_FACTOR;
     if (scara_arm->joints_value[JOINT_2] < 0.0f)
         scara_arm->set_joints_value[JOINT_3] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
@@ -372,7 +390,7 @@ static void operation_homing_control(engineer_scara_arm_s *scara_arm)
     scara_arm->set_joints_value[JOINT_5] = 0.0f;
     scara_arm->set_joints_value[JOINT_6] = 0.0f;
 
-    if ((fabsf(scara_arm->joints_value[JOINT_1] - ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 4.0f) < 0.04f) &&
+    if ((fabsf(scara_arm->joints_value[JOINT_1] - ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 5.0f) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_2] - 70.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_3] + 140.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_4] - 70.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&

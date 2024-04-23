@@ -44,10 +44,11 @@ const vt_link_remote_control_t *vt_link_rc_p;
 ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[512];
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
 
-// rfl_motor_pid_controller_s *motor_controller_test;
 rm_motor_s *motor_0_driver_test;
 rm_motor_s *motor_1_driver_test;
-rm_motor_s *motor_2_driver_test;
+
+rfl_motor_pid_controller_s *motor_0_controller_test;
+rfl_motor_pid_controller_s *motor_1_controller_test;
 
 extern uint32_t fuck_pm;
 extern uint32_t fuck_vt;
@@ -98,12 +99,6 @@ void print_task(void *pvParameters)
     referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
     vt_link_rc_p = getVtLinkRemoteControlData();
-
-    // motor_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].controller;
-
-    motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT4].driver;
-    motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
-    motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
 
     while (true)
     {
@@ -216,9 +211,11 @@ void print_task(void *pvParameters)
 
 #else
 
-        // motor_0_driver_test = (rm_motor_s *)gimbal_print->yaw_motor.driver;
-        // motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_LEFT].driver;
-        // motor_2_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT56_RIGHT].driver;
+        motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].driver;
+        motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].driver;
+
+        motor_0_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].controller;
+        motor_1_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].controller;
 
         if (print_uart_tx_dma_done)
         {
@@ -236,8 +233,9 @@ void print_task(void *pvParameters)
             /**
              * @brief Gimbal
              */
-            sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", gimbal_print->pitch_pwm_clk_freq, gimbal_print->pitch_pwm_freq,
-                    gimbal_print->pitch_pwm_reload, gimbal_print->pitch_pwm_compare);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", gimbal_print->pitch_pwm_clk_freq,
+            // gimbal_print->pitch_pwm_freq,
+            //         gimbal_print->pitch_pwm_reload, gimbal_print->pitch_pwm_compare);
 
             /**
              * @brief Scara Arm
@@ -264,13 +262,19 @@ void print_task(void *pvParameters)
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].torque_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].set_speed_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].speed_);
-            // sprintf((char *)test_txt, "%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-            //         arm_data->start_up_status, arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_data->set_joints_value[5] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_data->joints_value[5] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].angle_.deg,
-            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].angle_.deg);
+            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+                    arm_data->set_joints_value[JOINT_1], arm_data->joints_value[JOINT_1],
+                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].set_angle_.deg,
+                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].angle_.deg,
+                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].torque_,
+                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].speed_,
+                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].set_angle_.deg,
+                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].angle_.deg,
+                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].torque_,
+                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].speed_/*  motor_0_controller_test->angle_pid.set,
+                    motor_0_controller_test->angle_pid.fdb, motor_0_controller_test->angle_pid.out,
+                    motor_0_controller_test->speed_pid.set, motor_0_controller_test->speed_pid.fdb,
+                    motor_0_controller_test->speed_pid.out */);
             // sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->printer[0], arm_data->printer[1],
             // arm_data->printer[2]);
 

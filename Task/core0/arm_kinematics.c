@@ -70,8 +70,7 @@ void arm_model_init(engineer_scara_arm_s *scara_arm)
     memset(&scara_arm->tool_to_base_tmat_data, 0, 16 * sizeof(float));
     rflMatrixInit(&scara_arm->tool_to_base_tmat, 4, 4, scara_arm->tool_to_base_tmat_data);
 
-    // scara_arm->use_normal_solution = true;
-    scara_arm->use_normal_solution = false;
+    scara_arm->solution = JOINT_3_ON_THE_LEFT;
 }
 
 /**
@@ -437,6 +436,7 @@ static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
 
     z56 = L4 * sinf(Pitch);
     d1 = Z - z56;
+
     xy56 = L4 * cosf(Pitch);
     x56 = xy56 * cosf(Yaw);
     y56 = xy56 * sinf(Yaw);
@@ -445,11 +445,30 @@ static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
     x24 = X - x56 - x45;
     y24 = Y - y56 - y45;
     xy24 = sqrtf(x24 * x24 + y24 * y24);
-    t3 = (scara_arm->use_normal_solution ? 1.0f : -1.0f) *
-         (RAD_PI - acosf((L1 * L1 + L2 * L2 - xy24 * xy24) / (2 * L1 * L2)));
     angle_x24 = atan2f(y24, x24);
     angle_324 = acosf((L1 * L1 + xy24 * xy24 - L2 * L2) / (2 * L1 * xy24));
-    t2 = angle_x24 - (scara_arm->use_normal_solution ? 1.0f : -1.0f) * angle_324;
+
+    if (scara_arm->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+    {
+        if (checkIfArmNeedSwitchSolution())
+        {
+            scara_arm->solution =
+                (scara_arm->solution == JOINT_3_ON_THE_LEFT) ? JOINT_3_ON_THE_RIGHT : JOINT_3_ON_THE_LEFT;
+        }
+        if (xy24 > (L1 + L2) / 2.0f)
+        {
+            if (rflFloatLoopConstrain(angle_x24, -RAD_PI, RAD_PI) > 0.7853982f)
+                scara_arm->solution = JOINT_3_ON_THE_RIGHT;
+            else if (rflFloatLoopConstrain(angle_x24, -RAD_PI, RAD_PI) < -0.7853982f)
+                scara_arm->solution = JOINT_3_ON_THE_LEFT;
+        }
+    }
+    else
+        scara_arm->solution = JOINT_3_ON_THE_LEFT;
+
+    t3 = (scara_arm->solution == JOINT_3_ON_THE_LEFT ? -1.0f : 1.0f) *
+         (RAD_PI - acosf((L1 * L1 + L2 * L2 - xy24 * xy24) / (2 * L1 * L2)));
+    t2 = angle_x24 - (scara_arm->solution == JOINT_3_ON_THE_LEFT ? -1.0f : 1.0f) * angle_324;
     t4 = Yaw - t2 - t3;
     t5 = Pitch;
     t6 = Roll;

@@ -268,8 +268,8 @@ static void gimbal_steer_pitch_normal_control(engineer_gimbal_s *gimbal)
 
     // DT7 & 键鼠
 
-    temp_value = rflDeadZoneZero(gimbal->rc->dt7_dr16_data.rc.ch[4], 3) / 2;
-    temp_value = temp_value ? temp_value : (gimbal->rc->mouse_z * 10);
+    temp_value = rflDeadZoneZero(gimbal->rc->dt7_dr16_data.rc.ch[4], 3);
+    temp_value = temp_value ? temp_value : (gimbal->rc->mouse_z * 100);
 
     if (temp_value > 0)
         gimbal->pitch_pwm_compare += (uint32_t)(temp_value);

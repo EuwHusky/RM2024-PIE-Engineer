@@ -58,6 +58,12 @@ typedef enum EngineerScaraArmJointsMotorsIndex
     MOTOR_JOINT56_RIGHT,
 } engineer_scara_arm_joints_motors_index_e;
 
+typedef enum EngineerScaraArmSolution
+{
+    JOINT_3_ON_THE_LEFT = 0,
+    JOINT_3_ON_THE_RIGHT,
+} engineer_scara_arm_solution_e;
+
 /**
  * @brief 清除机械臂启动状态
  * @param[out] arm_start_up_status 机械臂状态簇
@@ -122,10 +128,11 @@ typedef struct EngineerScaraArm
      * [0:5]    J1-distance J2-angle J3-angle J4-angle J5-angle J6-angle
      */
     float joints_value[6];
+    uint8_t joint_1_homing_timer;
 
     /*控制量*/
 
-    bool use_normal_solution; /*使用默认解 默认解下关节3角度为正*/
+    engineer_scara_arm_solution_e solution; /*逆运动学多解选择*/
     /**
      * @brief   预期的工具坐标系在基坐标系六自由度位姿 距离单位 m 角度单位 rad
      * [0:5]    X Y Z YAW PITCH ROLL
@@ -197,7 +204,7 @@ extern bool *getArmOperationHomingStatus(void);
 /* 机械臂模型参数 */
 
 // 位姿可达范围相关参数
-#define ENGINEER_ARM_Z_MAX_DISTANCE (0.65f)                                            /*关节1的最大伸展距离*/
+#define ENGINEER_ARM_Z_MAX_DISTANCE (0.625f)                                           /*关节1的最大伸展距离*/
 #define ENGINEER_ARM_Z_MIN_DISTANCE (0.0f)                                             /*关节1最小伸展距离*/
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/
 #define ENGINEER_ARM_YAW_MAX_ANGLE (180.0f)                                            /* 末端YAW最大角度 */
@@ -206,6 +213,10 @@ extern bool *getArmOperationHomingStatus(void);
 #define ENGINEER_ARM_PITCH_MIN_ANGLE (-75.0f)                                          /* 末端PITCH最小角度 */
 #define ENGINEER_ARM_ROLL_MAX_ANGLE (720.0f)                                           /* 末端ROLL最大角度 */
 #define ENGINEER_ARM_ROLL_MIN_ANGLE (-720.0f)                                          /* 末端ROLL最小角度 */
+
+// 关节运行基准速度
+#define ENGINEER_ARM_MANUAL_OPERATION_BASE_SPEED (2.0f)
+#define ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED (1.0f)
 
 // 正常运行时的关节可达范围
 #define ENGINEER_ARM_JOINT_1_MAX_DISTANCE (ENGINEER_ARM_Z_MAX_DISTANCE)
@@ -256,29 +267,29 @@ extern bool *getArmOperationHomingStatus(void);
 #define ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_5_INITIAL_MIN_ANGLE * 2.0f)
 
 // 电机控制器参数
-#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (1.35f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KP (1.5f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KI (0.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KD (0.02f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_KD (0.1f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KP (1000.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KI (0.8f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KP (1250.0f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KI (7.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_KD (0.0f)
-#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_IOUT (6000.0f)
+#define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
 
-#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KP (0.4f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KP (0.8f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KI (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KD (0.08f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KP (800.0f)
-#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (0.8f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (1.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
 
-#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KP (0.2f)
+#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KP (0.8f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KI (0.0f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KD (0.006f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_MAX_IOUT (0.0f)

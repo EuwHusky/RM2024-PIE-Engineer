@@ -58,6 +58,14 @@ engineer_behavior_e getEngineerLastBehavior(void)
     return behavior_manager.last_behavior;
 }
 
+bool checkIfArmNeedSwitchSolution(void)
+{
+    if (behavior_manager.arm_switch_solution)
+        return behavior_manager.arm_switch_solution = false, true;
+
+    return false;
+}
+
 bool getArmGrabMode(void)
 {
     return behavior_manager.arm_grab;
@@ -85,6 +93,7 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->gimbal_reset_success = getGimbalResetStatus();
 
     behavior_manager->arm_grab = false;
+    behavior_manager->arm_switch_solution = false;
     behavior_manager->reset_ui = false;
     behavior_manager->hide_ui = false;
 }
@@ -239,6 +248,23 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
 
 static void module_operation(engineer_behavior_manager_s *behavior_manager)
 {
+    /**
+     * @brief 切换机械臂解算
+     * DT7 长拨拨轮触发切换
+     */
+    behavior_manager->dt7_arm_switch_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
+        behavior_manager->dt7_arm_switch_trigger_value > 600)
+    {
+        behavior_manager->dt7_arm_switch_trigger_timer++;
+        if (behavior_manager->dt7_arm_switch_trigger_timer == 10)
+        {
+            behavior_manager->arm_switch_solution = true;
+        }
+    }
+    else
+        behavior_manager->dt7_arm_switch_trigger_timer = 0;
+
     /**
      * @brief 机械臂吸取工作模式切换
      * DT7 长拨拨轮触发切换

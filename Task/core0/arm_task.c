@@ -79,6 +79,8 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
 
     arm_model_init(scara_arm);
 
+    scara_arm->joint_1_homing_timer = 0;
+
     arm_rm_motor_can_init();
     while (detect_error(ARM_JOINT_1_L_DH) || detect_error(ARM_JOINT_1_R_DH) || detect_error(ARM_JOINT_4_DH) ||
            detect_error(ARM_JOINT_56_L_DH) || detect_error(ARM_JOINT_56_R_DH))

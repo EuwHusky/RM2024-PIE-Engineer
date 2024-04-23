@@ -17,7 +17,9 @@
 static void chassis_init(engineer_chassis_s *chassis);
 static void chassis_mode_control(engineer_chassis_s *chassis);
 static void chassis_update_and_execute(engineer_chassis_s *chassis);
+static void chassis_stop_control(engineer_chassis_s *chassis);
 static void chassis_normal_control(engineer_chassis_s *chassis);
+static void chassis_slowly_control(engineer_chassis_s *chassis);
 static void chassis_motor_0_can_rx_callback(void);
 static void chassis_motor_1_can_rx_callback(void);
 static void chassis_motor_2_can_rx_callback(void);
@@ -85,9 +87,9 @@ static void chassis_init(engineer_chassis_s *chassis)
 
     // 底盘控制
     chassis->rc = getRemoteControlPointer();
-    rflRampInit(chassis->speed_ramper + 0, 0.008f, CHASSIS_WZ_DT7_CONTROL_MAX, -CHASSIS_WZ_DT7_CONTROL_MAX);
-    rflRampInit(chassis->speed_ramper + 1, 0.008f, CHASSIS_WZ_DT7_CONTROL_MAX, -CHASSIS_WZ_DT7_CONTROL_MAX);
-    rflRampInit(chassis->speed_ramper + 2, 0.05f, CHASSIS_WZ_DT7_CONTROL_MAX, -CHASSIS_WZ_DT7_CONTROL_MAX);
+    rflRampInit(chassis->speed_ramper + 0, CHASSIS_CONTROL_TIME, CHASSIS_VX_MAX, -CHASSIS_VX_MAX);
+    rflRampInit(chassis->speed_ramper + 1, CHASSIS_CONTROL_TIME, CHASSIS_VY_MAX, -CHASSIS_VY_MAX);
+    rflRampInit(chassis->speed_ramper + 2, CHASSIS_CONTROL_TIME, CHASSIS_WZ_MAX, -CHASSIS_WZ_MAX);
 
     // CAN通信
     rflCanRxMessageBoxAddId(CHASSIS_MOTORS_CAN_ORDINAL, 0x201);
@@ -156,8 +158,12 @@ static void chassis_mode_control(engineer_chassis_s *chassis)
     case ENGINEER_BEHAVIOR_MOVE:
         chassis_normal_control(chassis);
         break;
+    case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+        chassis_slowly_control(chassis);
+        break;
 
     default:
+        chassis_stop_control(chassis);
         break;
     }
 }
@@ -183,10 +189,11 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
     {
         rflChassisSetFollowOffset(&chassis->model, RFL_ANGLE_FORMAT_DEGREE, chassis->follow_offset);
 
-        rflAngleUpdate(&chassis->set_control_angle, RFL_ANGLE_FORMAT_DEGREE,
-                       rflFloatLoopConstrain(chassis->set_control_angle.deg +
-                                                 chassis->set_speed_vector[2] * CHASSIS_YAW_CONTROL_SEN,
-                                             -DEG_PI, DEG_PI));
+        rflAngleUpdate(
+            &chassis->set_control_angle, RFL_ANGLE_FORMAT_DEGREE,
+            rflFloatLoopConstrain(chassis->set_control_angle.deg +
+                                      chassis->set_speed_vector[2] * RADIAN_TO_DEGREE_FACTOR * CHASSIS_CONTROL_TIME,
+                                  -DEG_PI, DEG_PI));
 
         rflChassisSetSpeedVector(&chassis->model, chassis->set_speed_vector[0], chassis->set_speed_vector[1], 0.0f);
     }
@@ -215,6 +222,12 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
                       rflMotorGetOutput(chassis->motor + 3));
 }
 
+static void chassis_stop_control(engineer_chassis_s *chassis)
+{
+    for (uint8_t i = 0; i < 3; i++)
+        chassis->set_speed_vector[i] = 0.0f;
+}
+
 static void chassis_normal_control(engineer_chassis_s *chassis)
 {
     if (abs(chassis->rc->dt7_dr16_data.rc.ch[0]) + abs(chassis->rc->dt7_dr16_data.rc.ch[2]) +
@@ -222,40 +235,67 @@ static void chassis_normal_control(engineer_chassis_s *chassis)
         3)
     {
         chassis->set_speed_vector[0] =
-            rflRampCalc(chassis->speed_ramper + 0,
+            rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX,
                         ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], CHASSIS_DT7_DEADLINE)) / 660.0f *
-                         CHASSIS_VX_DT7_CONTROL_MAX));
+                         CHASSIS_VX_MAX));
         chassis->set_speed_vector[1] =
-            rflRampCalc(chassis->speed_ramper + 1,
+            rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX,
                         -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], CHASSIS_DT7_DEADLINE)) / 660.0f *
-                          CHASSIS_VY_DT7_CONTROL_MAX));
+                          CHASSIS_VY_MAX));
         chassis->set_speed_vector[2] =
-            rflRampCalc(chassis->speed_ramper + 2,
+            rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
                         -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], CHASSIS_DT7_DEADLINE)) / 660.0f *
-                          CHASSIS_WZ_DT7_CONTROL_MAX));
+                          CHASSIS_WZ_MAX));
     }
     else
     {
-        float km_x = 0.0f;
-        float km_y = 0.0f;
-        if (checkIsRcKeyPressed(RC_W))
-            km_x = 1.0f;
-        else if (checkIsRcKeyPressed(RC_S))
-            km_x = -1.0f;
+        float km_x_sign = 0.0f;
+        float km_y_sign = 0.0f;
+        if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
+            km_x_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
+            km_x_sign = -1.0f;
         else
-            km_x = 0.0f;
-        if (checkIsRcKeyPressed(RC_A))
-            km_y = 1.0f;
-        else if (checkIsRcKeyPressed(RC_D))
-            km_y = -1.0f;
+            km_x_sign = 0.0f;
+        if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
+            km_y_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
+            km_y_sign = -1.0f;
         else
-            km_y = 0.0f;
+            km_y_sign = 0.0f;
 
-        chassis->set_speed_vector[0] = rflRampCalc(chassis->speed_ramper + 0, km_x * CHASSIS_VX_KM_CONTROL_MAX);
-        chassis->set_speed_vector[1] = rflRampCalc(chassis->speed_ramper + 1, km_y * CHASSIS_VY_KM_CONTROL_MAX);
-        chassis->set_speed_vector[2] =
-            rflRampCalc(chassis->speed_ramper + 2, -((float)(getRcMouseX()) / 20.0f) * CHASSIS_WZ_KM_CONTROL_MAX);
+        chassis->set_speed_vector[0] =
+            rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX, km_x_sign * CHASSIS_VX_MAX / 2.0f);
+        chassis->set_speed_vector[1] =
+            rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX, km_y_sign * CHASSIS_VY_MAX / 2.0f);
+        chassis->set_speed_vector[2] = rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
+                                                   -((float)(getRcMouseX()) / 18.0f) * CHASSIS_WZ_MAX / 2.0f);
     }
+}
+
+static void chassis_slowly_control(engineer_chassis_s *chassis)
+{
+    float km_x_sign = 0.0f;
+    float km_y_sign = 0.0f;
+    if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
+        km_x_sign = 1.0f;
+    else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
+        km_x_sign = -1.0f;
+    else
+        km_x_sign = 0.0f;
+    if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
+        km_y_sign = 1.0f;
+    else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
+        km_y_sign = -1.0f;
+    else
+        km_y_sign = 0.0f;
+
+    chassis->set_speed_vector[0] =
+        rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f, km_x_sign * CHASSIS_VX_MAX / 8.0f);
+    chassis->set_speed_vector[1] =
+        rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 2.0f, km_y_sign * CHASSIS_VY_MAX / 18.0f);
+    chassis->set_speed_vector[2] = rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
+                                               -((float)(getRcMouseX()) / 18.0f) * CHASSIS_WZ_MAX / 6.0f);
 }
 
 static void chassis_motor_0_can_rx_callback(void)

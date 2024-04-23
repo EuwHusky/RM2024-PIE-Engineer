@@ -43,6 +43,7 @@ typedef struct EngineerBehaviorManager
     bool *gimbal_reset_success;
 
     /* 模块状态输出 */
+    bool arm_switch_solution;
     bool arm_grab;
     bool reset_ui;
     bool hide_ui;
@@ -58,12 +59,17 @@ typedef struct EngineerBehaviorManager
     uint32_t km_reset_trigger_timer;   // 使用键鼠复位的触发计时器
     int16_t dt7_arm_grab_trigger_value;
     uint32_t dt7_arm_grab_trigger_timer;
+    int16_t dt7_arm_switch_trigger_value;  // 使用DT7切换机械臂解算的触发器值
+    uint32_t dt7_arm_switch_trigger_timer; // 使用DT7切换机械臂解算的触发计时器
 } engineer_behavior_manager_s;
 
 extern void behavior_task(void *pvParameters);
 extern const engineer_behavior_manager_s *getEngineerBehaviorManagerPointer(void);
+
 extern engineer_behavior_e getEngineerCurrentBehavior(void);
 extern engineer_behavior_e getEngineerLastBehavior(void);
+
+extern bool checkIfArmNeedSwitchSolution(void);
 extern bool getArmGrabMode(void);
 extern bool checkIfNeedResetUi(void);
 extern bool getUiHideMode(void);
