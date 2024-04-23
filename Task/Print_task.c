@@ -262,16 +262,12 @@ void print_task(void *pvParameters)
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].torque_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].set_speed_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].speed_);
-            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
                     arm_data->set_joints_value[JOINT_1], arm_data->joints_value[JOINT_1],
                     arm_data->joints_motors[MOTOR_JOINT1_LEFT].set_angle_.deg,
                     arm_data->joints_motors[MOTOR_JOINT1_LEFT].angle_.deg,
-                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].torque_,
-                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].speed_,
                     arm_data->joints_motors[MOTOR_JOINT1_RIGHT].set_angle_.deg,
-                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].angle_.deg,
-                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].torque_,
-                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].speed_/*  motor_0_controller_test->angle_pid.set,
+                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].angle_.deg/*  motor_0_controller_test->angle_pid.set,
                     motor_0_controller_test->angle_pid.fdb, motor_0_controller_test->angle_pid.out,
                     motor_0_controller_test->speed_pid.set, motor_0_controller_test->speed_pid.fdb,
                     motor_0_controller_test->speed_pid.out */);

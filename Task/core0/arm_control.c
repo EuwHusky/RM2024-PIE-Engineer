@@ -363,7 +363,7 @@ static void move_homing_control(engineer_scara_arm_s *scara_arm)
     scara_arm->set_joints_value[JOINT_5] = 0.0f;
     scara_arm->set_joints_value[JOINT_6] = 0.0f;
 
-    if ((fabsf(scara_arm->joints_value[JOINT_1] - 0.0f) < 0.04f) &&
+    if ((fabsf(scara_arm->joints_value[JOINT_1] - 0.0f) < 0.002f) &&
         (fabsf(scara_arm->joints_value[JOINT_2] - 90.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_3] + 160.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_4] - 70.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
@@ -390,7 +390,7 @@ static void operation_homing_control(engineer_scara_arm_s *scara_arm)
     scara_arm->set_joints_value[JOINT_5] = 0.0f;
     scara_arm->set_joints_value[JOINT_6] = 0.0f;
 
-    if ((fabsf(scara_arm->joints_value[JOINT_1] - ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 5.0f) < 0.04f) &&
+    if ((fabsf(scara_arm->joints_value[JOINT_1] - ENGINEER_ARM_JOINT_1_MAX_DISTANCE / 5.0f) < 0.002f) &&
         (fabsf(scara_arm->joints_value[JOINT_2] - 70.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_3] + 140.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
         (fabsf(scara_arm->joints_value[JOINT_4] - 70.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f) &&
