@@ -448,6 +448,10 @@ static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
     angle_x24 = atan2f(y24, x24);
     angle_324 = acosf((L1 * L1 + xy24 * xy24 - L2 * L2) / (2 * L1 * xy24));
 
+    scara_arm->printer[0] = x24;
+    scara_arm->printer[1] = y24;
+    scara_arm->printer[2] = xy24;
+
     if (scara_arm->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
     {
         if (checkIfArmNeedSwitchSolution())

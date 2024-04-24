@@ -16,6 +16,7 @@ enum Detect_List
     DUAL_COMM_DH = 0, /* 双核通信 */
 
     PM_REFEREE_DH, /* 电源管理模块 裁判系统数据链路 */
+    UI_REFEREE_DH, /* UI发送 */
     VT_REFEREE_DH, /* 图传模块 裁判系统数据链路 */
     DBUS_DH,       /* 遥控器接收机 */
 

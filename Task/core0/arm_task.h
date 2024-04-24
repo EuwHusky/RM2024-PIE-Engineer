@@ -96,6 +96,10 @@ typedef struct EngineerScaraArm
     bool reset_success;
     bool move_homing_success;
     bool operation_homing_success;
+    uint8_t silver_mining_step;
+    bool silver_mining_success;
+
+    uint8_t joint_1_homing_timer;
 
     /*运动学模型*/
 
@@ -128,7 +132,6 @@ typedef struct EngineerScaraArm
      * [0:5]    J1-distance J2-angle J3-angle J4-angle J5-angle J6-angle
      */
     float joints_value[6];
-    uint8_t joint_1_homing_timer;
 
     /*控制量*/
 
@@ -170,6 +173,7 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);
 extern bool *getArmOperationHomingStatus(void);
+extern bool *getSilverMiningStatus(void);
 
 /* 机械臂结构参数 */
 

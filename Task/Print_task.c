@@ -41,7 +41,7 @@ const robot_status_t *referee_robot_status;
 const custom_robot_data_t *customer_controller;
 const vt_link_remote_control_t *vt_link_rc_p;
 
-ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[512];
+ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[256];
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
 
 rm_motor_s *motor_0_driver_test;
@@ -50,8 +50,11 @@ rm_motor_s *motor_1_driver_test;
 rfl_motor_pid_controller_s *motor_0_controller_test;
 rfl_motor_pid_controller_s *motor_1_controller_test;
 
-extern uint32_t fuck_pm;
-extern uint32_t fuck_vt;
+extern uint32_t test_all;
+extern uint32_t test_pm;
+extern uint32_t test_vt;
+extern uint32_t test_ui;
+extern uint32_t test_reset;
 
 void print_dma_isr(void)
 {
@@ -211,11 +214,12 @@ void print_task(void *pvParameters)
 
 #else
 
-        motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].driver;
-        motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].driver;
+        // motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].driver;
+        // motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].driver;
 
-        motor_0_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].controller;
-        motor_1_controller_test = (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].controller;
+        // motor_0_controller_test = (rfl_motor_pid_controller_s
+        // *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].controller; motor_1_controller_test =
+        // (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].controller;
 
         if (print_uart_tx_dma_done)
         {
@@ -262,17 +266,9 @@ void print_task(void *pvParameters)
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].torque_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].set_speed_,
             //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].speed_);
-            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-                    arm_data->set_joints_value[JOINT_1], arm_data->joints_value[JOINT_1],
-                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].set_angle_.deg,
-                    arm_data->joints_motors[MOTOR_JOINT1_LEFT].angle_.deg,
-                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].set_angle_.deg,
-                    arm_data->joints_motors[MOTOR_JOINT1_RIGHT].angle_.deg/*  motor_0_controller_test->angle_pid.set,
-                    motor_0_controller_test->angle_pid.fdb, motor_0_controller_test->angle_pid.out,
-                    motor_0_controller_test->speed_pid.set, motor_0_controller_test->speed_pid.fdb,
-                    motor_0_controller_test->speed_pid.out */);
-            // sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->printer[0], arm_data->printer[1],
-            // arm_data->printer[2]);
+            // sprintf((char *)test_txt, "%7.4f,%7.4f,%6.3f,%6.3f,%6.3f\r\n", arm_data->set_joints_value[JOINT_1],
+            //         arm_data->joints_value[JOINT_1], arm_data->joints_motors[MOTOR_JOINT1_LEFT].set_angle_.deg,
+            //         arm_data->printer[0], arm_data->printer[1], arm_data->printer[2]);
 
             /**
              * @brief Motor PID
@@ -291,8 +287,8 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->pose[0],
             //         customer_controller->pose[1], customer_controller->pose[2], customer_controller->pose[3],
             //         customer_controller->pose[4], customer_controller->pose[5], customer_controller->key);
-            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", fuck_pm, fuck_vt, vt_link_rc_p->mouse_x,
-            //         vt_link_rc_p->mouse_y, vt_link_rc_p->keyboard_value);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", getArmGrabMode(), test_all, test_pm, test_vt, test_ui,
+            //         test_reset);
 
             /**
              * @brief Remote Control

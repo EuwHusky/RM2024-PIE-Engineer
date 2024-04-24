@@ -70,6 +70,11 @@ bool *getArmOperationHomingStatus(void)
     return &scara_arm.operation_homing_success;
 }
 
+bool *getSilverMiningStatus(void)
+{
+    return &scara_arm.silver_mining_success;
+}
+
 static void arm_init(engineer_scara_arm_s *scara_arm)
 {
     memset(scara_arm, 0, sizeof(engineer_scara_arm_s));
@@ -77,9 +82,16 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->behavior = ENGINEER_BEHAVIOR_DISABLE;
     scara_arm->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
 
-    arm_model_init(scara_arm);
+    resetArmStartUpStatus(scara_arm->start_up_status);
+    scara_arm->reset_success = false;
+    scara_arm->move_homing_success = false;
+    scara_arm->operation_homing_success = false;
+    scara_arm->silver_mining_step = 0;
+    scara_arm->silver_mining_success = false;
 
     scara_arm->joint_1_homing_timer = 0;
+
+    arm_model_init(scara_arm);
 
     arm_rm_motor_can_init();
     while (detect_error(ARM_JOINT_1_L_DH) || detect_error(ARM_JOINT_1_R_DH) || detect_error(ARM_JOINT_4_DH) ||
@@ -88,10 +100,6 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     arm_motor_init(scara_arm);
 
     // MA600_init();
-
-    resetArmStartUpStatus(scara_arm->start_up_status);
-    scara_arm->move_homing_success = false;
-    scara_arm->operation_homing_success = false;
 
     scara_arm->rc = getRemoteControlPointer();
 

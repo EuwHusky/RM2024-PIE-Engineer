@@ -236,12 +236,12 @@ static uint8_t *manage_and_encode_client_ui_plot_data(void)
         if (manager.characters[manager.plotted_character_num].builder != NULL)
         {
             figure_operation_type_e figure_operation_type = FIGURE_NOP;
-            if (manager.figures[manager.plotted_character_num].is_hidden)
+            if (manager.characters[manager.plotted_character_num].is_hidden)
             {
-                if (manager.figures[manager.plotted_character_num].is_plotted)
+                if (manager.characters[manager.plotted_character_num].is_plotted)
                 {
                     figure_operation_type = FIGURE_DELETE;
-                    manager.figures[manager.plotted_character_num].is_plotted = false;
+                    manager.characters[manager.plotted_character_num].is_plotted = false;
                 }
                 else
                 {
@@ -250,19 +250,19 @@ static uint8_t *manage_and_encode_client_ui_plot_data(void)
             }
             else
             {
-                if (manager.figures[manager.plotted_character_num].is_plotted)
+                if (manager.characters[manager.plotted_character_num].is_plotted)
                 {
                     figure_operation_type = FIGURE_MODIFY;
                 }
                 else
                 {
                     figure_operation_type = FIGURE_ADD;
-                    manager.figures[manager.plotted_character_num].is_plotted = true;
+                    manager.characters[manager.plotted_character_num].is_plotted = true;
                 }
             }
 
-            manager.figures[manager.plotted_character_num].builder(
-                &manager.figures[manager.plotted_character_num].figure, figure_operation_type);
+            manager.characters[manager.plotted_character_num].builder(
+                &manager.characters[manager.plotted_character_num].character, figure_operation_type);
         }
 
         // 数据头编码
@@ -356,7 +356,7 @@ static uint8_t *manage_and_encode_client_ui_plot_data(void)
 
         // 结算打印流并循环
         manager.plotted_figure_num += to_be_plotted_figure_num_this_round;
-        if (manager.plotted_figure_num == manager.figure_num)
+        if (manager.plotted_figure_num >= manager.figure_num)
             manager.plotted_figure_num = 0;
 
         return manager.interaction_data_sent;

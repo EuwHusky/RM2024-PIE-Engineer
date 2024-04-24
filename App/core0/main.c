@@ -83,7 +83,7 @@ int main(void)
     xTaskCreate(dualcore_task, "dualcore_task", configMINIMAL_STACK_SIZE + 128U, NULL, DUALCORE_TASK_PRIORITY, NULL);
     xTaskCreate(detect_task, "detect_task", configMINIMAL_STACK_SIZE + 128U, NULL, DETECT_TASK_PRIORITY, NULL);
 
-    xTaskCreate(referee_task, "referee_task", configMINIMAL_STACK_SIZE + 128U, NULL, REFEREE_TASK_PRIORITY, NULL);
+    xTaskCreate(referee_task, "referee_task", configMINIMAL_STACK_SIZE + 256U, NULL, REFEREE_TASK_PRIORITY, NULL);
     xTaskCreate(rc_task, "rc_task", configMINIMAL_STACK_SIZE + 128U, NULL, RC_TASK_PRIORITY, NULL);
 
     xTaskCreate(behavior_task, "behavior_task", configMINIMAL_STACK_SIZE, NULL, BEHAVIOR_TASK_PRIORITY, NULL);

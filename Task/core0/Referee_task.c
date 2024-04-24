@@ -40,8 +40,11 @@ volatile bool vt_uart_rx_dma_done = true;                            // dma传�
 fifo_s_t *vt_uart_fifo = NULL;
 
 static uint32_t step_clock = 0;
-uint32_t fuck_pm = 0;
-uint32_t fuck_vt = 0;
+uint32_t test_all = 0;
+uint32_t test_pm = 0;
+uint32_t test_vt = 0;
+uint32_t test_ui = 0;
+uint32_t test_reset = 0;
 
 void pm_rx_referee_dma_isr(void)
 {
@@ -87,7 +90,7 @@ void referee_task(void *pvParameters)
     {
         if (pm_uart_rx_dma_done)
         {
-            fuck_pm++;
+            test_pm++;
             pm_uart_rx_dma_done = false;
             refereeUnpackFifoData(PM_REFEREE_LINK);
             uart_rx_trigger_dma(BOARD_HDMA, PM_UART_RX_DMA_CHN, PM_UART,
@@ -97,7 +100,7 @@ void referee_task(void *pvParameters)
 
         if (vt_uart_rx_dma_done)
         {
-            fuck_vt++;
+            test_vt++;
             vt_uart_rx_dma_done = false;
             refereeUnpackFifoData(VT_REFEREE_LINK);
             uart_rx_trigger_dma(BOARD_HDMA, VT_UART_RX_DMA_CHN, VT_UART,
@@ -110,6 +113,9 @@ void referee_task(void *pvParameters)
         step_clock++;
         if (pm_uart_tx_dma_done)
         {
+            test_ui++;
+            detect_hook(UI_REFEREE_DH);
+
             pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
 
             if (pm_tx_frame_pointer != NULL)
@@ -123,6 +129,17 @@ void referee_task(void *pvParameters)
             }
         }
 
+        // 发送挂了重新拉起
+        if (detect_error(UI_REFEREE_DH))
+        {
+            test_reset++;
+            pm_uart_tx_dma_done = true;
+            uart_reset_tx_fifo(PM_UART);
+            uart_flush(PM_UART);
+        }
+
+        test_all++;
+
         vTaskDelay(20);
     }
 }
@@ -134,13 +151,13 @@ static void client_ui(void)
         refereeClientUiOperate(UI_RESET_ALL, 0);
     }
 
-    if (getUiHideMode())
+    if (getUiSlot() == 0)
     {
         refereeClientUiOperate(UI_HIDE_FIGURE, 1);
         refereeClientUiOperate(UI_HIDE_FIGURE, 2);
         refereeClientUiOperate(UI_HIDE_FIGURE, 3);
     }
-    else
+    else if (getUiSlot() == 1)
     {
         refereeClientUiOperate(UI_DISPLAY_FIGURE, 1);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, 2);
