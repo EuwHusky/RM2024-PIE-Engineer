@@ -133,7 +133,8 @@ static void chassis_mode_control(engineer_chassis_s *chassis)
 
     if (chassis->last_behavior != chassis->behavior)
     {
-        if (chassis->behavior == ENGINEER_BEHAVIOR_DISABLE || chassis->behavior == ENGINEER_BEHAVIOR_RESET)
+        if (chassis->behavior == ENGINEER_BEHAVIOR_DISABLE || chassis->behavior == ENGINEER_BEHAVIOR_RESET ||
+            chassis->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
         {
             rflChassisSetBehavior(&chassis->model, RFL_CHASSIS_BEHAVIOR_NO_FORCE);
             for (uint8_t i = 0; i < 4; i++)
@@ -277,6 +278,7 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
 {
     float km_x_sign = 0.0f;
     float km_y_sign = 0.0f;
+    // float yaw_sign = 0.0f;
     if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
         km_x_sign = 1.0f;
     else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
@@ -289,13 +291,23 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
         km_y_sign = -1.0f;
     else
         km_y_sign = 0.0f;
+    // if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+    //     yaw_sign = 1.0f;
+    // else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+    //     yaw_sign = -1.0f;
+    // else
+    //     yaw_sign = 0.0f;
 
     chassis->set_speed_vector[0] =
-        rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f, km_x_sign * CHASSIS_VX_MAX / 8.0f);
+        rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f, km_x_sign * CHASSIS_VX_MAX / 12.0f);
     chassis->set_speed_vector[1] =
-        rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 2.0f, km_y_sign * CHASSIS_VY_MAX / 18.0f);
+        rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 2.0f, km_y_sign * CHASSIS_VY_MAX / 24.0f);
+    // if (yaw_sign)
+    //     chassis->set_speed_vector[2] =
+    //         rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f, yaw_sign * CHASSIS_WZ_MAX / 12.0f);
+    // else
     chassis->set_speed_vector[2] = rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
-                                               -((float)(getRcMouseX()) / 18.0f) * CHASSIS_WZ_MAX / 6.0f);
+                                               -((float)(getRcMouseX()) / 24.0f) * CHASSIS_WZ_MAX / 6.0f);
 }
 
 static void chassis_motor_0_can_rx_callback(void)

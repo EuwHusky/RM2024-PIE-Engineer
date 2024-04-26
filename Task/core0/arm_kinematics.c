@@ -99,6 +99,11 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
     scara_arm->dh[4][3] = scara_arm->joints_value[JOINT_5]; // Joint 5 angle
     scara_arm->dh[5][3] = scara_arm->joints_value[JOINT_6]; // Joint 6 angle
 
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        scara_arm->last_pose_6d[i] = scara_arm->pose_6d[i];
+    }
+
     solve_forward_kinematics(scara_arm);
 }
 

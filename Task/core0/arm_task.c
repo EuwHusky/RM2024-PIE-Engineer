@@ -90,6 +90,8 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->silver_mining_success = false;
 
     scara_arm->joint_1_homing_timer = 0;
+    scara_arm->silver_mining_grab_detect_timer = 0;
+    scara_arm->silver_mining_grab_end_timer = 0;
 
     arm_model_init(scara_arm);
 

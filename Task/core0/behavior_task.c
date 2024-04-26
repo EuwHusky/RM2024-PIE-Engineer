@@ -305,7 +305,7 @@ static void module_operation(engineer_behavior_manager_s *behavior_manager)
      * @brief 切换机械臂解算
      * 键鼠 短按Q键触发切换
      */
-    if (checkIfRcKeyFallingEdgeDetected(RC_Q))
+    if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
     {
         behavior_manager->arm_switch_solution = true;
     }

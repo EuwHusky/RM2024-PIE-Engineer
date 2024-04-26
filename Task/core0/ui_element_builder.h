@@ -3,6 +3,8 @@
 
 #include "referee_robot_interaction_manager.h"
 
+extern void uiModeIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
 extern void uiPumpIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
 extern void uiAutoGrabCalibrationLine0Builder(interaction_figure_t *figure,

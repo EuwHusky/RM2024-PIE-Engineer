@@ -80,11 +80,12 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 20, 4, 0);
-    refereeSetRobotInteractionFigureBuilder(0, uiPumpIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(1, uiAutoGrabCalibrationLine0Builder);
-    refereeSetRobotInteractionFigureBuilder(2, uiAutoGrabCalibrationLine1Builder);
-    refereeSetRobotInteractionFigureBuilder(3, uiAutoGrabCalibrationLine2Builder);
+    refereeInitRobotInteractionManager(&step_clock, 20, 5, 0);
+    refereeSetRobotInteractionFigureBuilder(0, uiModeIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(1, uiPumpIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(2, uiAutoGrabCalibrationLine0Builder);
+    refereeSetRobotInteractionFigureBuilder(3, uiAutoGrabCalibrationLine1Builder);
+    refereeSetRobotInteractionFigureBuilder(4, uiAutoGrabCalibrationLine2Builder);
 
     while (1)
     {
@@ -153,15 +154,15 @@ static void client_ui(void)
 
     if (getUiSlot() == 0)
     {
-        refereeClientUiOperate(UI_HIDE_FIGURE, 1);
         refereeClientUiOperate(UI_HIDE_FIGURE, 2);
         refereeClientUiOperate(UI_HIDE_FIGURE, 3);
+        refereeClientUiOperate(UI_HIDE_FIGURE, 4);
     }
     else if (getUiSlot() == 1)
     {
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, 1);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, 2);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, 3);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, 4);
     }
 }
 

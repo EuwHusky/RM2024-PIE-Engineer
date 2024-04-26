@@ -96,10 +96,14 @@ typedef struct EngineerScaraArm
     bool reset_success;
     bool move_homing_success;
     bool operation_homing_success;
-    uint8_t silver_mining_step;
     bool silver_mining_success;
 
     uint8_t joint_1_homing_timer;
+    uint8_t silver_mining_step;
+    uint16_t silver_mining_grab_detect_timer;
+    uint16_t silver_mining_grab_end_timer;
+
+    float silver_mining_pose_memory[6]; // 机械臂位置记忆
 
     /*运动学模型*/
 
@@ -127,6 +131,7 @@ typedef struct EngineerScaraArm
      * [0:5]    X Y Z YAW PITCH ROLL
      */
     float pose_6d[6];
+    float last_pose_6d[6];
     /**
      * @brief   关节变量 距离单位 m 角度单位 rad
      * [0:5]    J1-distance J2-angle J3-angle J4-angle J5-angle J6-angle
@@ -293,9 +298,9 @@ extern bool *getSilverMiningStatus(void);
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_IOUT (4000.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
 
-#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KP (0.8f)
+#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KP (1.2f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KI (0.0f)
-#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KD (0.006f)
+#define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_KD (0.01f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_56_RM_M2006_SPEED_PID_KP (800.0f)
