@@ -250,6 +250,10 @@ void print_task(void *pvParameters)
             //         arm_data->pose_6d[0], arm_data->pose_6d[1], arm_data->pose_6d[2], arm_data->pose_6d[3],
             //         arm_data->pose_6d[4], arm_data->pose_6d[5]);
             // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[0],
+            //         arm_data->cc_pose_6d[1], arm_data->cc_pose_6d[2], arm_data->set_pose_6d[0],
+            //         arm_data->set_pose_6d[1], arm_data->set_pose_6d[2], arm_data->local_pos_memory[0],
+            //         arm_data->local_pos_memory[1], arm_data->local_pos_memory[2]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[0],
             //         arm_data->cc_pose_6d[1], arm_data->cc_pose_6d[2], arm_data->customer_controller->pose[0],
             //         arm_data->customer_controller->pose[1], arm_data->customer_controller->pose[2]);
             // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[3],
@@ -305,9 +309,9 @@ void print_task(void *pvParameters)
             //         *behavior_print->arm_reset_success, *behavior_print->gimbal_reset_success,
             //         *behavior_print->arm_move_homing_success, *behavior_print->arm_operation_homing_success);
 
-            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                strlen((char *)test_txt));
+            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+            //                     strlen((char *)test_txt));
         }
 
         /**

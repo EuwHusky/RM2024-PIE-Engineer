@@ -6,11 +6,12 @@
 
 typedef enum
 {
-    ROUGHLY_KEY = 0,
-    PRECISELY_KEY,
-    PUMP_KEY,
-    SWITCH_KEY,
-    RESET_KEY,
+    CC_ROUGHLY = 0,
+    CC_PUMP,
+    CC_PRECISELY,
+    CC_SWITCH,
+    CC_RESET,
+    CC_KEY_NUM,
 } customer_controller_key_index_e;
 
 /**

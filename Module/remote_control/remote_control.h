@@ -4,6 +4,8 @@
 #include "bsp_dt7_dr16.h"
 #include "referee_protocol.h"
 
+#include "customer_controller.h"
+
 #define DT7_SW_UP ((uint16_t)1)
 #define DT7_SW_MID ((uint16_t)3)
 #define DT7_SW_DOWN ((uint16_t)2)
@@ -49,12 +51,14 @@ typedef struct RemoteControl
 {
     rfl_dt7_dr16_data_s dt7_dr16_data;
     const vt_link_remote_control_t *vt_link_data;
+    const custom_robot_data_t *cc_data;
 
     int16_t mouse_x; /* 鼠标左右方向速度 右为正 */
     int16_t mouse_y; /* 鼠标前后方向速度 后为正 */
     int16_t mouse_z; /* 鼠标滚轮速度 向前滚为正 */
 
-    remote_control_key_status_s keys[RC_KEY_NUM];
+    remote_control_key_status_s rc_keys[RC_KEY_NUM];
+    remote_control_key_status_s cc_keys[CC_KEY_NUM];
 } remote_control_s;
 
 extern void RemoteControlInit(void);
@@ -66,6 +70,11 @@ extern int16_t getRcMouseZ(void);
 extern uint8_t checkIsRcKeyPressed(remote_control_key_e key);
 extern uint8_t checkIfRcKeyFallingEdgeDetected(remote_control_key_e key);
 extern uint8_t checkIfRcKeyRisingEdgeDetected(remote_control_key_e key);
+
+extern float getCcPose(uint8_t pose_index);
+extern uint8_t checkIsCcKeyPressed(customer_controller_key_index_e key);
+extern uint8_t checkIfCcKeyFallingEdgeDetected(customer_controller_key_index_e key);
+extern uint8_t checkIfCcKeyRisingEdgeDetected(customer_controller_key_index_e key);
 
 extern remote_control_s *getRemoteControlPointer(void);
 

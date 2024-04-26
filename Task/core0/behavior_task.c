@@ -333,6 +333,14 @@ static void module_operation(engineer_behavior_manager_s *behavior_manager)
     {
         behavior_manager->arm_grab = !behavior_manager->arm_grab;
     }
+    /**
+     * @brief 机械臂吸取工作模式切换
+     * 自定义控制器 短按CC_PUMP键触发切换
+     */
+    if (checkIfCcKeyFallingEdgeDetected(CC_PUMP))
+    {
+        behavior_manager->arm_grab = !behavior_manager->arm_grab;
+    }
 
     /**
      * @brief 重置UI

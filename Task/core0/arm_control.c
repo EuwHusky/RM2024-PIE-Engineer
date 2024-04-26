@@ -8,7 +8,6 @@
 
 #include "algo_data_limiting.h"
 
-#include "customer_controller.h"
 #include "remote_control.h"
 
 static void control_value_process(engineer_scara_arm_s *scara_arm);
@@ -340,7 +339,7 @@ static void pose_control(engineer_scara_arm_s *scara_arm)
                                       660.0f * POSE_AR_CONTROL_SEN);
 
     // 自定义控制器控制
-    if (checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, ROUGHLY_KEY))
+    if (checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, CC_ROUGHLY))
     {
         for (uint8_t i = 0; i < 6; i++)
         {
@@ -555,7 +554,7 @@ static void control_value_process(engineer_scara_arm_s *scara_arm)
         scara_arm->cc_pose_6d[i] = scara_arm->cc_pose_filter[i].out;
     }
 
-    if (!checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, ROUGHLY_KEY))
+    if (!checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, CC_ROUGHLY))
     {
         for (uint8_t i = 0; i < 3; i++)
         {
