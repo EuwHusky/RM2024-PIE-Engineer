@@ -89,6 +89,8 @@ typedef struct EngineerScaraArm
 {
     /*基础*/
 
+    bool grabbed;
+
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
 
@@ -314,6 +316,12 @@ extern bool *getSilverMiningStatus(void);
 #define ENGINEER_ARM_JOINTS_123_RM_MOTORS_CAN_SLAVE_ID (0x200)
 #define ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL (2)
 #define ENGINEER_ARM_JOINTS_456_RM_MOTORS_CAN_SLAVE_ID (0x200)
+
+// 气泵&电磁阀端口定义
+#define ENGINEER_ARM_PUMP_GPIO_PORT (GPIO_DO_GPIOB)
+#define ENGINEER_ARM_PUMP_GPIO_PIN (31)
+#define ENGINEER_ARM_VALVE_GPIO_PORT (GPIO_DO_GPIOA)
+#define ENGINEER_ARM_VALVE_GPIO_PIN (31)
 
 // 磁编码器安装偏差
 #define ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET (0.0f)

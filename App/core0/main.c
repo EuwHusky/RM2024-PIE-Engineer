@@ -19,6 +19,7 @@
 #include "print_task.h"
 #include "rc_task.h"
 #include "referee_task.h"
+#include "storage_task.h"
 
 /* Freertos任务优先级（数字越小优先级越高1-7） */
 #define INS_TASK_PRIORITY (configMAX_PRIORITIES - 1U)
@@ -30,6 +31,7 @@
 #define RC_TASK_PRIORITY (configMAX_PRIORITIES - 3U)
 #define REFEREE_TASK_PRIORITY (configMAX_PRIORITIES - 4U)
 #define GIMBAL_TASK_PRIORITY (configMAX_PRIORITIES - 5U)
+#define STORAGE_TASK_PRIORITY (configMAX_PRIORITIES - 6U)
 #define PRINT_TASK_PRIORITY (configMAX_PRIORITIES - 7U)
 #define TEST_TASK_PRIORITY (configMAX_PRIORITIES - 7U)
 
@@ -80,7 +82,7 @@ int main(void)
     rflCanInit();
 
     xTaskCreate(INS_task, "INS_task", configMINIMAL_STACK_SIZE + 128U, NULL, INS_TASK_PRIORITY, NULL);
-    xTaskCreate(dualcore_task, "dualcore_task", configMINIMAL_STACK_SIZE + 128U, NULL, DUALCORE_TASK_PRIORITY, NULL);
+    // xTaskCreate(dualcore_task, "dualcore_task", configMINIMAL_STACK_SIZE + 128U, NULL, DUALCORE_TASK_PRIORITY, NULL);
     xTaskCreate(detect_task, "detect_task", configMINIMAL_STACK_SIZE + 128U, NULL, DETECT_TASK_PRIORITY, NULL);
 
     xTaskCreate(referee_task, "referee_task", configMINIMAL_STACK_SIZE + 256U, NULL, REFEREE_TASK_PRIORITY, NULL);
@@ -92,6 +94,7 @@ int main(void)
     xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 512U, NULL, CHASSIS_TASK_PRIORITY, NULL);
 
     xTaskCreate(gimbal_task, "gimbal_task", configMINIMAL_STACK_SIZE + 256U, NULL, GIMBAL_TASK_PRIORITY, NULL);
+    xTaskCreate(storage_task, "storage_task", configMINIMAL_STACK_SIZE + 128U, NULL, STORAGE_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);
     xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE + 128U, NULL, PRINT_TASK_PRIORITY, NULL);

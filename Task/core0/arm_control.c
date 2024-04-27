@@ -100,6 +100,29 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
     }
 }
 
+static void control_value_process(engineer_scara_arm_s *scara_arm)
+{
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        if (i < 3)
+            scara_arm->cc_pose_6d[i] = scara_arm->customer_controller->pose[i];
+        else
+            scara_arm->cc_pose_6d[i] = rflFloatLoopConstrain(scara_arm->customer_controller->pose[i], -RAD_PI, RAD_PI);
+
+        rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->cc_pose_6d[i]);
+        scara_arm->cc_pose_6d[i] = scara_arm->cc_pose_filter[i].out;
+    }
+
+    if (!checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, CC_ROUGHLY))
+    {
+        for (uint8_t i = 0; i < 3; i++)
+        {
+            scara_arm->local_pos_memory[i] = scara_arm->pose_6d[i];
+            scara_arm->cc_pos_memory[i] = scara_arm->cc_pose_6d[i];
+        }
+    }
+}
+
 // 机械臂无力，模型的预期关节变量跟随实际关节变量
 static void no_force_control(engineer_scara_arm_s *scara_arm)
 {
@@ -537,29 +560,6 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
                 if (fabsf(scara_arm->pose_6d[2] - 0.0f) < 0.002f)
                     scara_arm->silver_mining_success = true;
             }
-        }
-    }
-}
-
-static void control_value_process(engineer_scara_arm_s *scara_arm)
-{
-    for (uint8_t i = 0; i < 6; i++)
-    {
-        if (i < 3)
-            scara_arm->cc_pose_6d[i] = scara_arm->customer_controller->pose[i];
-        else
-            scara_arm->cc_pose_6d[i] = rflFloatLoopConstrain(scara_arm->customer_controller->pose[i], -RAD_PI, RAD_PI);
-
-        rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->cc_pose_6d[i]);
-        scara_arm->cc_pose_6d[i] = scara_arm->cc_pose_filter[i].out;
-    }
-
-    if (!checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, CC_ROUGHLY))
-    {
-        for (uint8_t i = 0; i < 3; i++)
-        {
-            scara_arm->local_pos_memory[i] = scara_arm->pose_6d[i];
-            scara_arm->cc_pos_memory[i] = scara_arm->cc_pose_6d[i];
         }
     }
 }

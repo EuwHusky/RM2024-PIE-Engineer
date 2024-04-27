@@ -307,6 +307,7 @@
       <file file_name="Task/print_task.c" />
       <file file_name="Task/core0/rc_task.c" />
       <file file_name="Task/core0/referee_task.c" />
+      <file file_name="Task/core0/storage_task.c" />
       <file file_name="Task/core0/ui_element_builder.c" />
     </folder>
   </project>

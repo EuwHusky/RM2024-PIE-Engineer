@@ -17,6 +17,7 @@
 #include "detect_task.h"
 
 static void arm_init(engineer_scara_arm_s *scara_arm);
+static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm);
 // static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 
 static engineer_scara_arm_s scara_arm;
@@ -35,6 +36,9 @@ void arm_task(void *pvParameters)
     {
         // 接收行为控制任务的指令 控制机械臂
         arm_mode_control(&scara_arm);
+
+        // 抓取机构更新与执行
+        update_and_execute_grabber(&scara_arm);
 
         // // 更新磁编码器反馈
         // update_mag_encoder_ma600_feedback(&scara_arm);
@@ -101,8 +105,6 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
         rflOsDelayMs(10);
     arm_motor_init(scara_arm);
 
-    // MA600_init();
-
     scara_arm->rc = getRemoteControlPointer();
 
     scara_arm->customer_controller = getCustomerControllerData();
@@ -113,7 +115,28 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[4], 0.15f, 0.85f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[5], 0.15f, 0.85f);
 
+    // 气泵
+    HPM_IOC->PAD[IOC_PAD_PB31].FUNC_CTL = IOC_PB31_FUNC_CTL_GPIO_B_31;
+    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN, 0);
+
+    // 卸力阀
+    HPM_IOC->PAD[IOC_PAD_PA31].FUNC_CTL = IOC_PA31_FUNC_CTL_GPIO_A_31;
+    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN, 1);
+
+    // MA600_init();
     // rflSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
+}
+
+static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm)
+{
+    scara_arm->grabbed = 0;
+
+    // 执行
+
+    gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN,
+                   getArmGrabMode() ? 1 : 0); // 气泵
+    gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN,
+                   !getArmGrabMode() ? 1 : 0); // 电磁阀
 }
 
 // static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)

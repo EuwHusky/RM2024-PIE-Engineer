@@ -36,15 +36,15 @@ int main(void)
 {
     board_init_pmp(); // 双核通信共享内存保护
 
-    xTaskCreate(dualcore_task, "dualcore_task", configMINIMAL_STACK_SIZE + 256U, NULL, DUALCORE_TASK_PRIORITY, NULL);
-    xTaskCreate(detect_task, "detect_task", configMINIMAL_STACK_SIZE + 128U, NULL, DETECT_TASK_PRIORITY, NULL);
+    // xTaskCreate(dualcore_task, "dualcore_task", configMINIMAL_STACK_SIZE + 256U, NULL, DUALCORE_TASK_PRIORITY, NULL);
+    // xTaskCreate(detect_task, "detect_task", configMINIMAL_STACK_SIZE + 128U, NULL, DETECT_TASK_PRIORITY, NULL);
 
-    xTaskCreate(pump_task, "pump_task", configMINIMAL_STACK_SIZE, NULL, PUMP_TASK_PRIORITY, NULL);
+    // xTaskCreate(pump_task, "pump_task", configMINIMAL_STACK_SIZE, NULL, PUMP_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);
     xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE, NULL, PRINT_TASK_PRIORITY, NULL);
 
-    vTaskStartScheduler(); //    启动freertos
+    vTaskStartScheduler(); // 启动freertos
     while (1)
         ;
     return 0;
