@@ -23,6 +23,7 @@
 #include "behavior_task.h"
 #include "chassis_task.h"
 #include "gimbal_task.h"
+#include "storage_task.h"
 
 INS_t *ins_;
 transmit_data_021 *data_send;
@@ -33,6 +34,7 @@ const engineer_behavior_manager_s *behavior_print;
 engineer_scara_arm_s *arm_data;
 engineer_chassis_s *chassis_data;
 const engineer_gimbal_s *gimbal_print;
+const engineer_storage_s *storage_print;
 
 const remote_control_s *print_rc_pointer;
 
@@ -96,6 +98,8 @@ void print_task(void *pvParameters)
     arm_data = getArmDataPointer();
     chassis_data = getChassisDataPointer();
     gimbal_print = getGimbalDataPointer();
+    storage_print = getStorageDataPointer();
+
     print_rc_pointer = getRemoteControlPointer();
 
     referee_robot_hp = getRobotHp();
@@ -226,6 +230,15 @@ void print_task(void *pvParameters)
             print_uart_tx_dma_done = false;
 
             /**
+             * @brief Storage
+             */
+            sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d\r\n", behavior_print->behavior,
+                    behavior_print->last_behavior, storage_print->current_target_slot,
+                    storage_print->storage_slot_status[STORAGE_BACK], storage_print->storage_slot_status[STORAGE_FRONT],
+                    storage_print->storage_slot_needed[STORAGE_BACK], storage_print->storage_slot_needed[STORAGE_FRONT],
+                    storage_print->storage_used_num);
+
+            /**
              * @brief Chassis
              */
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f\r\n", chassis_data->follow_offset,
@@ -240,9 +253,6 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", gimbal_print->pitch_pwm_clk_freq,
             // gimbal_print->pitch_pwm_freq,
             //         gimbal_print->pitch_pwm_reload, gimbal_print->pitch_pwm_compare);
-            sprintf((char *)test_txt, "%f,%f,%f\r\n", arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-                    rflMotorGetAngle(&gimbal_print->yaw_motor, RFL_ANGLE_FORMAT_DEGREE));
 
             /**
              * @brief Scara Arm
@@ -252,6 +262,8 @@ void print_task(void *pvParameters)
             //         arm_data->set_pose_6d[3], arm_data->set_pose_6d[4], arm_data->set_pose_6d[5],
             //         arm_data->pose_6d[0], arm_data->pose_6d[1], arm_data->pose_6d[2], arm_data->pose_6d[3],
             //         arm_data->pose_6d[4], arm_data->pose_6d[5]);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->pose_6d[0], arm_data->pose_6d[1],
+            //         arm_data->pose_6d[2], arm_data->pose_6d[3], arm_data->pose_6d[4], arm_data->pose_6d[5]);
             // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[0],
             //         arm_data->cc_pose_6d[1], arm_data->cc_pose_6d[2], arm_data->set_pose_6d[0],
             //         arm_data->set_pose_6d[1], arm_data->set_pose_6d[2], arm_data->local_pos_memory[0],

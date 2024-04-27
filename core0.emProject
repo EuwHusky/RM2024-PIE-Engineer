@@ -77,7 +77,6 @@
     <folder Name="App">
       <file file_name="App/core0/main.c" />
       <file file_name="App/core0/multicore_common.c" />
-      <file file_name="App/core0/sec_core_img.c" />
     </folder>
     <folder Name="Module">
       <folder Name="bmi088">
@@ -91,6 +90,7 @@
         <file file_name="Module/Referee/referee.c" />
         <file file_name="Module/referee/referee_frame_process.c" />
         <file file_name="Module/referee/referee_robot_interaction_manager.c" />
+        <file file_name="App/core0/sec_core_img.c" />
       </folder>
       <folder Name="remote_control">
         <file file_name="Module/remote_control/customer_controller.c" />

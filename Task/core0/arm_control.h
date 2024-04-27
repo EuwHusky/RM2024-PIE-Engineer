@@ -54,6 +54,13 @@
 #define SILVER_MINING_STEP_WAIT (3)
 #define SILVER_MINING_STEP_OK (4)
 
+#define STORAGE_PUSH_STEP_INIT (0)
+#define STORAGE_PUSH_STEP_START (1)
+#define STORAGE_PUSH_STEP_SLOT (2)
+#define STORAGE_PUSH_STEP_PUSH_IN (3)
+
+#define STORAGE_POP_STEP_INIT (0)
+
 /**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量
  */

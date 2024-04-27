@@ -10,6 +10,8 @@
 
 #include "remote_control.h"
 
+#include "storage_task.h"
+
 static void control_value_process(engineer_scara_arm_s *scara_arm);
 
 static void no_force_control(engineer_scara_arm_s *scara_arm);
@@ -21,6 +23,8 @@ static void pose_control(engineer_scara_arm_s *scara_arm);
 static void move_homing_control(engineer_scara_arm_s *scara_arm);
 static void operation_homing_control(engineer_scara_arm_s *scara_arm);
 static void silver_mining_control(engineer_scara_arm_s *scara_arm);
+static void storage_push_control(engineer_scara_arm_s *scara_arm);
+static void storage_pop_control(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量
@@ -61,6 +65,15 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
         {
             scara_arm->silver_mining_step = SILVER_MINING_STEP_INIT;
         }
+
+        if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+        {
+            scara_arm->storage_push_step = STORAGE_PUSH_STEP_INIT;
+        }
+        if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+        {
+            scara_arm->storage_pop_step = STORAGE_POP_STEP_INIT;
+        }
     }
 
     // 关节速度控制
@@ -92,6 +105,12 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
         break;
     case ENGINEER_BEHAVIOR_AUTO_SILVER_MINING:
         silver_mining_control(scara_arm);
+        break;
+    case ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH:
+        storage_push_control(scara_arm);
+        break;
+    case ENGINEER_BEHAVIOR_AUTO_STORAGE_POP:
+        storage_pop_control(scara_arm);
         break;
 
     default:
@@ -429,6 +448,12 @@ static void operation_homing_control(engineer_scara_arm_s *scara_arm)
         scara_arm->operation_homing_success = true;
 }
 
+/**
+ * @brief 取银矿控制
+ * @note 分为两种情况，即完整的自动取矿，和已经手动取矿后的上提并收回
+ *
+ * @param scara_arm
+ */
 static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 {
     if (checkIfRcKeyFallingEdgeDetected(RC_Z))
@@ -443,6 +468,12 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
             scara_arm->silver_mining_grab_detect_timer = 0;
             scara_arm->silver_mining_grab_end_timer = 0;
 
+            // 清除历史误操作
+            if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
+                ;
+            if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
+                ;
+
             scara_arm->set_pose_6d[0] = 0.3f;
             scara_arm->set_pose_6d[1] = 0.0f;
             scara_arm->set_pose_6d[2] = 0.43f;
@@ -454,12 +485,11 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
                 scara_arm->silver_mining_pose_memory[i] = scara_arm->set_pose_6d[i];
             }
 
-            // 清除历史误操作
-            if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
-                ;
-            if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
-                ;
+            // 若已经取到矿，则直接上提
+            if (scara_arm->grabbed)
+                scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
 
+            // 普通完整流程
             if (fabsf(scara_arm->pose_6d[0] - 0.3f) < 0.002f && fabsf(scara_arm->pose_6d[1] - 0.0f) < 0.002f &&
                 fabsf(scara_arm->pose_6d[2] - 0.43f) < 0.002f && fabsf(scara_arm->pose_6d[3] - 0.0f) < 0.04f &&
                 fabsf(scara_arm->pose_6d[4] - 0.0f) < 0.04f && fabsf(scara_arm->pose_6d[5] - 0.0f) < 0.04f)
@@ -562,4 +592,82 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
             }
         }
     }
+}
+
+static void storage_push_control(engineer_scara_arm_s *scara_arm)
+{
+    if (checkIfRcKeyFallingEdgeDetected(RC_Z))
+    {
+        StorageCancelPushIn();
+        scara_arm->storage_push_success = true;
+    }
+
+    if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_INIT)
+    {
+        if (getStoragePushInAvailableSlot() >= STORAGE_NULL)
+        {
+            StorageCancelPushIn();
+            scara_arm->storage_push_success = true;
+        }
+
+        scara_arm->solution = JOINT_3_ON_THE_LEFT;
+        scara_arm->set_pose_6d[0] = 0.061f;
+        scara_arm->set_pose_6d[1] = -0.3015f;
+        scara_arm->set_pose_6d[2] = 0.05f;
+        scara_arm->set_pose_6d[3] = -180.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[4] = 0.0f * DEGREE_TO_RADIAN_FACTOR;
+
+        scara_arm->storage_push_step = STORAGE_PUSH_STEP_START;
+    }
+    else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_START)
+    {
+        if (fabsf(scara_arm->pose_6d[0] - 0.061f) < 0.001f && fabsf(scara_arm->pose_6d[1] + 0.3015f) < 0.001f &&
+            fabsf(scara_arm->pose_6d[2] - 0.05f) < 0.001f &&
+            fabsf(scara_arm->pose_6d[3] + 180.0f * DEGREE_TO_RADIAN_FACTOR) < 0.02f &&
+            fabsf(scara_arm->pose_6d[4] - 0.0f) < 0.02f)
+            scara_arm->storage_push_step = STORAGE_PUSH_STEP_SLOT;
+    }
+    else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SLOT)
+    {
+        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+        {
+            scara_arm->set_pose_6d[0] = -0.34f;
+            scara_arm->set_pose_6d[1] = -0.36f;
+            scara_arm->set_pose_6d[3] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+
+            if (fabsf(scara_arm->pose_6d[0] + 0.34f) < 0.002f && fabsf(scara_arm->pose_6d[1] + 0.36f) < 0.002f &&
+                fabsf(scara_arm->pose_6d[3] + 185.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f)
+                scara_arm->storage_push_step = STORAGE_PUSH_STEP_PUSH_IN;
+        }
+        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+        {
+            scara_arm->set_pose_6d[0] = -0.04f;
+            scara_arm->set_pose_6d[1] = -0.36f;
+            scara_arm->set_pose_6d[3] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+
+            if (fabsf(scara_arm->pose_6d[0] + 0.04f) < 0.002f && fabsf(scara_arm->pose_6d[1] + 0.36f) < 0.002f &&
+                fabsf(scara_arm->pose_6d[3] + 185.0f * DEGREE_TO_RADIAN_FACTOR) < 0.04f)
+                scara_arm->storage_push_step = STORAGE_PUSH_STEP_PUSH_IN;
+        }
+    }
+    else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_PUSH_IN)
+    {
+        scara_arm->set_pose_6d[1] += 0.00008f;
+
+        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+        {
+            if (getStorageSlotStatus(STORAGE_BACK) == STORAGE_SLOT_USED)
+                scara_arm->storage_push_success = true;
+        }
+        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+        {
+            if (getStorageSlotStatus(STORAGE_FRONT) == STORAGE_SLOT_USED)
+                scara_arm->storage_push_success = true;
+        }
+    }
+}
+
+static void storage_pop_control(engineer_scara_arm_s *scara_arm)
+{
+    scara_arm->storage_pop_success = true;
 }

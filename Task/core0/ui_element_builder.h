@@ -5,7 +5,15 @@
 
 extern void uiModeIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
-extern void uiPumpIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+extern void uiSplitLine0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
+extern void uiGrabberPoweredBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+extern void uiGrabbedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
+extern void uiSplitLine1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
+extern void uiStorageFrontUsedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+extern void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
 extern void uiAutoGrabCalibrationLine0Builder(interaction_figure_t *figure,
                                               figure_operation_type_e figure_operation_type);

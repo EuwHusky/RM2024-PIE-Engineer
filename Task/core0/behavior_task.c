@@ -11,6 +11,7 @@
 #include "INS_task.h"
 #include "arm_task.h"
 #include "gimbal_task.h"
+#include "storage_task.h"
 
 engineer_behavior_manager_s behavior_manager;
 
@@ -103,6 +104,8 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_move_homing_success = getArmMoveHomingStatue();
     behavior_manager->arm_operation_homing_success = getArmOperationHomingStatus();
     behavior_manager->silver_mining_success = getSilverMiningStatus();
+    behavior_manager->storage_push_success = getStoragePushStatus();
+    behavior_manager->storage_pop_success = getStoragePushStatus();
     behavior_manager->gimbal_reset_success = getGimbalResetStatus();
 
     behavior_manager->arm_grab = false;
@@ -185,7 +188,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 失能 -> 复位
      * 键鼠 长拨V键触发
      */
-    if (checkIsRcKeyPressed(RC_X) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    if (checkIsRcKeyPressed(RC_C) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
     {
         behavior_manager->km_reset_trigger_timer++;
         if (behavior_manager->km_reset_trigger_timer == 50)
@@ -203,7 +206,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief Any -> 失能
      * 键鼠 长按C键触发
      */
-    if (checkIsRcKeyPressed(RC_C))
+    if (checkIsRcKeyPressed(RC_G))
     {
         behavior_manager->km_disable_trigger_timer++;
         if (behavior_manager->km_disable_trigger_timer == 10)
@@ -218,7 +221,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 机动 -> 作业 / 作业 -> 机动
      * 键鼠 短按G键触发切换
      */
-    if (checkIfRcKeyFallingEdgeDetected(RC_G) && *behavior_manager->arm_reset_success &&
+    if (checkIfRcKeyFallingEdgeDetected(RC_F) && *behavior_manager->arm_reset_success &&
         *behavior_manager->gimbal_reset_success)
     {
         if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
@@ -229,13 +232,48 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
     }
 
-    /**
-     * @brief 手动作业 -> 自动取银矿
-     * 键鼠 短按Z键触发切换
-     */
-    if (checkIfRcKeyFallingEdgeDetected(RC_Z) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+    if (checkIsRcKeyPressed(RC_CTRL))
     {
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_SILVER_MINING);
+        /**
+         * @brief 手动作业 -> 自动取银矿
+         * 键鼠 CTRL+Z键触发切换
+         */
+        if (behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_SILVER_MINING &&
+            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH &&
+            checkIfRcKeyFallingEdgeDetected(RC_Z) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_SILVER_MINING);
+
+        /**
+         * @brief 手动作业 -> 自动取金矿
+         * 键鼠 CTRL+X键触发切换
+         */
+        if (/* behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && */
+            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_POP && checkIfRcKeyFallingEdgeDetected(RC_X) &&
+            behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            // update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+            ;
+    }
+    else if (!checkIsRcKeyPressed(RC_CTRL))
+    {
+        /**
+         * @brief 手动作业 -> 自动存矿
+         * 键鼠 Z键触发切换
+         */
+        if (behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_SILVER_MINING &&
+            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH &&
+            checkIfRcKeyFallingEdgeDetected(RC_Z) && getStorageStatus() != STORAGE_FULL && checkIfArmGrabbed() &&
+            behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH);
+
+        /**
+         * @brief 手动作业 -> 自动取矿
+         * 键鼠 X键触发切换
+         */
+        if (/* behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && */
+            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_POP && checkIfRcKeyFallingEdgeDetected(RC_X) &&
+            getStorageStatus() != STORAGE_EMPTY && !checkIfArmGrabbed() &&
+            behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_POP);
     }
 }
 
@@ -260,9 +298,31 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
     }
 
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && *behavior_manager->silver_mining_success)
+    {
+        *behavior_manager->silver_mining_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    }
+
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING && *behavior_manager->silver_mining_success)
     {
         *behavior_manager->silver_mining_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    }
+    // if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && *behavior_manager->gold_mining_success)
+    // {
+    //     *behavior_manager->gold_mining_successs = false;
+    //     update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    // }
+
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && *behavior_manager->storage_push_success)
+    {
+        *behavior_manager->storage_push_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    }
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP && *behavior_manager->storage_pop_success)
+    {
+        *behavior_manager->storage_pop_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
     }
 
@@ -346,7 +406,7 @@ static void module_operation(engineer_behavior_manager_s *behavior_manager)
      * @brief 重置UI
      * 键鼠 按下X键触发
      */
-    if (checkIsRcKeyPressed(RC_X))
+    if (checkIsRcKeyPressed(RC_C))
     {
         behavior_manager->reset_ui = true;
     }

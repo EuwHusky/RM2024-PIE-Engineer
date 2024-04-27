@@ -87,7 +87,7 @@ typedef enum EngineerScaraArmSolution
 
 typedef struct EngineerScaraArm
 {
-    /*基础*/
+    /* 行为 */
 
     bool grabbed;
 
@@ -99,21 +99,25 @@ typedef struct EngineerScaraArm
     bool move_homing_success;
     bool operation_homing_success;
     bool silver_mining_success;
+    bool storage_push_success;
+    bool storage_pop_success;
 
     uint8_t joint_1_homing_timer;
     uint8_t silver_mining_step;
     uint16_t silver_mining_grab_detect_timer;
     uint16_t silver_mining_grab_end_timer;
+    uint8_t storage_push_step;
+    uint8_t storage_pop_step;
 
     float silver_mining_pose_memory[6]; // 机械臂位置记忆
 
-    /*运动学模型*/
+    /* 运动学模型 */
 
-    rfl_matrix_instance j1_to_base_tmat; /*关节1坐标系到基坐标系变换矩阵*/
+    rfl_matrix_instance j1_to_base_tmat; // 关节1坐标系到基坐标系变换矩阵
     float j1_to_base_tmat_data[16];
-    rfl_matrix_instance tool_to_j6_tmat; /*工具坐标系到关节6坐标系变换矩阵*/
+    rfl_matrix_instance tool_to_j6_tmat; // 工具坐标系到关节6坐标系变换矩阵
     float tool_to_j6_tmat_data[16];
-    rfl_matrix_instance tool_to_base_tmat; /*工具坐标系到基坐标系变换矩阵*/
+    rfl_matrix_instance tool_to_base_tmat; // 工具坐标系到基坐标系变换矩阵
     float tool_to_base_tmat_data[16];
     /**
      * @brief   Scara构型机械臂DH参数
@@ -126,7 +130,7 @@ typedef struct EngineerScaraArm
      */
     float dh[6][5];
 
-    /*状态量*/
+    /* 状态量 */
 
     /**
      * @brief   工具坐标系在基坐标系六自由度位姿 距离单位 m 角度单位 rad
@@ -140,9 +144,9 @@ typedef struct EngineerScaraArm
      */
     float joints_value[6];
 
-    /*控制量*/
+    /* 控制量 */
 
-    engineer_scara_arm_solution_e solution; /*逆运动学多解选择*/
+    engineer_scara_arm_solution_e solution; // 逆运动学多解选择
     /**
      * @brief   预期的工具坐标系在基坐标系六自由度位姿 距离单位 m 角度单位 rad
      * [0:5]    X Y Z YAW PITCH ROLL
@@ -154,7 +158,7 @@ typedef struct EngineerScaraArm
      */
     float set_joints_value[6];
 
-    /*设备*/
+    /* 设备 */
 
     const remote_control_s *rc; // 遥控器数据
 
@@ -170,24 +174,28 @@ typedef struct EngineerScaraArm
 
     rfl_motor_s joints_motors[7];
 
-    float printer[6]; // 只是方便把数发出来
+    // float printer[6]; // 只是方便把数发出来
 
 } engineer_scara_arm_s;
 
 extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
 
+extern bool checkIfArmGrabbed(void);
+
 extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);
 extern bool *getArmOperationHomingStatus(void);
 extern bool *getSilverMiningStatus(void);
+extern bool *getStoragePushStatus(void);
+extern bool *getStoragePopStatus(void);
 
 /* 机械臂结构参数 */
 
 #define ENGINEER_ARM_1_LENGTH (0.276f)  /*第一节小臂臂长*/
 #define ENGINEER_ARM_2_LENGTH (0.3015f) /*第二节小臂臂长*/
 #define ENGINEER_ARM_3_LENGTH (0.07f)   /*第三节小臂臂长*/
-#define ENGINEER_ARM_4_LENGTH (0.055f)  /*第四节小臂臂长*/
+#define ENGINEER_ARM_4_LENGTH (0.145f)  /*第四节小臂臂长*/
 
 /**
  * @brief 抬升链轮半径 单位 mm
@@ -218,8 +226,8 @@ extern bool *getSilverMiningStatus(void);
 #define ENGINEER_ARM_Z_MAX_DISTANCE (0.625f)                                           /*关节1的最大伸展距离*/
 #define ENGINEER_ARM_Z_MIN_DISTANCE (0.0f)                                             /*关节1最小伸展距离*/
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/
-#define ENGINEER_ARM_YAW_MAX_ANGLE (180.0f)                                            /* 末端YAW最大角度 */
-#define ENGINEER_ARM_YAW_MIN_ANGLE (-180.0f)                                           /* 末端YAW最小角度 */
+#define ENGINEER_ARM_YAW_MAX_ANGLE (185.0f)                                            /* 末端YAW最大角度 */
+#define ENGINEER_ARM_YAW_MIN_ANGLE (-185.0f)                                           /* 末端YAW最小角度 */
 #define ENGINEER_ARM_PITCH_MAX_ANGLE (48.0f)                                           /* 末端PITCH最大角度 */
 #define ENGINEER_ARM_PITCH_MIN_ANGLE (-75.0f)                                          /* 末端PITCH最小角度 */
 #define ENGINEER_ARM_ROLL_MAX_ANGLE (720.0f)                                           /* 末端ROLL最大角度 */
@@ -317,11 +325,13 @@ extern bool *getSilverMiningStatus(void);
 #define ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL (2)
 #define ENGINEER_ARM_JOINTS_456_RM_MOTORS_CAN_SLAVE_ID (0x200)
 
-// 气泵&电磁阀端口定义
+// 气泵&电磁阀&气压传感器端口定义
 #define ENGINEER_ARM_PUMP_GPIO_PORT (GPIO_DO_GPIOB)
 #define ENGINEER_ARM_PUMP_GPIO_PIN (31)
 #define ENGINEER_ARM_VALVE_GPIO_PORT (GPIO_DO_GPIOA)
 #define ENGINEER_ARM_VALVE_GPIO_PIN (31)
+#define ENGINEER_ARM_SENSOR_GPIO_PORT (GPIO_DO_GPIOC)
+#define ENGINEER_ARM_SENSOR_GPIO_PIN (0)
 
 // 磁编码器安装偏差
 #define ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET (0.0f)

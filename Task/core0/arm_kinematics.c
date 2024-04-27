@@ -295,10 +295,10 @@ static void set_pose_limiting(engineer_scara_arm_s *scara_arm)
     float y_45 = L3 * sinf(Yaw);
     float x_24 = X - x_56 - x_45;
     float y_24 = Y - y_56 - y_45;
-    scara_arm->printer[0] = x_24;
-    scara_arm->printer[1] = y_24;
+    //scara_arm->printer[0] = x_24;
+    //scara_arm->printer[1] = y_24;
     float xy_24 = sqrtf(x_24 * x_24 + y_24 * y_24);
-    scara_arm->printer[2] = xy_24;
+    //scara_arm->printer[2] = xy_24;
 
     if (x_24 < X_L)
         x_24 = X_L;
@@ -453,9 +453,9 @@ static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
     angle_x24 = atan2f(y24, x24);
     angle_324 = acosf((L1 * L1 + xy24 * xy24 - L2 * L2) / (2 * L1 * xy24));
 
-    scara_arm->printer[0] = x24;
-    scara_arm->printer[1] = y24;
-    scara_arm->printer[2] = xy24;
+    //scara_arm->printer[0] = x24;
+    //scara_arm->printer[1] = y24;
+    //scara_arm->printer[2] = xy24;
 
     if (scara_arm->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
     {

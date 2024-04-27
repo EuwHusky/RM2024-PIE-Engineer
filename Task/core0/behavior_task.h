@@ -21,6 +21,9 @@ typedef enum EngineerBehavior
     ENGINEER_BEHAVIOR_AUTO_SILVER_MINING,    // 自动作业 取银矿
     // ENGINEER_BEHAVIOR_AUTO_GOLD_MINING,      // 自动作业 取中央金矿
     ENGINEER_BEHAVIOR_MANUAL_OPERATION, // 手动作业
+
+    ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH, // 自动存矿
+    ENGINEER_BEHAVIOR_AUTO_STORAGE_POP,  // 自动取矿
 } engineer_behavior_e;
 
 typedef struct EngineerBehaviorManager
@@ -41,9 +44,12 @@ typedef struct EngineerBehaviorManager
     bool *arm_move_homing_success;
     bool *arm_operation_homing_success;
     bool *silver_mining_success;
+    bool *storage_push_success;
+    bool *storage_pop_success;
     bool *gimbal_reset_success;
 
     /* 模块状态输出 */
+
     bool arm_switch_solution;
     bool arm_grab;
     bool reset_ui;
@@ -63,6 +69,7 @@ typedef struct EngineerBehaviorManager
     int16_t dt7_arm_switch_trigger_value;  // 使用DT7切换机械臂解算的触发器值
     uint32_t dt7_arm_switch_trigger_timer; // 使用DT7切换机械臂解算的触发计时器
     uint32_t km_reboot_trigger_timer;      // 使用键鼠重启的触发计时器
+
 } engineer_behavior_manager_s;
 
 extern void behavior_task(void *pvParameters);
