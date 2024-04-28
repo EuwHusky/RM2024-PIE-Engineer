@@ -188,7 +188,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 失能 -> 复位
      * 键鼠 长拨V键触发
      */
-    if (checkIsRcKeyPressed(RC_C) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    if (checkIsRcKeyPressed(RC_V) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
     {
         behavior_manager->km_reset_trigger_timer++;
         if (behavior_manager->km_reset_trigger_timer == 50)
@@ -204,7 +204,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
     /**
      * @brief Any -> 失能
-     * 键鼠 长按C键触发
+     * 键鼠 长按G键触发
      */
     if (checkIsRcKeyPressed(RC_G))
     {
@@ -219,7 +219,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
     /**
      * @brief 机动 -> 作业 / 作业 -> 机动
-     * 键鼠 短按G键触发切换
+     * 键鼠 短按F键触发切换
      */
     if (checkIfRcKeyFallingEdgeDetected(RC_F) && *behavior_manager->arm_reset_success &&
         *behavior_manager->gimbal_reset_success)
@@ -404,16 +404,16 @@ static void module_operation(engineer_behavior_manager_s *behavior_manager)
 
     /**
      * @brief 重置UI
-     * 键鼠 按下X键触发
+     * 键鼠 按下V键触发
      */
-    if (checkIsRcKeyPressed(RC_C))
+    if (checkIsRcKeyPressed(RC_V))
     {
         behavior_manager->reset_ui = true;
     }
 
     /**
      * @brief UI切换
-     * 键鼠 按下E键触发切换
+     * 键鼠 短按E键触发切换
      */
     if (checkIfRcKeyFallingEdgeDetected(RC_E) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
     {

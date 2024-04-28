@@ -3,6 +3,7 @@
 #include "referee.h"
 
 #define PRESS_SEN 5
+#define USE_VT_LINK (false)
 
 static remote_control_s remote_control;
 
@@ -21,26 +22,36 @@ void RemoteControlUpdate(void)
 
     int temp_value = 0;
 
+#if USE_VT_LINK
     remote_control.mouse_x = (temp_value = remote_control.dt7_dr16_data.mouse.x,
                               temp_value ? temp_value : (remote_control.vt_link_data->mouse_x));
     remote_control.mouse_y = (temp_value = remote_control.dt7_dr16_data.mouse.y,
                               temp_value ? temp_value : (remote_control.vt_link_data->mouse_y));
     remote_control.mouse_z = (temp_value = remote_control.dt7_dr16_data.mouse.z,
                               temp_value ? temp_value : (remote_control.vt_link_data->mouse_z));
-
     remote_control.rc_keys[RC_LEFT].is_pressed =
         (temp_value = remote_control.dt7_dr16_data.mouse.press_l,
          temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->left_button_down));
     remote_control.rc_keys[RC_RIGHT].is_pressed =
         (temp_value = remote_control.dt7_dr16_data.mouse.press_r,
          temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->right_button_down));
-
     for (uint8_t i = RC_W; i <= RC_B; i++)
     {
         remote_control.rc_keys[i].is_pressed =
             (temp_value = ((remote_control.dt7_dr16_data.key.v >> (i - RC_W)) & 1),
              temp_value ? temp_value : ((remote_control.vt_link_data->keyboard_value >> (i - RC_W)) & 1));
     }
+#else
+    remote_control.mouse_x = remote_control.dt7_dr16_data.mouse.x;
+    remote_control.mouse_y = remote_control.dt7_dr16_data.mouse.y;
+    remote_control.mouse_z = remote_control.dt7_dr16_data.mouse.z;
+    remote_control.rc_keys[RC_LEFT].is_pressed = remote_control.dt7_dr16_data.mouse.press_l;
+    remote_control.rc_keys[RC_RIGHT].is_pressed = remote_control.dt7_dr16_data.mouse.press_r;
+    for (uint8_t i = RC_W; i <= RC_B; i++)
+    {
+        remote_control.rc_keys[i].is_pressed = ((remote_control.dt7_dr16_data.key.v >> (i - RC_W)) & 1);
+    }
+#endif
 
     for (uint8_t i = 0; i < RC_KEY_NUM; i++)
     {

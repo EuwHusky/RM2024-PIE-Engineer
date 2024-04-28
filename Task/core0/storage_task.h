@@ -38,6 +38,9 @@ typedef struct EngineerStorage
 
     bool storage_slot_needed[STORAGE_MAX_LIMIT];
 
+    uint32_t gpio_port[STORAGE_MAX_LIMIT][3];
+    uint8_t gpio_pin[STORAGE_MAX_LIMIT][3];
+
 } engineer_storage_s;
 
 extern void storage_task(void *pvParameters);
@@ -70,7 +73,14 @@ engineer_storage_slot_index_e getStoragePopOutAvailableSlot(void);
  */
 void StorageConfirmPopOut(void);
 
-// 气泵&电磁阀端口定义
+#define ENGINEER_STORAGE_POWER (0)
+#define ENGINEER_STORAGE_RELIEF (1)
+#define ENGINEER_STORAGE_SENSOR (2)
+
+// 气泵&电磁阀&气压传感器端口定义
+
+#define ENGINEER_STORAGE_GPIO (HPM_GPIO0)
+
 #define ENGINEER_STORAGE_PUMP_GPIO_PORT (GPIO_DO_GPIOF)
 #define ENGINEER_STORAGE_PUMP_GPIO_PIN (1)
 
@@ -87,7 +97,5 @@ void StorageConfirmPopOut(void);
 #define ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PIN (1)
 #define ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT (GPIO_DO_GPIOA)
 #define ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN (11)
-// #define ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT (GPIO_DO_GPIOC)
-// #define ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN (0)
 
 #endif /* _STORAGE_TASK_H__ */

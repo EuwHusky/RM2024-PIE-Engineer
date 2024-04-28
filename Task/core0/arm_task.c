@@ -143,7 +143,7 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN, 1);
 
     // 气压传感器
-    HPM_IOC->PAD[IOC_PAD_PC00].FUNC_CTL = IOC_PC00_FUNC_CTL_GPIO_C_00;
+    HPM_IOC->PAD[IOC_PAD_PA05].FUNC_CTL = IOC_PA05_FUNC_CTL_GPIO_A_05;
     gpio_set_pin_input(HPM_GPIO0, ENGINEER_ARM_SENSOR_GPIO_PORT, ENGINEER_ARM_SENSOR_GPIO_PIN);
 
     // MA600_init();
@@ -155,7 +155,6 @@ static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm)
     // 更新
 
     scara_arm->grabbed = (gpio_read_pin(HPM_GPIO0, ENGINEER_ARM_SENSOR_GPIO_PORT, ENGINEER_ARM_SENSOR_GPIO_PIN) == 0);
-    // scara_arm->grabbed = true;
 
     // 执行
 

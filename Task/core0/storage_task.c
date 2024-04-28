@@ -3,8 +3,10 @@
 #include "drv_delay.h"
 
 #include "INS_task.h"
+#include "behavior_task.h"
 
-#define STATUS_DETECT_TIMER_THRESHOLD_VALUE (100)
+#define USED_DETECT_TIMER_THRESHOLD_VALUE (20)
+#define EMPTY_DETECT_TIMER_THRESHOLD_VALUE (200)
 
 static void storage_init(engineer_storage_s *storage);
 static void storage_update(engineer_storage_s *storage);
@@ -151,102 +153,117 @@ static void storage_init(engineer_storage_s *storage)
         storage->used_detect_timer[i] = 0;
     }
 
+    storage->gpio_port[STORAGE_FRONT][ENGINEER_STORAGE_POWER] = ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PORT;
+    storage->gpio_port[STORAGE_FRONT][ENGINEER_STORAGE_RELIEF] = ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PORT;
+    storage->gpio_port[STORAGE_FRONT][ENGINEER_STORAGE_SENSOR] = ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PORT;
+
+    storage->gpio_pin[STORAGE_FRONT][ENGINEER_STORAGE_POWER] = ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PIN;
+    storage->gpio_pin[STORAGE_FRONT][ENGINEER_STORAGE_RELIEF] = ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PIN;
+    storage->gpio_pin[STORAGE_FRONT][ENGINEER_STORAGE_SENSOR] = ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PIN;
+
+    storage->gpio_port[STORAGE_BACK][ENGINEER_STORAGE_POWER] = ENGINEER_STORAGE_BACK_POWER_VALVE_GPIO_PORT;
+    storage->gpio_port[STORAGE_BACK][ENGINEER_STORAGE_RELIEF] = ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PORT;
+    storage->gpio_port[STORAGE_BACK][ENGINEER_STORAGE_SENSOR] = ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT;
+
+    storage->gpio_pin[STORAGE_BACK][ENGINEER_STORAGE_POWER] = ENGINEER_STORAGE_BACK_POWER_VALVE_GPIO_PIN;
+    storage->gpio_pin[STORAGE_BACK][ENGINEER_STORAGE_RELIEF] = ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PIN;
+    storage->gpio_pin[STORAGE_BACK][ENGINEER_STORAGE_SENSOR] = ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN;
+
     // 气泵
     HPM_IOC->PAD[IOC_PAD_PF01].FUNC_CTL = IOC_PF01_FUNC_CTL_GPIO_F_01;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_STORAGE_PUMP_GPIO_PORT, ENGINEER_STORAGE_PUMP_GPIO_PIN, 0);
+    gpio_set_pin_output_with_initial(ENGINEER_STORAGE_GPIO, ENGINEER_STORAGE_PUMP_GPIO_PORT,
+                                     ENGINEER_STORAGE_PUMP_GPIO_PIN, 0);
 
     // 前储矿动力阀
     HPM_IOC->PAD[IOC_PAD_PA25].FUNC_CTL = IOC_PA25_FUNC_CTL_GPIO_A_25;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PORT,
+    gpio_set_pin_output_with_initial(ENGINEER_STORAGE_GPIO, ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PORT,
                                      ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PIN, 0);
 
     // 前储矿卸力阀
     HPM_IOC->PAD[IOC_PAD_PA24].FUNC_CTL = IOC_PA24_FUNC_CTL_GPIO_A_24;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PORT,
+    gpio_set_pin_output_with_initial(ENGINEER_STORAGE_GPIO, ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PORT,
                                      ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PIN, 0);
 
     // 前储矿气压传感器
     HPM_IOC->PAD[IOC_PAD_PA06].FUNC_CTL = IOC_PA06_FUNC_CTL_GPIO_A_06;
-    gpio_set_pin_input(HPM_GPIO0, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PORT, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PIN);
+    gpio_set_pin_input(ENGINEER_STORAGE_GPIO, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PORT,
+                       ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PIN);
 
     // 后储矿动力阀
     HPM_IOC->PAD[IOC_PAD_PB02].FUNC_CTL = IOC_PB02_FUNC_CTL_GPIO_B_02;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_STORAGE_BACK_POWER_VALVE_GPIO_PORT,
+    gpio_set_pin_output_with_initial(ENGINEER_STORAGE_GPIO, ENGINEER_STORAGE_BACK_POWER_VALVE_GPIO_PORT,
                                      ENGINEER_STORAGE_BACK_POWER_VALVE_GPIO_PIN, 1);
 
     // 后储矿卸力阀
     HPM_IOC->PAD[IOC_PAD_PB01].FUNC_CTL = IOC_PB01_FUNC_CTL_GPIO_B_01;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PORT,
+    gpio_set_pin_output_with_initial(ENGINEER_STORAGE_GPIO, ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PORT,
                                      ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PIN, 1);
 
     // 后储矿气压传感器
     HPM_IOC->PAD[IOC_PAD_PA11].FUNC_CTL = IOC_PA11_FUNC_CTL_GPIO_A_11;
-    // HPM_IOC->PAD[IOC_PAD_PC00].FUNC_CTL = IOC_PC00_FUNC_CTL_GPIO_C_00;
-    gpio_set_pin_input(HPM_GPIO0, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN);
+    gpio_set_pin_input(ENGINEER_STORAGE_GPIO, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT,
+                       ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN);
 }
 
 static void storage_update(engineer_storage_s *storage)
 {
-    // 读取气压传感器
+    // 更新槽位矿石状态
+
     for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
         storage->last_storage_slot_status[i] = storage->storage_slot_status[i];
 
-    // storage->storage_slot_status[STORAGE_FRONT] = (gpio_read_pin(HPM_GPIO0, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PORT,
-    //                                                              ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PIN) == 0);
-    // storage->storage_slot_status[STORAGE_BACK] =
-    //     (gpio_read_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN) ==
-    //     0);
+    // 判断槽位是否吸取到矿石
 
-    // STORAGE_FRONT
-
-    if (storage->storage_slot_status[STORAGE_FRONT] == STORAGE_SLOT_EMPTY &&
-        gpio_read_pin(HPM_GPIO0, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PORT, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PIN) == 0)
+    for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
     {
-        storage->used_detect_timer[STORAGE_FRONT]++;
-        if (storage->used_detect_timer[STORAGE_FRONT] >= STATUS_DETECT_TIMER_THRESHOLD_VALUE)
-            storage->storage_slot_status[STORAGE_FRONT] = STORAGE_SLOT_USED;
+        if (storage->storage_slot_status[i] == STORAGE_SLOT_EMPTY &&
+            gpio_read_pin(ENGINEER_STORAGE_GPIO, storage->gpio_port[i][ENGINEER_STORAGE_SENSOR],
+                          storage->gpio_pin[i][ENGINEER_STORAGE_SENSOR]) == 0)
+        {
+            storage->used_detect_timer[i]++;
+            if (storage->used_detect_timer[i] >= USED_DETECT_TIMER_THRESHOLD_VALUE)
+                storage->storage_slot_status[i] = STORAGE_SLOT_USED;
+        }
+        else
+        {
+            storage->used_detect_timer[i] = 0;
+        }
+    }
+
+    // 判断槽位已吸取到的矿石是否意外掉落
+    // 由于槽位一开一关的情况下，气路负压不足会导致传感器无法触发，故在存矿模式下不做掉落判断
+
+    if (getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH &&
+        getEngineerCurrentBehavior() != ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+    {
+        for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+        {
+            if (storage->storage_slot_status[i] == STORAGE_SLOT_USED &&
+                gpio_read_pin(ENGINEER_STORAGE_GPIO, storage->gpio_port[i][ENGINEER_STORAGE_SENSOR],
+                              storage->gpio_pin[i][ENGINEER_STORAGE_SENSOR]) == 1)
+            {
+                storage->empty_detect_timer[i]++;
+                if (storage->empty_detect_timer[i] >= EMPTY_DETECT_TIMER_THRESHOLD_VALUE)
+                    storage->storage_slot_status[i] = STORAGE_SLOT_EMPTY;
+            }
+            else
+            {
+                storage->empty_detect_timer[i] = 0;
+            }
+        }
     }
     else
-        storage->used_detect_timer[STORAGE_FRONT] = 0;
-
-    if (storage->storage_slot_status[STORAGE_FRONT] == STORAGE_SLOT_USED &&
-        gpio_read_pin(HPM_GPIO0, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PORT, ENGINEER_STORAGE_FRONT_SENSOR_GPIO_PIN) == 1)
     {
-        storage->empty_detect_timer[STORAGE_FRONT]++;
-        if (storage->empty_detect_timer[STORAGE_FRONT] >= STATUS_DETECT_TIMER_THRESHOLD_VALUE)
-            storage->storage_slot_status[STORAGE_FRONT] = STORAGE_SLOT_EMPTY;
+        for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+            storage->empty_detect_timer[i] = 0;
     }
-    else
-        storage->empty_detect_timer[STORAGE_FRONT] = 0;
-
-    // STORAGE_BACK
-
-    if (storage->storage_slot_status[STORAGE_BACK] == STORAGE_SLOT_EMPTY &&
-        gpio_read_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN) == 0)
-    {
-        storage->used_detect_timer[STORAGE_BACK]++;
-        if (storage->used_detect_timer[STORAGE_BACK] >= STATUS_DETECT_TIMER_THRESHOLD_VALUE)
-            storage->storage_slot_status[STORAGE_BACK] = STORAGE_SLOT_USED;
-    }
-    else
-        storage->used_detect_timer[STORAGE_BACK] = 0;
-
-    if (storage->storage_slot_status[STORAGE_BACK] == STORAGE_SLOT_USED &&
-        gpio_read_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PORT, ENGINEER_STORAGE_BACK_SENSOR_GPIO_PIN) == 1)
-    {
-        storage->empty_detect_timer[STORAGE_BACK]++;
-        if (storage->empty_detect_timer[STORAGE_BACK] >= STATUS_DETECT_TIMER_THRESHOLD_VALUE)
-            storage->storage_slot_status[STORAGE_BACK] = STORAGE_SLOT_EMPTY;
-    }
-    else
-        storage->empty_detect_timer[STORAGE_BACK] = 0;
 
     // 判断矿石是否意外掉落 若是则关闭该槽位的吸取
 
-    // for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
-    //     if (storage->last_storage_slot_status[i] == STORAGE_SLOT_USED &&
-    //         storage->storage_slot_status[i] == STORAGE_SLOT_EMPTY)
-    //         storage->storage_slot_needed[i] = false;
+    for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+        if (storage->last_storage_slot_status[i] == STORAGE_SLOT_USED &&
+            storage->storage_slot_status[i] == STORAGE_SLOT_EMPTY)
+            storage->storage_slot_needed[i] = false;
 
     // 计算已使用槽位数量
 
@@ -262,15 +279,13 @@ static void storage_execute(engineer_storage_s *storage)
     gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_PUMP_GPIO_PORT, ENGINEER_STORAGE_PUMP_GPIO_PIN,
                    (storage->storage_slot_needed[STORAGE_FRONT] || storage->storage_slot_needed[STORAGE_BACK]) ? 1 : 0);
 
-    // 前储矿气阀
-    gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PORT, ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PIN,
-                   storage->storage_slot_needed[STORAGE_FRONT] ? 1 : 0);
-    gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PORT,
-                   ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PIN, storage->storage_slot_needed[STORAGE_FRONT] ? 0 : 1);
-
-    // 后储矿气阀
-    gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_POWER_VALVE_GPIO_PORT, ENGINEER_STORAGE_BACK_POWER_VALVE_GPIO_PIN,
-                   storage->storage_slot_needed[STORAGE_BACK] ? 1 : 0);
-    gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PORT, ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PIN,
-                   storage->storage_slot_needed[STORAGE_BACK] ? 0 : 1);
+    for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+    {
+        // 动力阀
+        gpio_write_pin(ENGINEER_STORAGE_GPIO, storage->gpio_port[i][ENGINEER_STORAGE_POWER],
+                       storage->gpio_pin[i][ENGINEER_STORAGE_POWER], storage->storage_slot_needed[i] ? 1 : 0);
+        // 卸力阀
+        gpio_write_pin(ENGINEER_STORAGE_GPIO, storage->gpio_port[i][ENGINEER_STORAGE_RELIEF],
+                       storage->gpio_pin[i][ENGINEER_STORAGE_RELIEF], storage->storage_slot_needed[i] ? 0 : 1);
+    }
 }

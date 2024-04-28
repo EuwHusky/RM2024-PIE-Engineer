@@ -31,12 +31,12 @@ transmit_data_120 *data_read;
 
 const engineer_behavior_manager_s *behavior_print;
 
-engineer_scara_arm_s *arm_data;
-engineer_chassis_s *chassis_data;
+engineer_scara_arm_s *arm_print;
+engineer_chassis_s *chassis_print;
 const engineer_gimbal_s *gimbal_print;
 const engineer_storage_s *storage_print;
 
-const remote_control_s *print_rc_pointer;
+const remote_control_s *rc_print;
 
 const game_robot_HP_t *referee_robot_hp;
 const robot_status_t *referee_robot_status;
@@ -95,12 +95,12 @@ void print_task(void *pvParameters)
 
     behavior_print = getEngineerBehaviorManagerPointer();
 
-    arm_data = getArmDataPointer();
-    chassis_data = getChassisDataPointer();
+    arm_print = getArmDataPointer();
+    chassis_print = getChassisDataPointer();
     gimbal_print = getGimbalDataPointer();
     storage_print = getStorageDataPointer();
 
-    print_rc_pointer = getRemoteControlPointer();
+    rc_print = getRemoteControlPointer();
 
     referee_robot_hp = getRobotHp();
     referee_robot_status = getRobotStatus();
@@ -218,12 +218,12 @@ void print_task(void *pvParameters)
 
 #else
 
-        // motor_0_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].driver;
-        // motor_1_driver_test = (rm_motor_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].driver;
+        // motor_0_driver_test = (rm_motor_s *)arm_print->joints_motors[MOTOR_JOINT1_LEFT].driver;
+        // motor_1_driver_test = (rm_motor_s *)arm_print->joints_motors[MOTOR_JOINT1_RIGHT].driver;
 
         // motor_0_controller_test = (rfl_motor_pid_controller_s
-        // *)arm_data->joints_motors[MOTOR_JOINT1_LEFT].controller; motor_1_controller_test =
-        // (rfl_motor_pid_controller_s *)arm_data->joints_motors[MOTOR_JOINT1_RIGHT].controller;
+        // *)arm_print->joints_motors[MOTOR_JOINT1_LEFT].controller; motor_1_controller_test =
+        // (rfl_motor_pid_controller_s *)arm_print->joints_motors[MOTOR_JOINT1_RIGHT].controller;
 
         if (print_uart_tx_dma_done)
         {
@@ -232,20 +232,21 @@ void print_task(void *pvParameters)
             /**
              * @brief Storage
              */
-            sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d\r\n", behavior_print->behavior,
-                    behavior_print->last_behavior, storage_print->current_target_slot,
-                    storage_print->storage_slot_status[STORAGE_BACK], storage_print->storage_slot_status[STORAGE_FRONT],
-                    storage_print->storage_slot_needed[STORAGE_BACK], storage_print->storage_slot_needed[STORAGE_FRONT],
-                    storage_print->storage_used_num);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d\r\n", behavior_print->behavior,
+            //         behavior_print->last_behavior, storage_print->current_target_slot,
+            //         storage_print->storage_slot_status[STORAGE_BACK],
+            //         storage_print->storage_slot_status[STORAGE_FRONT],
+            //         storage_print->storage_slot_needed[STORAGE_BACK],
+            //         storage_print->storage_slot_needed[STORAGE_FRONT], storage_print->storage_used_num);
 
             /**
              * @brief Chassis
              */
-            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f\r\n", chassis_data->follow_offset,
-            //         chassis_data->set_control_angle.deg, chassis_data->model.control_vector.deg,
-            //         chassis_data->model.set_forward_vector.deg, chassis_data->model.forward_vector_->deg,
-            //         chassis_data->model.speed_vector_[0], chassis_data->model.speed_vector_[1],
-            //         chassis_data->model.speed_vector_[2]);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f\r\n", chassis_print->follow_offset,
+            //         chassis_print->set_control_angle.deg, chassis_print->model.control_vector.deg,
+            //         chassis_print->model.set_forward_vector.deg, chassis_print->model.forward_vector_->deg,
+            //         chassis_print->model.speed_vector_[0], chassis_print->model.speed_vector_[1],
+            //         chassis_print->model.speed_vector_[2]);
 
             /**
              * @brief Gimbal
@@ -258,36 +259,28 @@ void print_task(void *pvParameters)
              * @brief Scara Arm
             //  */
             // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-            //         arm_data->set_pose_6d[0], arm_data->set_pose_6d[1], arm_data->set_pose_6d[2],
-            //         arm_data->set_pose_6d[3], arm_data->set_pose_6d[4], arm_data->set_pose_6d[5],
-            //         arm_data->pose_6d[0], arm_data->pose_6d[1], arm_data->pose_6d[2], arm_data->pose_6d[3],
-            //         arm_data->pose_6d[4], arm_data->pose_6d[5]);
-            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_data->pose_6d[0], arm_data->pose_6d[1],
-            //         arm_data->pose_6d[2], arm_data->pose_6d[3], arm_data->pose_6d[4], arm_data->pose_6d[5]);
-            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[0],
-            //         arm_data->cc_pose_6d[1], arm_data->cc_pose_6d[2], arm_data->set_pose_6d[0],
-            //         arm_data->set_pose_6d[1], arm_data->set_pose_6d[2], arm_data->local_pos_memory[0],
-            //         arm_data->local_pos_memory[1], arm_data->local_pos_memory[2]);
-            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[0],
-            //         arm_data->cc_pose_6d[1], arm_data->cc_pose_6d[2], arm_data->customer_controller->pose[0],
-            //         arm_data->customer_controller->pose[1], arm_data->customer_controller->pose[2]);
-            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", arm_data->cc_pose_6d[3],
-            //         arm_data->cc_pose_6d[4], arm_data->cc_pose_6d[5], arm_data->customer_controller->pose[3],
-            //         arm_data->customer_controller->pose[4], arm_data->customer_controller->pose[5]);
-            // sprintf((char *)test_txt, "%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-            //         arm_data->start_up_status, arm_data->set_joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_data->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].control_output_,
-            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].torque_,
-            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].set_speed_,
-            //         arm_data->joints_motors[MOTOR_JOINT56_LEFT].speed_,
-            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].control_output_,
-            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].torque_,
-            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].set_speed_,
-            //         arm_data->joints_motors[MOTOR_JOINT56_RIGHT].speed_);
-            // sprintf((char *)test_txt, "%7.4f,%7.4f,%6.3f,%6.3f,%6.3f\r\n", arm_data->set_joints_value[JOINT_1],
-            //         arm_data->joints_value[JOINT_1], arm_data->joints_motors[MOTOR_JOINT1_LEFT].set_angle_.deg,
-            //         arm_data->printer[0], arm_data->printer[1], arm_data->printer[2]);
+            //         arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
+            //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
+            //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
+            //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->pose_6d[0], arm_print->pose_6d[1],
+            //         arm_print->pose_6d[2], arm_print->pose_6d[3], arm_print->pose_6d[4], arm_print->pose_6d[5],
+            //         arm_print->printer[0], arm_print->printer[1], arm_print->printer[2]);
+            // sprintf((char *)test_txt, "%d,%f,%f\r\n", arm_print->silver_mining_step, arm_print->set_pose_6d[2],
+            //         arm_print->pose_6d[2]);
+            // sprintf((char *)test_txt,
+            //         "%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f\r\n",
+            //         arm_print->customer_controller->pose[0], arm_print->customer_controller->pose[1],
+            //         arm_print->customer_controller->pose[2], arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1],
+            //         arm_print->cc_pose_6d[2], arm_print->cc_pos_memory[0], arm_print->cc_pos_memory[1],
+            //         arm_print->cc_pos_memory[2], arm_print->local_pos_memory[0], arm_print->local_pos_memory[1],
+            //         arm_print->local_pos_memory[2], arm_print->set_pose_6d[0], arm_print->set_pose_6d[1],
+            //         arm_print->set_pose_6d[2]);
+            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", getCustomerControllerData()->pose[0],
+                    getCustomerControllerData()->pose[1], getCustomerControllerData()->pose[2],
+                    arm_print->customer_controller->pose[0], arm_print->customer_controller->pose[1],
+                    arm_print->customer_controller->pose[2], rc_print->cc_data->pose[0], rc_print->cc_data->pose[1],
+                    rc_print->cc_data->pose[2]);
 
             /**
              * @brief Motor PID
