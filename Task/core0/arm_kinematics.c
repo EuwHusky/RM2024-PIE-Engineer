@@ -115,9 +115,7 @@ void arm_model_update_control(engineer_scara_arm_s *scara_arm)
     if (scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
     {
 #if !USE_JOINTS_CONTROL
-        if (scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING &&
-            scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING)
-            solve_inverse_kinematics(scara_arm);
+        solve_inverse_kinematics(scara_arm);
 #endif
 
         scara_arm->set_joints_value[JOINT_1] = rflFloatConstrain(

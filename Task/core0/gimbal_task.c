@@ -22,7 +22,7 @@ static void gimbal_steer_pitch_normal_control(engineer_gimbal_s *gimbal);
 static void gimbal_steer_pitch_reset_control(engineer_gimbal_s *gimbal);
 static void gimbal_motor_yaw_can_rx_callback(void);
 
-static engineer_gimbal_s gimbal;
+ATTR_PLACE_AT_NONCACHEABLE static engineer_gimbal_s gimbal;
 
 void gimbal_task(void *pvParameters)
 {
@@ -66,7 +66,7 @@ static void gimbal_init(engineer_gimbal_s *gimbal)
     gimbal->behavior = ENGINEER_BEHAVIOR_DISABLE;
     gimbal->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
 
-    gimbal->reset_step_flag = ENGINEER_GIMBAL_RESET_STEP_HOMING;
+    gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_HOMING;
     gimbal->reset_success = false;
 
     rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, GIMBAL_YAW_START_ANGLE);
@@ -81,16 +81,16 @@ static void gimbal_init(engineer_gimbal_s *gimbal)
     rfl_motor_config_s motor_config = {0};
     rflMotorGetDefaultConfig(&motor_config, RFL_MOTOR_RM_M2006, RFL_MOTOR_CONTROLLER_PID);
     motor_config.control_period_factor = 4.0f;
-    motor_config.angle_pid_kp = ENGINEER_GIMBAL_YAW_RM_M3508_ANGLE_PID_KP;
-    motor_config.angle_pid_ki = ENGINEER_GIMBAL_YAW_RM_M3508_ANGLE_PID_KI;
-    motor_config.angle_pid_kd = ENGINEER_GIMBAL_YAW_RM_M3508_ANGLE_PID_KD;
-    motor_config.angle_pid_max_iout = ENGINEER_GIMBAL_YAW_RM_M3508_ANGLE_PID_MAX_IOUT;
-    motor_config.angle_pid_max_out = ENGINEER_GIMBAL_YAW_RM_M3508_ANGLE_PID_MAX_OUT;
-    motor_config.speed_pid_kp = ENGINEER_GIMBAL_YAW_RM_M3508_SPEED_PID_KP;
-    motor_config.speed_pid_ki = ENGINEER_GIMBAL_YAW_RM_M3508_SPEED_PID_KI;
-    motor_config.speed_pid_kd = ENGINEER_GIMBAL_YAW_RM_M3508_SPEED_PID_KD;
-    motor_config.speed_pid_max_iout = ENGINEER_GIMBAL_YAW_RM_M3508_SPEED_PID_MAX_IOUT;
-    motor_config.speed_pid_max_out = ENGINEER_GIMBAL_YAW_RM_M3508_SPEED_PID_MAX_OUT;
+    motor_config.angle_pid_kp = ENGINEER_GIMBAL_YAW_RM_M2006_ANGLE_PID_KP;
+    motor_config.angle_pid_ki = ENGINEER_GIMBAL_YAW_RM_M2006_ANGLE_PID_KI;
+    motor_config.angle_pid_kd = ENGINEER_GIMBAL_YAW_RM_M2006_ANGLE_PID_KD;
+    motor_config.angle_pid_max_iout = ENGINEER_GIMBAL_YAW_RM_M2006_ANGLE_PID_MAX_IOUT;
+    motor_config.angle_pid_max_out = ENGINEER_GIMBAL_YAW_RM_M2006_ANGLE_PID_MAX_OUT;
+    motor_config.speed_pid_kp = ENGINEER_GIMBAL_YAW_RM_M2006_SPEED_PID_KP;
+    motor_config.speed_pid_ki = ENGINEER_GIMBAL_YAW_RM_M2006_SPEED_PID_KI;
+    motor_config.speed_pid_kd = ENGINEER_GIMBAL_YAW_RM_M2006_SPEED_PID_KD;
+    motor_config.speed_pid_max_iout = ENGINEER_GIMBAL_YAW_RM_M2006_SPEED_PID_MAX_IOUT;
+    motor_config.speed_pid_max_out = ENGINEER_GIMBAL_YAW_RM_M2006_SPEED_PID_MAX_OUT;
     motor_config.can_ordinal = GIMBAL_MOTORS_CAN_ORDINAL;
     motor_config.master_can_id = 0x201;
     rflMotorInit(&gimbal->yaw_motor, &motor_config);
@@ -158,12 +158,14 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
 
         if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
         {
-            gimbal->reset_step_flag = ENGINEER_GIMBAL_RESET_STEP_HOMING;
+            rflMotorSetMaxSpeed(&gimbal->yaw_motor, 3.2f);
+            gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_HOMING;
             rflMotorSetDegAngleLimit(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_GIMBAL_YAW_INITIAL_MAX_ANGLE,
                                      ENGINEER_GIMBAL_YAW_INITIAL_MIN_ANGLE);
         }
         else if (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_RESET && gimbal->behavior != ENGINEER_BEHAVIOR_RESET)
         {
+            rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.8f);
             rflMotorSetDegAngleLimit(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_GIMBAL_YAW_MAX_ANGLE,
                                      ENGINEER_GIMBAL_YAW_MIN_ANGLE);
         }
@@ -199,8 +201,6 @@ static void gimbal_update_and_execute(engineer_gimbal_s *gimbal)
 {
     rflMotorSetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, gimbal->set_gimbal_angle.deg);
 
-    rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.8f);
-
     rflMotorUpdateStatus(&gimbal->yaw_motor);
     rflMotorUpdateControl(&gimbal->yaw_motor);
     rflRmMotorControl(GIMBAL_MOTORS_CAN_ORDINAL, GIMBAL_MOTORS_CAN_SLAVE_ID, rflMotorGetOutput(&gimbal->yaw_motor), 0,
@@ -223,7 +223,7 @@ static void gimbal_reset_control(engineer_gimbal_s *gimbal)
     // gimbal->reset_success = true; // 只是测试时用来取消归中
     if (gimbal->reset_success == false)
     {
-        if (gimbal->reset_step_flag == ENGINEER_GIMBAL_RESET_STEP_HOMING)
+        if (gimbal->reset_step == ENGINEER_GIMBAL_RESET_STEP_HOMING)
         {
             rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE,
                            gimbal->set_gimbal_angle.deg + GIMBAL_YAW_HOMING_STEP_ANGLE);
@@ -232,10 +232,10 @@ static void gimbal_reset_control(engineer_gimbal_s *gimbal)
                 fabsf(rflMotorGetSpeed(&gimbal->yaw_motor)) < 0.2f)
             {
                 rflMotorResetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, GIMBAL_YAW_HOMING_ANGLE, false);
-                gimbal->reset_step_flag = ENGINEER_GIMBAL_RESET_STEP_STARTING;
+                gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_STARTING;
             }
         }
-        else if (gimbal->reset_step_flag == ENGINEER_GIMBAL_RESET_STEP_STARTING)
+        else if (gimbal->reset_step == ENGINEER_GIMBAL_RESET_STEP_STARTING)
         {
             rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, -getChassisFollowOffsetMemory());
 

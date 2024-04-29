@@ -12,7 +12,7 @@ static void storage_init(engineer_storage_s *storage);
 static void storage_update(engineer_storage_s *storage);
 static void storage_execute(engineer_storage_s *storage);
 
-static engineer_storage_s storage;
+ATTR_PLACE_AT_NONCACHEABLE static engineer_storage_s storage;
 
 void storage_task(void *pvParameters)
 {

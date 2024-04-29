@@ -25,7 +25,7 @@ static void chassis_motor_1_can_rx_callback(void);
 static void chassis_motor_2_can_rx_callback(void);
 static void chassis_motor_3_can_rx_callback(void);
 
-static engineer_chassis_s chassis;
+ATTR_PLACE_AT_NONCACHEABLE static engineer_chassis_s chassis;
 
 void chassis_task(void *pvParameters)
 {

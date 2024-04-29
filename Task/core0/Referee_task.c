@@ -31,15 +31,15 @@ ATTR_PLACE_AT_NONCACHEABLE uint8_t pm_rx_buf[PM_UART_RX_BUF_LENGHT]; // 接收�
 ATTR_PLACE_AT_NONCACHEABLE uint8_t pm_tx_buf[REF_PROTOCOL_FRAME_MAX_SIZE];
 volatile bool pm_uart_rx_dma_done = true; // dma传输完成标志位
 volatile bool pm_uart_tx_dma_done = true; // dma传输完成标志位
-fifo_s_t *pm_uart_fifo = NULL;
-uint8_t *pm_tx_frame_pointer;
+ATTR_PLACE_AT_NONCACHEABLE static fifo_s_t *pm_uart_fifo = NULL;
+ATTR_PLACE_AT_NONCACHEABLE static uint8_t *pm_tx_frame_pointer;
 
 // 图传链路裁判系统数据相关变量和结构
 ATTR_PLACE_AT_NONCACHEABLE uint8_t vt_rx_buf[VT_UART_RX_BUF_LENGHT]; // 接收原始数据
 volatile bool vt_uart_rx_dma_done = true;                            // dma传输完成标志位
-fifo_s_t *vt_uart_fifo = NULL;
+ATTR_PLACE_AT_NONCACHEABLE static fifo_s_t *vt_uart_fifo = NULL;
 
-static uint32_t step_clock = 0;
+ATTR_PLACE_AT_NONCACHEABLE static uint32_t step_clock = 0;
 uint32_t test_all = 0;
 uint32_t test_pm = 0;
 uint32_t test_vt = 0;

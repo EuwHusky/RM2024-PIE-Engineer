@@ -13,7 +13,7 @@
 #include "gimbal_task.h"
 #include "storage_task.h"
 
-engineer_behavior_manager_s behavior_manager;
+ATTR_PLACE_AT_NONCACHEABLE static engineer_behavior_manager_s behavior_manager;
 
 static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager);
 static void update_robot_status(engineer_behavior_manager_s *behavior_manager);

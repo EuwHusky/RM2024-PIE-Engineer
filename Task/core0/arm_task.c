@@ -20,7 +20,7 @@ static void arm_init(engineer_scara_arm_s *scara_arm);
 static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm);
 // static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 
-static engineer_scara_arm_s scara_arm;
+ATTR_PLACE_AT_NONCACHEABLE static engineer_scara_arm_s scara_arm;
 
 void arm_task(void *pvParameters)
 {
@@ -134,12 +134,12 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->rc = getRemoteControlPointer();
 
     scara_arm->customer_controller = getCustomerControllerData();
-    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[0], 0.15f, 0.85f);
-    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[1], 0.15f, 0.85f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[0], 0.02f, 0.98f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[1], 0.02f, 0.98f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[2], 0.01f, 0.99f);
-    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[3], 0.15f, 0.85f);
-    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[4], 0.15f, 0.85f);
-    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[5], 0.15f, 0.85f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[3], 0.03f, 0.97f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[4], 0.03f, 0.97f);
+    rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[5], 0.03f, 0.97f);
 
     // 气泵
     HPM_IOC->PAD[IOC_PAD_PB31].FUNC_CTL = IOC_PB31_FUNC_CTL_GPIO_B_31;

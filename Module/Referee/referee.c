@@ -3,10 +3,10 @@
 
 #include "referee.h"
 
-static game_robot_HP_t game_robot_HP;
-static robot_status_t robot_status;
-static custom_robot_data_t customer_controller_data;
-static vt_link_remote_control_t vt_link_remote_control;
+ATTR_PLACE_AT_NONCACHEABLE static game_robot_HP_t game_robot_HP;
+ATTR_PLACE_AT_NONCACHEABLE static robot_status_t robot_status;
+ATTR_PLACE_AT_NONCACHEABLE static custom_robot_data_t customer_controller_data;
+ATTR_PLACE_AT_NONCACHEABLE static vt_link_remote_control_t vt_link_remote_control;
 
 void refereeInitData(void)
 {
@@ -39,30 +39,14 @@ void referee_data_decode(uint8_t *frame, uint16_t cmd_id)
     case CUSTOM_ROBOT_DATA_CMD_ID: {
         uint32_t temp;
         float temp_out;
-        temp = ((frame[10] << 24) | (frame[9] << 16) | (frame[8] << 8) | frame[7]);
-        temp_out = *(float *)&temp;
-        customer_controller_data.pose[0] = temp_out;
-        temp = ((frame[14] << 24) | (frame[13] << 16) | (frame[12] << 8) | frame[11]);
-        temp_out = *(float *)&temp;
-        customer_controller_data.pose[1] = temp_out;
-        temp = ((frame[18] << 24) | (frame[17] << 16) | (frame[16] << 8) | frame[15]);
-        temp_out = *(float *)&temp;
-        customer_controller_data.pose[2] = temp_out;
-        temp = ((frame[22] << 24) | (frame[21] << 16) | (frame[20] << 8) | frame[19]);
-        temp_out = *(float *)&temp;
-        customer_controller_data.pose[3] = temp_out;
-        temp = ((frame[26] << 24) | (frame[25] << 16) | (frame[24] << 8) | frame[23]);
-        temp_out = *(float *)&temp;
-        customer_controller_data.pose[4] = temp_out;
-        temp = ((frame[30] << 24) | (frame[29] << 16) | (frame[28] << 8) | frame[27]);
-        temp_out = *(float *)&temp;
-        customer_controller_data.pose[5] = temp_out;
-        customer_controller_data.key = frame[31];
-        customer_controller_data.reserved[0] = frame[32];
-        customer_controller_data.reserved[1] = frame[33];
-        customer_controller_data.reserved[2] = frame[34];
-        customer_controller_data.reserved[3] = frame[35];
-        customer_controller_data.reserved[4] = frame[36];
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            temp = ((frame[index + 3U + sizeof(float) * i] << 24) | (frame[index + 2U + sizeof(float) * i] << 16) |
+                    (frame[index + 1U + sizeof(float) * i] << 8) | frame[index + 0U + sizeof(float) * i]);
+            temp_out = *(float *)&temp;
+            customer_controller_data.pose[i] = temp_out;
+        }
+        customer_controller_data.key = frame[index + sizeof(float) * 6];
         break;
     }
     case REMOTE_CONTROL_CMD_ID: {

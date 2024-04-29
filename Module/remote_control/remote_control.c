@@ -2,10 +2,11 @@
 
 #include "referee.h"
 
-#define PRESS_SEN 5
 #define USE_VT_LINK (false)
 
-static remote_control_s remote_control;
+#define PRESS_SEN 6
+
+ATTR_PLACE_AT_NONCACHEABLE static remote_control_s remote_control;
 
 void RemoteControlInit(void)
 {
@@ -22,7 +23,6 @@ void RemoteControlUpdate(void)
 
 #if USE_VT_LINK
     int temp_value = 0;
-
     remote_control.mouse_x = (temp_value = remote_control.dt7_dr16_data.mouse.x,
                               temp_value ? temp_value : (remote_control.vt_link_data->mouse_x));
     remote_control.mouse_y = (temp_value = remote_control.dt7_dr16_data.mouse.y,

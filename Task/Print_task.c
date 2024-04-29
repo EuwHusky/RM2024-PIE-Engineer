@@ -120,13 +120,13 @@ void print_task(void *pvParameters)
             if (detect_error(i))
                 switch (i)
                 {
-                case DUAL_COMM_DH: // 双核
-                    sprintf((char *)test_txt, "核间通信异常\n");
-                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                        strlen((char *)test_txt));
-                    vTaskDelay(5);
-                    break;
+                // case DUAL_COMM_DH: // 双核
+                //     sprintf((char *)test_txt, "核间通信异常\n");
+                //     uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                //                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                //                         strlen((char *)test_txt));
+                //     vTaskDelay(5);
+                //     break;
                 case PM_REFEREE_DH: // 电管
                     sprintf((char *)test_txt, "电管串口异常\n");
                     uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
@@ -214,7 +214,7 @@ void print_task(void *pvParameters)
                 }
         }
 
-        vTaskDelay(500);
+        vTaskDelay(100);
 
 #else
 
@@ -254,6 +254,9 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", gimbal_print->pitch_pwm_clk_freq,
             // gimbal_print->pitch_pwm_freq,
             //         gimbal_print->pitch_pwm_reload, gimbal_print->pitch_pwm_compare);
+            sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
+                    gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
+                    gimbal_print->yaw_motor.angle_.deg);
 
             /**
              * @brief Scara Arm
@@ -266,9 +269,10 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->pose_6d[0], arm_print->pose_6d[1],
             //         arm_print->pose_6d[2], arm_print->pose_6d[3], arm_print->pose_6d[4], arm_print->pose_6d[5],
             //         arm_print->printer[0], arm_print->printer[1], arm_print->printer[2]);
-            sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
-                    arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1],
-                    arm_print->set_pose_6d[2], arm_print->pose_6d[2], arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
+            // sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
+            //         arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1],
+            //         arm_print->pose_6d[1], arm_print->set_pose_6d[2], arm_print->pose_6d[2],
+            //         arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
             // sprintf((char *)test_txt,
             //         "%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f\r\n",
             //         arm_print->customer_controller->pose[0], arm_print->customer_controller->pose[1],
@@ -277,11 +281,14 @@ void print_task(void *pvParameters)
             //         arm_print->cc_pos_memory[2], arm_print->local_pos_memory[0], arm_print->local_pos_memory[1],
             //         arm_print->local_pos_memory[2], arm_print->set_pose_6d[0], arm_print->set_pose_6d[1],
             //         arm_print->set_pose_6d[2]);
-            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", getCustomerControllerData()->pose[0],
+            // sprintf((char *)test_txt,
+            // "%d,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f\r\n",
+            //         arm_print->customer_controller->key, getCustomerControllerData()->pose[0],
             //         getCustomerControllerData()->pose[1], getCustomerControllerData()->pose[2],
-            //         arm_print->customer_controller->pose[0], arm_print->customer_controller->pose[1],
-            //         arm_print->customer_controller->pose[2], rc_print->cc_data->pose[0], rc_print->cc_data->pose[1],
-            //         rc_print->cc_data->pose[2]);
+            //         getCustomerControllerData()->pose[3], getCustomerControllerData()->pose[4],
+            //         getCustomerControllerData()->pose[5], arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1],
+            //         arm_print->cc_pose_6d[2], arm_print->cc_pose_6d[3], arm_print->cc_pose_6d[4],
+            //         arm_print->cc_pose_6d[5]);
 
             /**
              * @brief Motor PID

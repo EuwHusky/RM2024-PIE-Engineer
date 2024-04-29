@@ -128,11 +128,11 @@ static void control_value_process(engineer_scara_arm_s *scara_arm)
     for (uint8_t i = 0; i < 6; i++)
     {
         if (i < 3)
-            scara_arm->cc_pose_6d[i] = scara_arm->customer_controller->pose[i];
+            rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->customer_controller->pose[i]);
         else
-            scara_arm->cc_pose_6d[i] = rflFloatLoopConstrain(scara_arm->customer_controller->pose[i], -RAD_PI, RAD_PI);
+            rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i],
+                                    rflFloatLoopConstrain(scara_arm->customer_controller->pose[i], -RAD_PI, RAD_PI));
 
-        rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->cc_pose_6d[i]);
         scara_arm->cc_pose_6d[i] = scara_arm->cc_pose_filter[i].out;
     }
 
@@ -406,57 +406,37 @@ static void pose_control(engineer_scara_arm_s *scara_arm)
 
 static void move_homing_control(engineer_scara_arm_s *scara_arm)
 {
-    for (uint8_t i = 0; i < 6; i++)
-    {
-        scara_arm->set_pose_6d[i] = scara_arm->pose_6d[i];
-    }
+    scara_arm->set_pose_6d[0] = 0.122f;
+    scara_arm->set_pose_6d[1] = -0.267f;
+    scara_arm->set_pose_6d[2] = 0.0f;
+    scara_arm->set_pose_6d[3] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
+    scara_arm->set_pose_6d[4] = 0.0f;
+    scara_arm->set_pose_6d[5] = 0.0f;
 
-    scara_arm->set_joints_value[JOINT_1] = 0.0f;
-    scara_arm->set_joints_value[JOINT_2] = 90.0f * DEGREE_TO_RADIAN_FACTOR;
-    if (scara_arm->joints_value[JOINT_2] < 0.0f)
-        scara_arm->set_joints_value[JOINT_3] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
-    else
-        scara_arm->set_joints_value[JOINT_3] = -160.0f * DEGREE_TO_RADIAN_FACTOR;
-    if (scara_arm->pose_6d[3] < (90 * DEGREE_TO_RADIAN_FACTOR))
-        scara_arm->set_joints_value[JOINT_4] = 70.0f * DEGREE_TO_RADIAN_FACTOR;
-    scara_arm->set_joints_value[JOINT_5] = 0.0f;
-    scara_arm->set_joints_value[JOINT_6] = 0.0f;
-
-    if ((fabsf(scara_arm->joints_value[JOINT_1] - scara_arm->set_joints_value[JOINT_1]) <
-         TOLERABLE_DISTANCE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_2] - scara_arm->set_joints_value[JOINT_2]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_3] - scara_arm->set_joints_value[JOINT_3]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_4] - scara_arm->set_joints_value[JOINT_4]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_5] - scara_arm->set_joints_value[JOINT_5]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_6] - scara_arm->set_joints_value[JOINT_6]) < TOLERABLE_ANGLE_DEVIATION))
+    if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[5] - scara_arm->set_pose_6d[5]) < TOLERABLE_ANGLE_DEVIATION)
         scara_arm->move_homing_success = true;
 }
 
 static void operation_homing_control(engineer_scara_arm_s *scara_arm)
 {
-    for (uint8_t i = 0; i < 6; i++)
-    {
-        scara_arm->set_pose_6d[i] = scara_arm->pose_6d[i];
-    }
+    scara_arm->set_pose_6d[0] = 0.45f;
+    scara_arm->set_pose_6d[1] = 0.0f;
+    scara_arm->set_pose_6d[2] = OPERATION_MODE_DEFAULT_Z;
+    scara_arm->set_pose_6d[3] = 0.0f;
+    scara_arm->set_pose_6d[4] = 0.0f;
+    scara_arm->set_pose_6d[5] = 0.0f;
 
-    scara_arm->set_joints_value[JOINT_1] = OPERATION_MODE_DEFAULT_Z;
-    scara_arm->set_joints_value[JOINT_2] = 70.0f * DEGREE_TO_RADIAN_FACTOR;
-    if (scara_arm->joints_value[JOINT_2] < 0.0f)
-        scara_arm->set_joints_value[JOINT_3] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
-    else
-        scara_arm->set_joints_value[JOINT_3] = -140.0f * DEGREE_TO_RADIAN_FACTOR;
-    if (scara_arm->pose_6d[3] < (90 * DEGREE_TO_RADIAN_FACTOR))
-        scara_arm->set_joints_value[JOINT_4] = 70.0f * DEGREE_TO_RADIAN_FACTOR;
-    scara_arm->set_joints_value[JOINT_5] = 0.0f;
-    scara_arm->set_joints_value[JOINT_6] = 0.0f;
-
-    if ((fabsf(scara_arm->joints_value[JOINT_1] - scara_arm->set_joints_value[JOINT_1]) <
-         TOLERABLE_DISTANCE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_2] - scara_arm->set_joints_value[JOINT_2]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_3] - scara_arm->set_joints_value[JOINT_3]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_4] - scara_arm->set_joints_value[JOINT_4]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_5] - scara_arm->set_joints_value[JOINT_5]) < TOLERABLE_ANGLE_DEVIATION) &&
-        (fabsf(scara_arm->joints_value[JOINT_6] - scara_arm->set_joints_value[JOINT_6]) < TOLERABLE_ANGLE_DEVIATION))
+    if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[5] - scara_arm->set_pose_6d[5]) < TOLERABLE_ANGLE_DEVIATION)
         scara_arm->operation_homing_success = true;
 }
 
@@ -501,7 +481,6 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
             if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
                 fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
                 fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
                 fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
             {
                 setArmGrabMode(true);
