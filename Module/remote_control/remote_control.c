@@ -20,9 +20,9 @@ void RemoteControlUpdate(void)
 {
     // 常规遥控控制器
 
+#if USE_VT_LINK
     int temp_value = 0;
 
-#if USE_VT_LINK
     remote_control.mouse_x = (temp_value = remote_control.dt7_dr16_data.mouse.x,
                               temp_value ? temp_value : (remote_control.vt_link_data->mouse_x));
     remote_control.mouse_y = (temp_value = remote_control.dt7_dr16_data.mouse.y,

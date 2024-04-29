@@ -266,8 +266,9 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->pose_6d[0], arm_print->pose_6d[1],
             //         arm_print->pose_6d[2], arm_print->pose_6d[3], arm_print->pose_6d[4], arm_print->pose_6d[5],
             //         arm_print->printer[0], arm_print->printer[1], arm_print->printer[2]);
-            // sprintf((char *)test_txt, "%d,%f,%f\r\n", arm_print->silver_mining_step, arm_print->set_pose_6d[2],
-            //         arm_print->pose_6d[2]);
+            sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
+                    arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1],
+                    arm_print->set_pose_6d[2], arm_print->pose_6d[2], arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
             // sprintf((char *)test_txt,
             //         "%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f,%6.4f\r\n",
             //         arm_print->customer_controller->pose[0], arm_print->customer_controller->pose[1],
@@ -276,11 +277,11 @@ void print_task(void *pvParameters)
             //         arm_print->cc_pos_memory[2], arm_print->local_pos_memory[0], arm_print->local_pos_memory[1],
             //         arm_print->local_pos_memory[2], arm_print->set_pose_6d[0], arm_print->set_pose_6d[1],
             //         arm_print->set_pose_6d[2]);
-            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", getCustomerControllerData()->pose[0],
-                    getCustomerControllerData()->pose[1], getCustomerControllerData()->pose[2],
-                    arm_print->customer_controller->pose[0], arm_print->customer_controller->pose[1],
-                    arm_print->customer_controller->pose[2], rc_print->cc_data->pose[0], rc_print->cc_data->pose[1],
-                    rc_print->cc_data->pose[2]);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", getCustomerControllerData()->pose[0],
+            //         getCustomerControllerData()->pose[1], getCustomerControllerData()->pose[2],
+            //         arm_print->customer_controller->pose[0], arm_print->customer_controller->pose[1],
+            //         arm_print->customer_controller->pose[2], rc_print->cc_data->pose[0], rc_print->cc_data->pose[1],
+            //         rc_print->cc_data->pose[2]);
 
             /**
              * @brief Motor PID

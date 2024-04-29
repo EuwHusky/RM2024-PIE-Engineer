@@ -6,12 +6,14 @@
 
 #include "customer_controller.h"
 
-#define DT7_SW_UP ((uint16_t)1)
-#define DT7_SW_MID ((uint16_t)3)
-#define DT7_SW_DOWN ((uint16_t)2)
-#define checkIfDt7SwitchIsUp(s) (s == DT7_SW_UP)
-#define checkIfDt7SwitchIsMid(s) (s == DT7_SW_MID)
-#define checkIfDt7SwitchIsDown(s) (s == DT7_SW_DOWN)
+// #define DT7_SW_UP ((uint16_t)1)
+// #define DT7_SW_MID ((uint16_t)3)
+// #define DT7_SW_DOWN ((uint16_t)2)
+// #define checkIfDt7SwitchIsUp(s) ((s) == DT7_SW_UP)
+// #define checkIfDt7SwitchIsMid(s) ((s) == DT7_SW_MID)
+// #define checkIfDt7SwitchIsDown(s) ((s) == DT7_SW_DOWN)
+
+#define RC_DT7_ROCKER_DEADLINE (2)
 
 typedef enum RemoteControlKey
 {

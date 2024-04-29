@@ -5,14 +5,32 @@
 
 #include "arm_task.h"
 
-#define ARM_RC_DEADLINE (2)
+/**
+ * @brief 距离最小允许偏差 控制距离时预期值与测量值相差小于此值时认为达到控制预期
+ * @单位 米 m
+ */
+#define TOLERABLE_DISTANCE_DEVIATION (0.002f)
 
+/**
+ * @brief 角度最小允许偏差 控制角度时预期值与测量值相差小于此值时认为达到控制预期
+ * @单位 弧度 radian
+ */
+#define TOLERABLE_ANGLE_DEVIATION (0.04f)
+
+/**
+ * @brief 作业模式默认抬升高度
+ * @note 此值将影响自动取矿辅助UI的位置 修改此项后需要重新调整相关UI的参数
+ */
+#define OPERATION_MODE_DEFAULT_Z (ENGINEER_ARM_Z_MAX_DISTANCE / 5.0f)
+
+#if USE_JOINTS_CONTROL
 #define JOINT_1_CONTROL_SEN (0.0002f)
 #define JOINT_2_CONTROL_SEN (0.04f)
 #define JOINT_3_CONTROL_SEN (0.04f)
 #define JOINT_4_CONTROL_SEN (0.04f)
 #define JOINT_5_CONTROL_SEN (0.04f)
 #define JOINT_6_CONTROL_SEN (0.04f)
+#endif
 
 #define POSE_X_CONTROL_SEN (0.001f)
 #define POSE_Y_CONTROL_SEN (0.001f)
@@ -37,7 +55,7 @@
 #define JOINT_3_START_ANGLE (0.0f)
 
 #define JOINT_4_HOMING_STEP_ANGLE (0.005f)
-#define JOINT_4_HOMING_TORQUE_THRESHOLD (1.0f)
+#define JOINT_4_HOMING_TORQUE_THRESHOLD (1.5f)
 #define JOINT_4_HOMING_ANGLE (-124.480934f)
 #define JOINT_4_START_ANGLE (0.0f)
 

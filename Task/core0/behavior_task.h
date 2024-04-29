@@ -19,12 +19,21 @@ typedef enum EngineerBehavior
 
     ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING, // 自动归位 到作业模式默认位置
     ENGINEER_BEHAVIOR_AUTO_SILVER_MINING,    // 自动作业 取银矿
-    // ENGINEER_BEHAVIOR_AUTO_GOLD_MINING,      // 自动作业 取中央金矿
-    ENGINEER_BEHAVIOR_MANUAL_OPERATION, // 手动作业
+    ENGINEER_BEHAVIOR_AUTO_GOLD_MINING,      // 自动作业 取金矿
+    ENGINEER_BEHAVIOR_MANUAL_OPERATION,      // 手动作业
 
     ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH, // 自动存矿
     ENGINEER_BEHAVIOR_AUTO_STORAGE_POP,  // 自动取矿
 } engineer_behavior_e;
+
+typedef enum EngineerVisualAidUiType
+{
+    VAU_NONE = 0,
+    VAU_SILVER,
+    VAU_LEFT_GOLD,
+    VAU_MID_GOLD,
+    VAU_RIGHT_GOLD,
+} engineer_visual_aid_ui_type_e;
 
 typedef struct EngineerBehaviorManager
 {
@@ -44,6 +53,7 @@ typedef struct EngineerBehaviorManager
     bool *arm_move_homing_success;
     bool *arm_operation_homing_success;
     bool *silver_mining_success;
+    bool *gold_mining_success;
     bool *storage_push_success;
     bool *storage_pop_success;
     bool *gimbal_reset_success;
@@ -53,7 +63,7 @@ typedef struct EngineerBehaviorManager
     bool arm_switch_solution;
     bool arm_grab;
     bool reset_ui;
-    uint8_t ui_slot;
+    engineer_visual_aid_ui_type_e visual_aid_ui;
 
     /* 设备 */
 
@@ -83,6 +93,6 @@ extern void setArmGrabMode(bool enable);
 extern bool checkIfArmNeedSwitchSolution(void);
 extern bool getArmGrabMode(void);
 extern bool checkIfNeedResetUi(void);
-extern uint8_t getUiSlot(void);
+extern engineer_visual_aid_ui_type_e getVisualAidUi(void);
 
 #endif /* _BEHAVIOR_TASK_H__ */

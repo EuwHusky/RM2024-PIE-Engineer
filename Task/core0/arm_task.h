@@ -99,6 +99,7 @@ typedef struct EngineerScaraArm
     bool move_homing_success;
     bool operation_homing_success;
     bool silver_mining_success;
+    bool gold_mining_success;
     bool storage_push_success;
     bool storage_pop_success;
 
@@ -106,6 +107,7 @@ typedef struct EngineerScaraArm
     uint8_t silver_mining_step;
     uint16_t silver_mining_grab_detect_timer;
     uint16_t silver_mining_grab_end_timer;
+    uint8_t gold_mining_step;
     uint8_t storage_push_step;
     uint8_t storage_pop_step;
 
@@ -187,6 +189,7 @@ extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);
 extern bool *getArmOperationHomingStatus(void);
 extern bool *getSilverMiningStatus(void);
+extern bool *getGoldMiningStatus(void);
 extern bool *getStoragePushStatus(void);
 extern bool *getStoragePopStatus(void);
 
@@ -223,6 +226,9 @@ extern bool *getStoragePopStatus(void);
 /* 机械臂模型参数 */
 
 // 位姿可达范围相关参数
+#define ENGINEER_ARM_XY_MAX_DISTANCE (0.7925f) /*机械臂平面最大伸展距离*/
+#define ENGINEER_ARM_XY_MIN_DISTANCE (0.33f)   /*机械臂平面最小伸展距离*/
+
 #define ENGINEER_ARM_Z_MAX_DISTANCE (0.625f)                                           /*关节1的最大伸展距离*/
 #define ENGINEER_ARM_Z_MIN_DISTANCE (0.0f)                                             /*关节1最小伸展距离*/
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/

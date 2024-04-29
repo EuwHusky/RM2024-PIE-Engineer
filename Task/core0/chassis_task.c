@@ -72,9 +72,9 @@ static void chassis_init(engineer_chassis_s *chassis)
     config.reference_frame = RFL_CHASSIS_INERTIAL_FRAME;
     rflAngleUpdate(&chassis->set_control_angle, RFL_ANGLE_FORMAT_DEGREE, GIMBAL_YAW_START_ANGLE);
     config.set_control_vector = &chassis->set_control_angle;
-    config.direction_pid_param[0] = 0.1f;
+    config.direction_pid_param[0] = 0.2f;
     config.direction_pid_param[1] = 0.0f;
-    config.direction_pid_param[2] = 0.0f;
+    config.direction_pid_param[2] = 0.005f;
     config.direction_pid_param[3] = 0.0f;
     config.direction_pid_param[4] = 4.0f;
     rflChassisInit(&chassis->model, &config, &chassis->yaw, chassis->wheel_speed);
@@ -133,8 +133,8 @@ static void chassis_mode_control(engineer_chassis_s *chassis)
 
     if (chassis->last_behavior != chassis->behavior)
     {
-        if (chassis->behavior == ENGINEER_BEHAVIOR_DISABLE || chassis->behavior == ENGINEER_BEHAVIOR_RESET ||
-            chassis->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+        if (chassis->behavior == ENGINEER_BEHAVIOR_DISABLE || chassis->behavior == ENGINEER_BEHAVIOR_RESET/*  ||
+            chassis->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING */)
         {
             rflChassisSetBehavior(&chassis->model, RFL_CHASSIS_BEHAVIOR_NO_FORCE);
             for (uint8_t i = 0; i < 4; i++)
@@ -156,10 +156,14 @@ static void chassis_mode_control(engineer_chassis_s *chassis)
 
     switch (chassis->behavior)
     {
+    case ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING:
     case ENGINEER_BEHAVIOR_MOVE:
         chassis_normal_control(chassis);
         break;
+    case ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING:
     case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    case ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH:
+    case ENGINEER_BEHAVIOR_AUTO_STORAGE_POP:
         chassis_slowly_control(chassis);
         break;
 
@@ -237,16 +241,16 @@ static void chassis_normal_control(engineer_chassis_s *chassis)
     {
         chassis->set_speed_vector[0] =
             rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX,
-                        ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], CHASSIS_DT7_DEADLINE)) / 660.0f *
-                         CHASSIS_VX_MAX));
+                        ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], RC_DT7_ROCKER_DEADLINE)) /
+                         660.0f * CHASSIS_VX_MAX));
         chassis->set_speed_vector[1] =
             rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX,
-                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], CHASSIS_DT7_DEADLINE)) / 660.0f *
-                          CHASSIS_VY_MAX));
+                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], RC_DT7_ROCKER_DEADLINE)) /
+                          660.0f * CHASSIS_VY_MAX));
         chassis->set_speed_vector[2] =
             rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
-                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], CHASSIS_DT7_DEADLINE)) / 660.0f *
-                          CHASSIS_WZ_MAX));
+                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], RC_DT7_ROCKER_DEADLINE)) /
+                          660.0f * CHASSIS_WZ_MAX));
     }
     else
     {

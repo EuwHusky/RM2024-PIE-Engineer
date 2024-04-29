@@ -80,17 +80,21 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 20, 10, 0);
-    refereeSetRobotInteractionFigureBuilder(0, uiAutoGrabCalibrationLine0Builder);
-    refereeSetRobotInteractionFigureBuilder(1, uiAutoGrabCalibrationLine1Builder);
-    refereeSetRobotInteractionFigureBuilder(2, uiAutoGrabCalibrationLine2Builder);
-    refereeSetRobotInteractionFigureBuilder(3, uiModeIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(4, uiSplitLine0Builder);
-    refereeSetRobotInteractionFigureBuilder(5, uiGrabberPoweredBuilder);
-    refereeSetRobotInteractionFigureBuilder(6, uiGrabbedBuilder);
-    refereeSetRobotInteractionFigureBuilder(7, uiSplitLine1Builder);
-    refereeSetRobotInteractionFigureBuilder(8, uiStorageFrontUsedBuilder);
-    refereeSetRobotInteractionFigureBuilder(9, uiStorageBackUsedBuilder);
+    refereeInitRobotInteractionManager(&step_clock, 20, 13, 0);
+    refereeSetRobotInteractionFigureBuilder(0, uiModeIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(1, uiSplitLine0Builder);
+    refereeSetRobotInteractionFigureBuilder(2, uiGrabberPoweredBuilder);
+    refereeSetRobotInteractionFigureBuilder(3, uiGrabbedBuilder);
+    refereeSetRobotInteractionFigureBuilder(4, uiSplitLine1Builder);
+    refereeSetRobotInteractionFigureBuilder(5, uiStorageFrontUsedBuilder);
+    refereeSetRobotInteractionFigureBuilder(6, uiStorageBackUsedBuilder);
+    refereeSetRobotInteractionFigureBuilder(SILVER_AID_0_UI_INDEX, uiAutoSilverMiningAid0Builder);
+    refereeSetRobotInteractionFigureBuilder(SILVER_AID_1_UI_INDEX, uiAutoSilverMiningAid1Builder);
+    refereeSetRobotInteractionFigureBuilder(SILVER_AID_2_UI_INDEX, uiAutoSilverMiningAid2Builder);
+    refereeSetRobotInteractionFigureBuilder(LEFT_GOLD_INDICATOR_AID_UI_INDEX, uiAutoGoldMiningAidLeftIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(MID_GOLD_INDICATOR_AID_UI_INDEX, uiAutoGoldMiningAidMidIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(RIGHT_GOLD_INDICATOR_AID_UI_INDEX,
+                                            uiAutoGoldMiningAidRightIndicatorBuilder);
 
     while (1)
     {
@@ -157,17 +161,33 @@ static void client_ui(void)
         refereeClientUiOperate(UI_RESET_ALL, 0);
     }
 
-    if (getUiSlot() == 0)
+    if (getVisualAidUi() == VAU_NONE)
     {
-        refereeClientUiOperate(UI_HIDE_FIGURE, 0);
-        refereeClientUiOperate(UI_HIDE_FIGURE, 1);
-        refereeClientUiOperate(UI_HIDE_FIGURE, 2);
+        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_0_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_1_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_2_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, LEFT_GOLD_INDICATOR_AID_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, MID_GOLD_INDICATOR_AID_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, RIGHT_GOLD_INDICATOR_AID_UI_INDEX);
     }
-    else if (getUiSlot() == 1)
+    else if (getVisualAidUi() == VAU_SILVER)
     {
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, 0);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, 1);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, 2);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, SILVER_AID_0_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, SILVER_AID_1_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, SILVER_AID_2_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, LEFT_GOLD_INDICATOR_AID_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, MID_GOLD_INDICATOR_AID_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, RIGHT_GOLD_INDICATOR_AID_UI_INDEX);
+    }
+    else if (getVisualAidUi() == VAU_LEFT_GOLD || getVisualAidUi() == VAU_MID_GOLD ||
+             getVisualAidUi() == VAU_RIGHT_GOLD)
+    {
+        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_0_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_1_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_2_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, LEFT_GOLD_INDICATOR_AID_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, MID_GOLD_INDICATOR_AID_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, RIGHT_GOLD_INDICATOR_AID_UI_INDEX);
     }
 }
 

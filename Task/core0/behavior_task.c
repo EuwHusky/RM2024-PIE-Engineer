@@ -20,7 +20,6 @@ static void update_robot_status(engineer_behavior_manager_s *behavior_manager);
 static void update_behavior(engineer_behavior_manager_s *behavior_manager, engineer_behavior_e new_behavior);
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager);
 static void auto_operation(engineer_behavior_manager_s *behavior_manager);
-static void module_operation(engineer_behavior_manager_s *behavior_manager);
 
 void behavior_task(void *pvParameters)
 {
@@ -38,8 +37,6 @@ void behavior_task(void *pvParameters)
 
         operator_manual_operation(&behavior_manager);
         auto_operation(&behavior_manager);
-
-        module_operation(&behavior_manager);
 
         vTaskDelay(10);
     }
@@ -86,9 +83,9 @@ bool checkIfNeedResetUi(void)
     return false;
 }
 
-uint8_t getUiSlot(void)
+engineer_visual_aid_ui_type_e getVisualAidUi(void)
 {
-    return behavior_manager.ui_slot;
+    return behavior_manager.visual_aid_ui;
 }
 
 static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
@@ -104,6 +101,7 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_move_homing_success = getArmMoveHomingStatue();
     behavior_manager->arm_operation_homing_success = getArmOperationHomingStatus();
     behavior_manager->silver_mining_success = getSilverMiningStatus();
+    behavior_manager->gold_mining_success = getGoldMiningStatus();
     behavior_manager->storage_push_success = getStoragePushStatus();
     behavior_manager->storage_pop_success = getStoragePushStatus();
     behavior_manager->gimbal_reset_success = getGimbalResetStatus();
@@ -111,7 +109,7 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_grab = false;
     behavior_manager->arm_switch_solution = false;
     behavior_manager->reset_ui = false;
-    behavior_manager->ui_slot = 0;
+    behavior_manager->visual_aid_ui = VAU_NONE;
 }
 
 static void update_robot_status(engineer_behavior_manager_s *behavior_manager)
@@ -128,7 +126,7 @@ static void update_behavior(engineer_behavior_manager_s *behavior_manager, engin
 
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager)
 {
-    // DT7操作
+    /* ================================================== DT7 ================================================== */
 
     behavior_manager->last_dt7_behavior_switch_value = behavior_manager->dt7_behavior_switch_value;
     behavior_manager->dt7_behavior_switch_value = behavior_manager->rc->dt7_dr16_data.rc.s[1];
@@ -182,7 +180,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         }
     }
 
-    // 键鼠操作
+    /* ================================================== 键鼠 ================================================== */
 
     /**
      * @brief 失能 -> 复位
@@ -236,115 +234,135 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     {
         /**
          * @brief 手动作业 -> 自动取银矿
-         * 键鼠 CTRL+Z键触发切换
+         * 键鼠 CTRL+Z 触发切换
          */
-        if (behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_SILVER_MINING &&
-            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH &&
-            checkIfRcKeyFallingEdgeDetected(RC_Z) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        if (checkIfRcKeyFallingEdgeDetected(RC_Z) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_SILVER_MINING);
 
         /**
          * @brief 手动作业 -> 自动取金矿
-         * 键鼠 CTRL+X键触发切换
+         * 键鼠 CTRL+X 触发切换
          */
-        if (/* behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && */
-            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_POP && checkIfRcKeyFallingEdgeDetected(RC_X) &&
-            behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-            // update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
-            ;
+        if (checkIfRcKeyFallingEdgeDetected(RC_X) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_GOLD_MINING);
+
+        /**
+         * @brief 立即停止自动取金/银矿、自动存/取矿 切换到作业预归位模式
+         * 键鼠 Ctrl+C 触发
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_C) &&
+            (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
+             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING ||
+             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
+             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP))
+        {
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+                *behavior_manager->silver_mining_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+                *behavior_manager->gold_mining_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+            {
+                *behavior_manager->storage_push_success = false;
+                StorageCancelPushIn();
+            }
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+                *behavior_manager->storage_pop_success = false;
+
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+        }
+
+        /**
+         * @brief 切换机械臂解算
+         * 键鼠 Ctrl+Q/E 触发切换
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        {
+            behavior_manager->arm_switch_solution = true;
+        }
+        if (checkIfRcKeyFallingEdgeDetected(RC_E) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        {
+            behavior_manager->arm_switch_solution = true;
+        }
     }
     else if (!checkIsRcKeyPressed(RC_CTRL))
     {
         /**
          * @brief 手动作业 -> 自动存矿
-         * 键鼠 Z键触发切换
+         * 键鼠 短按Z键触发切换
          */
-        if (behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_SILVER_MINING &&
-            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH &&
-            checkIfRcKeyFallingEdgeDetected(RC_Z) && getStorageStatus() != STORAGE_FULL && checkIfArmGrabbed() &&
+        if (checkIfRcKeyFallingEdgeDetected(RC_Z) && getStorageStatus() != STORAGE_FULL && checkIfArmGrabbed() &&
             behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH);
 
         /**
          * @brief 手动作业 -> 自动取矿
-         * 键鼠 X键触发切换
+         * 键鼠 短按X键触发切换
          */
-        if (/* behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && */
-            behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_POP && checkIfRcKeyFallingEdgeDetected(RC_X) &&
-            getStorageStatus() != STORAGE_EMPTY && !checkIfArmGrabbed() &&
+        if (checkIfRcKeyFallingEdgeDetected(RC_X) && getStorageStatus() != STORAGE_EMPTY && !checkIfArmGrabbed() &&
             behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_POP);
-    }
-}
 
-static void auto_operation(engineer_behavior_manager_s *behavior_manager)
-{
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_RESET && *behavior_manager->arm_reset_success &&
-        *behavior_manager->gimbal_reset_success)
-    {
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
-        board_write_led_b(LED_OFF);
-    }
-    else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING &&
-             *behavior_manager->arm_move_homing_success)
-    {
-        *behavior_manager->arm_move_homing_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
-    }
-    else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
-             *behavior_manager->arm_operation_homing_success)
-    {
-        *behavior_manager->arm_operation_homing_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+        /**
+         * @brief 立即停止自动取金/银矿、自动存/取矿 切换回手动作业
+         * 键鼠 短按C键触发
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_C) &&
+            (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
+             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING ||
+             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
+             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP))
+        {
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+                *behavior_manager->silver_mining_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+                *behavior_manager->gold_mining_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+            {
+                *behavior_manager->storage_push_success = false;
+                StorageCancelPushIn();
+            }
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+                *behavior_manager->storage_pop_success = false;
+
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+        }
+
+        /**
+         * @brief 切换视觉辅助UI类型
+         * 键鼠 短按Q键触发切换
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        {
+            if (behavior_manager->visual_aid_ui == VAU_NONE)
+                behavior_manager->visual_aid_ui = VAU_SILVER;
+            else if (behavior_manager->visual_aid_ui == VAU_SILVER)
+                behavior_manager->visual_aid_ui = VAU_MID_GOLD;
+            else if (behavior_manager->visual_aid_ui == VAU_LEFT_GOLD ||
+                     behavior_manager->visual_aid_ui == VAU_MID_GOLD ||
+                     behavior_manager->visual_aid_ui == VAU_RIGHT_GOLD)
+                behavior_manager->visual_aid_ui = VAU_NONE;
+            else
+                behavior_manager->visual_aid_ui = VAU_NONE;
+        }
+        else if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            behavior_manager->visual_aid_ui = VAU_NONE;
+
+        /**
+         * @brief 切换取金矿的位置选择和视觉辅助UI位置
+         * 键鼠 短按E键触发切换
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_E) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        {
+            if (behavior_manager->visual_aid_ui == VAU_LEFT_GOLD || behavior_manager->visual_aid_ui == VAU_MID_GOLD ||
+                behavior_manager->visual_aid_ui == VAU_RIGHT_GOLD)
+                behavior_manager->visual_aid_ui = behavior_manager->visual_aid_ui == VAU_RIGHT_GOLD
+                                                      ? VAU_LEFT_GOLD
+                                                      : behavior_manager->visual_aid_ui + 1;
+        }
     }
 
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && *behavior_manager->silver_mining_success)
-    {
-        *behavior_manager->silver_mining_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
-    }
+    /* ================================================== 下级模块 ================================================== */
 
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING && *behavior_manager->silver_mining_success)
-    {
-        *behavior_manager->silver_mining_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
-    }
-    // if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && *behavior_manager->gold_mining_success)
-    // {
-    //     *behavior_manager->gold_mining_successs = false;
-    //     update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
-    // }
-
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && *behavior_manager->storage_push_success)
-    {
-        *behavior_manager->storage_push_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
-    }
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP && *behavior_manager->storage_pop_success)
-    {
-        *behavior_manager->storage_pop_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
-    }
-
-    if (behavior_manager->robot_survival_status == false && behavior_manager->last_robot_survival_status == true)
-    {
-        *behavior_manager->arm_reset_success = false;
-        *behavior_manager->gimbal_reset_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
-        ppor_sw_reset(HPM_PPOR, 10);
-    }
-    else if (behavior_manager->robot_survival_status == false)
-    {
-        board_write_led_r(LED_ON);
-    }
-    else if (behavior_manager->robot_survival_status == true)
-    {
-        board_write_led_r(LED_OFF);
-    }
-}
-
-static void module_operation(engineer_behavior_manager_s *behavior_manager)
-{
     /**
      * @brief 切换机械臂解算
      * DT7 长拨拨轮触发切换
@@ -361,14 +379,6 @@ static void module_operation(engineer_behavior_manager_s *behavior_manager)
     }
     else
         behavior_manager->dt7_arm_switch_trigger_timer = 0;
-    /**
-     * @brief 切换机械臂解算
-     * 键鼠 短按Q键触发切换
-     */
-    if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-    {
-        behavior_manager->arm_switch_solution = true;
-    }
 
     /**
      * @brief 机械臂吸取工作模式切换
@@ -412,19 +422,6 @@ static void module_operation(engineer_behavior_manager_s *behavior_manager)
     }
 
     /**
-     * @brief UI切换
-     * 键鼠 短按E键触发切换
-     */
-    if (checkIfRcKeyFallingEdgeDetected(RC_E) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-    {
-        behavior_manager->ui_slot = behavior_manager->ui_slot >= 1 ? 0 : behavior_manager->ui_slot + 1;
-    }
-    else if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-    {
-        behavior_manager->ui_slot = 0;
-    }
-
-    /**
      * @brief 重启
      * 键鼠 长按B键触发
      */
@@ -438,4 +435,79 @@ static void module_operation(engineer_behavior_manager_s *behavior_manager)
     }
     else
         behavior_manager->km_reboot_trigger_timer = 0;
+}
+
+static void auto_operation(engineer_behavior_manager_s *behavior_manager)
+{
+    /**
+     * @brief 复位成功后自动切换到机动模式
+     */
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_RESET && *behavior_manager->arm_reset_success &&
+        *behavior_manager->gimbal_reset_success)
+    {
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
+        board_write_led_b(LED_OFF);
+    }
+    /**
+     * @brief 机动/作业模式互相切换 自动归位
+     */
+    else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING &&
+             *behavior_manager->arm_move_homing_success)
+    {
+        *behavior_manager->arm_move_homing_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
+    }
+    else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
+             *behavior_manager->arm_operation_homing_success)
+    {
+        *behavior_manager->arm_operation_homing_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    }
+
+    /**
+     * @brief 自动取金/银矿成功后自动切换到作业模式
+     */
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING && *behavior_manager->silver_mining_success)
+    {
+        *behavior_manager->silver_mining_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    }
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && *behavior_manager->gold_mining_success)
+    {
+        *behavior_manager->gold_mining_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+    }
+
+    /**
+     * @brief 自动存/取矿成功后自动切换到作业预归位模式
+     */
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && *behavior_manager->storage_push_success)
+    {
+        *behavior_manager->storage_push_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+    }
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP && *behavior_manager->storage_pop_success)
+    {
+        *behavior_manager->storage_pop_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+    }
+
+    /**
+     * @brief 阵亡自动切换到失能模式
+     */
+    if (behavior_manager->robot_survival_status == false && behavior_manager->last_robot_survival_status == true)
+    {
+        *behavior_manager->arm_reset_success = false;
+        *behavior_manager->gimbal_reset_success = false;
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
+        ppor_sw_reset(HPM_PPOR, 10);
+    }
+    else if (behavior_manager->robot_survival_status == false)
+    {
+        board_write_led_r(LED_ON);
+    }
+    else if (behavior_manager->robot_survival_status == true)
+    {
+        board_write_led_r(LED_OFF);
+    }
 }
