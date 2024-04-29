@@ -80,7 +80,7 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 20, 13, 0);
+    refereeInitRobotInteractionManager(&step_clock, 17, 13, 0);
     refereeSetRobotInteractionFigureBuilder(0, uiModeIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(1, uiSplitLine0Builder);
     refereeSetRobotInteractionFigureBuilder(2, uiGrabberPoweredBuilder);
@@ -150,7 +150,7 @@ void referee_task(void *pvParameters)
 
         test_all++;
 
-        vTaskDelay(20);
+        vTaskDelay(17);
     }
 }
 
