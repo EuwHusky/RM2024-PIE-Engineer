@@ -103,7 +103,7 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->silver_mining_success = getSilverMiningStatus();
     behavior_manager->gold_mining_success = getGoldMiningStatus();
     behavior_manager->storage_push_success = getStoragePushStatus();
-    behavior_manager->storage_pop_success = getStoragePushStatus();
+    behavior_manager->storage_pop_success = getStoragePopStatus();
     behavior_manager->gimbal_reset_success = getGimbalResetStatus();
 
     behavior_manager->arm_grab = false;
@@ -209,6 +209,21 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         behavior_manager->km_disable_trigger_timer++;
         if (behavior_manager->km_disable_trigger_timer == 10)
         {
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
+                *behavior_manager->arm_move_homing_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING)
+                *behavior_manager->arm_operation_homing_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+                *behavior_manager->silver_mining_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+                *behavior_manager->gold_mining_success = false;
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+            {
+                *behavior_manager->storage_push_success = false;
+                StorageCancelPushIn();
+            }
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+                *behavior_manager->storage_pop_success = false;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
         }
     }

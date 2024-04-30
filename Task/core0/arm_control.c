@@ -46,6 +46,7 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
         if (scara_arm->behavior == ENGINEER_BEHAVIOR_DISABLE)
         {
             arm_motor_set_mode(scara_arm, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+            setArmGrabMode(false);
         }
         else if (scara_arm->behavior != ENGINEER_BEHAVIOR_DISABLE)
         {
@@ -60,20 +61,6 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
         else if (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_RESET && scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
         {
             arm_motor_set_angle_limit(scara_arm, false);
-        }
-
-        if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
-        {
-            scara_arm->silver_mining_step = SILVER_MINING_STEP_INIT;
-        }
-
-        if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
-        {
-            scara_arm->storage_push_step = STORAGE_PUSH_STEP_INIT;
-        }
-        if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
-        {
-            scara_arm->storage_pop_step = STORAGE_POP_STEP_INIT;
         }
     }
 
@@ -448,155 +435,163 @@ static void operation_homing_control(engineer_scara_arm_s *scara_arm)
  */
 static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 {
-    if (!scara_arm->silver_mining_success)
+    if (scara_arm->silver_mining_success == true)
+        return;
+
+    if (scara_arm->silver_mining_step == SILVER_MINING_STEP_INIT) // 对位
     {
-        if (scara_arm->silver_mining_step == SILVER_MINING_STEP_INIT) // 对位
+        scara_arm->silver_mining_grab_detect_timer = 0;
+        scara_arm->silver_mining_grab_end_timer = 0;
+
+        // 清除历史误操作
+        if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
+            ;
+        if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
+            ;
+
+        scara_arm->set_pose_6d[0] = 0.45f;
+        scara_arm->set_pose_6d[1] = 0.0f;
+        scara_arm->set_pose_6d[2] = 0.45f;
+        scara_arm->set_pose_6d[4] = 0.0f;
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            scara_arm->silver_mining_pose_memory[i] = scara_arm->set_pose_6d[i];
+        }
+
+        // 若已经取到矿，则直接上提
+        if (scara_arm->grabbed)
+        {
+            scara_arm->set_pose_6d[2] += 0.15f;
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
+        }
+
+        // 普通完整流程
+        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
+        {
+            setArmGrabMode(true);
+            scara_arm->set_pose_6d[0] = 0.75f;
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_GRAB;
+        }
+    }
+    else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_GRAB)
+    {
+        // 判断前伸是否因为碰到矿石而无法前进
+        if (fabsf(scara_arm->pose_6d[0] - scara_arm->last_pose_6d[0]) < 0.002f)
+            scara_arm->silver_mining_grab_detect_timer++;
+        else
+            scara_arm->silver_mining_grab_detect_timer = 0;
+
+        scara_arm->silver_mining_grab_end_timer++;
+
+        if (scara_arm->silver_mining_grab_detect_timer >= 200 || scara_arm->silver_mining_grab_end_timer >= 2500)
         {
             scara_arm->silver_mining_grab_detect_timer = 0;
             scara_arm->silver_mining_grab_end_timer = 0;
-
-            // 清除历史误操作
-            if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
-                ;
-            if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
-                ;
-
-            scara_arm->set_pose_6d[0] = 0.45f;
-            scara_arm->set_pose_6d[1] = 0.0f;
-            scara_arm->set_pose_6d[2] = 0.45f;
-            scara_arm->set_pose_6d[4] = 0.0f;
+            scara_arm->set_pose_6d[0] = scara_arm->pose_6d[0] - 0.05f;
+            scara_arm->set_pose_6d[2] = scara_arm->pose_6d[0] + 0.15f;
+            scara_arm->set_pose_6d[4] = scara_arm->pose_6d[4] + 10.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
+        }
+    }
+    else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_WAIT)
+    {
+        if (checkIfRcKeyFallingEdgeDetected(RC_LEFT) &&
+            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
+        {
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_OK;
+        }
+        if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT) &&
+            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
+        {
             for (uint8_t i = 0; i < 6; i++)
             {
-                scara_arm->silver_mining_pose_memory[i] = scara_arm->set_pose_6d[i];
+                scara_arm->set_pose_6d[i] = scara_arm->silver_mining_pose_memory[i];
             }
-
-            // 若已经取到矿，则直接上提
-            if (scara_arm->grabbed)
-            {
-                scara_arm->set_pose_6d[2] += 0.15f;
-                scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
-            }
-
-            // 普通完整流程
-            if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
-            {
-                setArmGrabMode(true);
-                scara_arm->set_pose_6d[0] = 0.75f;
-                scara_arm->silver_mining_step = SILVER_MINING_STEP_GRAB;
-            }
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_READY;
         }
-        else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_GRAB)
+    }
+    else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_READY)
+    {
+        float y_sign = 0.0f;
+        float z_sign = 0.0f;
+        float yaw_sign = 0.0f;
+        float roll_sign = 0.0f;
+
+        if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
+            y_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
+            y_sign = -1.0f;
+        else
+            y_sign = 0.0f;
+
+        if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
+            z_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
+            z_sign = -1.0f;
+        else
+            z_sign = 0.0f;
+
+        if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+            yaw_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+            yaw_sign = -1.0f;
+        else
+            yaw_sign = 0.0f;
+
+        if (checkIsRcKeyPressed(RC_Z) && !checkIsRcKeyPressed(RC_X))
+            roll_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_Z) && checkIsRcKeyPressed(RC_X))
+            roll_sign = -1.0f;
+        else
+            roll_sign = 0.0f;
+
+        scara_arm->set_pose_6d[1] += y_sign * SILVER_MINING_Y_CONTROL_SEN;
+        scara_arm->set_pose_6d[2] += z_sign * SILVER_MINING_Z_CONTROL_SEN;
+        scara_arm->set_pose_6d[3] += yaw_sign * SILVER_MINING_AY_CONTROL_SEN;
+        scara_arm->set_pose_6d[5] += roll_sign * SILVER_MINING_AR_CONTROL_SEN;
+        for (uint8_t i = 0; i < 6; i++)
         {
-            // 判断前伸是否因为碰到矿石而无法前进
-            if (fabsf(scara_arm->pose_6d[0] - scara_arm->last_pose_6d[0]) < 0.002f)
-                scara_arm->silver_mining_grab_detect_timer++;
-            else
-                scara_arm->silver_mining_grab_detect_timer = 0;
-
-            scara_arm->silver_mining_grab_end_timer++;
-
-            if (scara_arm->silver_mining_grab_detect_timer >= 200 || scara_arm->silver_mining_grab_end_timer >= 2500)
-            {
-                scara_arm->silver_mining_grab_detect_timer = 0;
-                scara_arm->silver_mining_grab_end_timer = 0;
-                scara_arm->set_pose_6d[0] = scara_arm->pose_6d[0] - 0.05f;
-                scara_arm->set_pose_6d[2] = scara_arm->pose_6d[0] + 0.15f;
-                scara_arm->set_pose_6d[4] = scara_arm->pose_6d[4] + 10.0f * DEGREE_TO_RADIAN_FACTOR;
-                scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
-            }
+            scara_arm->silver_mining_pose_memory[i] = scara_arm->set_pose_6d[i];
         }
-        else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_WAIT)
+
+        if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
         {
-            if (checkIfRcKeyFallingEdgeDetected(RC_LEFT) &&
-                fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
-            {
-                scara_arm->silver_mining_step = SILVER_MINING_STEP_OK;
-            }
-            if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT) &&
-                fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
-            {
-                for (uint8_t i = 0; i < 6; i++)
-                {
-                    scara_arm->set_pose_6d[i] = scara_arm->silver_mining_pose_memory[i];
-                }
-                scara_arm->silver_mining_step = SILVER_MINING_STEP_READY;
-            }
+            scara_arm->set_pose_6d[0] = 0.75f;
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_GRAB;
         }
-        else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_READY)
+    }
+    else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_OK)
+    {
+        scara_arm->set_pose_6d[0] = 0.4f;
+        scara_arm->set_pose_6d[1] = 0.0f;
+
+        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION)
         {
-            float y_sign = 0.0f;
-            float z_sign = 0.0f;
-            float yaw_sign = 0.0f;
-            float roll_sign = 0.0f;
+            scara_arm->set_pose_6d[2] = 0.05f;
+            if (fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
+                scara_arm->silver_mining_success = true;
 
-            if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
-                y_sign = 1.0f;
-            else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
-                y_sign = -1.0f;
-            else
-                y_sign = 0.0f;
-
-            if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
-                z_sign = 1.0f;
-            else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
-                z_sign = -1.0f;
-            else
-                z_sign = 0.0f;
-
-            if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
-                yaw_sign = 1.0f;
-            else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
-                yaw_sign = -1.0f;
-            else
-                yaw_sign = 0.0f;
-
-            if (checkIsRcKeyPressed(RC_X) && !checkIsRcKeyPressed(RC_C))
-                roll_sign = 1.0f;
-            else if (!checkIsRcKeyPressed(RC_X) && checkIsRcKeyPressed(RC_C))
-                roll_sign = -1.0f;
-            else
-                roll_sign = 0.0f;
-
-            scara_arm->set_pose_6d[1] += y_sign * SILVER_MINING_Y_CONTROL_SEN;
-            scara_arm->set_pose_6d[2] += z_sign * SILVER_MINING_Z_CONTROL_SEN;
-            scara_arm->set_pose_6d[3] += yaw_sign * SILVER_MINING_AY_CONTROL_SEN;
-            scara_arm->set_pose_6d[5] += roll_sign * SILVER_MINING_AR_CONTROL_SEN;
-            for (uint8_t i = 0; i < 6; i++)
-            {
-                scara_arm->silver_mining_pose_memory[i] = scara_arm->set_pose_6d[i];
-            }
-
-            if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
-            {
-                scara_arm->set_pose_6d[0] = 0.75f;
-                scara_arm->silver_mining_step = SILVER_MINING_STEP_GRAB;
-            }
-        }
-        else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_OK)
-        {
-            scara_arm->set_pose_6d[0] = 0.4f;
-            scara_arm->set_pose_6d[1] = 0.0f;
-
-            if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION)
-            {
-                scara_arm->set_pose_6d[2] = 0.05f;
-                if (fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
-                    scara_arm->silver_mining_success = true;
-            }
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_INIT;
         }
     }
 }
 
 static void gold_mining_control(engineer_scara_arm_s *scara_arm)
 {
+    if (scara_arm->gold_mining_success == true)
+        return;
+
     scara_arm->gold_mining_success = true;
 }
 
 static void storage_push_control(engineer_scara_arm_s *scara_arm)
 {
+    if (scara_arm->storage_push_success == true)
+        return;
+
     if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_INIT)
     {
         if (getStoragePushInAvailableSlot() >= STORAGE_NULL)
@@ -606,56 +601,57 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
         }
 
         scara_arm->solution = JOINT_3_ON_THE_LEFT;
-        scara_arm->set_pose_6d[0] = 0.15f;
-        scara_arm->set_pose_6d[1] = -0.38f;
-        scara_arm->set_pose_6d[2] = 0.04f;
-        scara_arm->set_pose_6d[3] = -135.0f * DEGREE_TO_RADIAN_FACTOR;
-        scara_arm->set_pose_6d[4] = 12.5f * DEGREE_TO_RADIAN_FACTOR;
 
         scara_arm->storage_push_step = STORAGE_PUSH_STEP_START;
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_START)
     {
+        scara_arm->set_pose_6d[0] = 0.15f;
+        scara_arm->set_pose_6d[1] = -0.4f;
+        scara_arm->set_pose_6d[2] = 0.04f;
+        scara_arm->set_pose_6d[3] = -135.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[4] = 12.5f * DEGREE_TO_RADIAN_FACTOR;
+
+        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION)
+            scara_arm->storage_push_step = STORAGE_PUSH_STEP_SLOT;
+    }
+    else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SLOT)
+    {
+        scara_arm->set_pose_6d[1] = -0.4f;
+        scara_arm->set_pose_6d[2] = 0.04f;
+        scara_arm->set_pose_6d[3] = -182.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[4] = 12.5f * DEGREE_TO_RADIAN_FACTOR;
+
+        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+            scara_arm->set_pose_6d[0] = -0.355f;
+        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+            scara_arm->set_pose_6d[0] = -0.02f;
+
         if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
             fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
-            scara_arm->storage_push_step = STORAGE_PUSH_STEP_SLOT;
-    }
-    else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SLOT)
-    {
-        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
-        {
-            scara_arm->set_pose_6d[0] = -0.355f;
-            scara_arm->set_pose_6d[1] = -0.4f;
-            scara_arm->set_pose_6d[3] = -182.0f * DEGREE_TO_RADIAN_FACTOR;
-
-            if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION)
-                scara_arm->storage_push_step = STORAGE_PUSH_STEP_PUSH_IN;
-        }
-        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-        {
-            scara_arm->set_pose_6d[0] = -0.02f;
-            scara_arm->set_pose_6d[1] = -0.4f;
-            scara_arm->set_pose_6d[3] = -182.0f * DEGREE_TO_RADIAN_FACTOR;
-
-            if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-                fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION)
-                scara_arm->storage_push_step = STORAGE_PUSH_STEP_PUSH_IN;
-        }
+            scara_arm->storage_push_step = STORAGE_PUSH_STEP_PUSH_IN;
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_PUSH_IN)
     {
-        scara_arm->set_pose_6d[1] += 0.0005f;
-
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+        {
             scara_arm->set_pose_6d[0] = -0.355f;
+
+            scara_arm->set_pose_6d[1] += 0.0005f;
+        }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-            scara_arm->set_pose_6d[0] = -0.02f;
+        {
+            scara_arm->set_pose_6d[0] = -0.025f;
+
+            scara_arm->set_pose_6d[1] += 0.0003f;
+        }
+
+        if (scara_arm->set_pose_6d[1] > -0.27)
+            scara_arm->set_pose_6d[1] = -0.27;
     }
 
     if (getStorageSlotStatus(getStorageCurrentTargetSlot()) == STORAGE_SLOT_USED)
@@ -664,10 +660,84 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
         scara_arm->set_pose_6d[0] = scara_arm->pose_6d[0] + 0.1f;
         scara_arm->set_pose_6d[1] = scara_arm->pose_6d[1] - 0.1f;
         scara_arm->storage_push_success = true;
+
+        scara_arm->storage_push_step = STORAGE_PUSH_STEP_INIT;
     }
 }
 
 static void storage_pop_control(engineer_scara_arm_s *scara_arm)
 {
-    scara_arm->storage_pop_success = true;
+    if (scara_arm->storage_pop_success == true)
+        return;
+
+    if (scara_arm->storage_pop_step == STORAGE_POP_STEP_INIT)
+    {
+        if (getStoragePopOutAvailableSlot() >= STORAGE_NULL)
+        {
+            scara_arm->storage_pop_success = true;
+        }
+
+        scara_arm->solution = JOINT_3_ON_THE_LEFT;
+
+        scara_arm->storage_pop_step = STORAGE_POP_STEP_START;
+    }
+    else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_START)
+    {
+        scara_arm->set_pose_6d[0] = 0.06f;
+        scara_arm->set_pose_6d[1] = -0.3f;
+        scara_arm->set_pose_6d[2] = 0.0f;
+        scara_arm->set_pose_6d[3] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[4] = 0.0f;
+
+        if (fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION)
+            scara_arm->storage_pop_step = STORAGE_POP_STEP_SLOT;
+    }
+    else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_SLOT)
+    {
+        scara_arm->set_pose_6d[1] = -0.3f;
+        scara_arm->set_pose_6d[2] = 0.0f;
+        scara_arm->set_pose_6d[3] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[4] = 0.0f;
+
+        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+            scara_arm->set_pose_6d[0] = -0.315f;
+        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+            scara_arm->set_pose_6d[0] = 0.015f;
+
+        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
+        {
+            setArmGrabMode(true);
+            scara_arm->storage_pop_step = STORAGE_POP_STEP_POP_OUT;
+        }
+    }
+    else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_POP_OUT)
+    {
+        scara_arm->set_pose_6d[0] -= 0.00025f;
+        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+        {
+            if (scara_arm->set_pose_6d[0] < -0.4f)
+                scara_arm->set_pose_6d[0] = -0.4f;
+        }
+        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+        {
+            if (scara_arm->set_pose_6d[0] < -0.07f)
+                scara_arm->set_pose_6d[0] = -0.07f;
+        }
+
+        scara_arm->set_pose_6d[1] = -0.3f;
+    }
+
+    if (checkIfArmGrabbed())
+    {
+        StorageConfirmPopOut();
+        scara_arm->set_pose_6d[0] = scara_arm->pose_6d[0] + 0.1f;
+        scara_arm->set_pose_6d[1] = scara_arm->pose_6d[1] - 0.1f;
+        scara_arm->storage_pop_success = true;
+
+        scara_arm->storage_pop_step = STORAGE_POP_STEP_INIT;
+    }
 }

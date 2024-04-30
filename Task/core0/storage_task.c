@@ -5,8 +5,8 @@
 #include "INS_task.h"
 #include "behavior_task.h"
 
-#define USED_DETECT_TIMER_THRESHOLD_VALUE (20)
-#define EMPTY_DETECT_TIMER_THRESHOLD_VALUE (200)
+#define USED_DETECT_TIMER_THRESHOLD_VALUE (10)
+#define EMPTY_DETECT_TIMER_THRESHOLD_VALUE (10)
 
 static void storage_init(engineer_storage_s *storage);
 static void storage_update(engineer_storage_s *storage);
@@ -99,9 +99,9 @@ engineer_storage_slot_index_e getStoragePushInAvailableSlot(void)
         }
     }
 
-    storage.storage_slot_needed[use_slot_index] = true;
-
     storage.current_target_slot = use_slot_index;
+
+    storage.storage_slot_needed[storage.current_target_slot] = true;
 
     return use_slot_index;
 }
@@ -124,9 +124,12 @@ engineer_storage_slot_index_e getStoragePopOutAvailableSlot(void)
     if (storage.storage_used_num == 0)
         return STORAGE_NULL;
 
-    for (uint8_t i = STORAGE_MAX_LIMIT - 1; i >= 0; i++)
-        if (storage.storage_slot_status[i] == STORAGE_SLOT_USED)
-            storage.current_target_slot = i;
+    for (uint8_t i = STORAGE_MAX_LIMIT, j = STORAGE_MAX_LIMIT - 1; i > 0; i--, j--)
+        if (storage.storage_slot_status[j] == STORAGE_SLOT_USED)
+        {
+            storage.current_target_slot = j;
+            break;
+        }
 
     return storage.current_target_slot;
 }
@@ -264,6 +267,17 @@ static void storage_update(engineer_storage_s *storage)
         if (storage->last_storage_slot_status[i] == STORAGE_SLOT_USED &&
             storage->storage_slot_status[i] == STORAGE_SLOT_EMPTY)
             storage->storage_slot_needed[i] = false;
+
+    // 失能时关闭并重置储矿功能
+
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_DISABLE)
+        for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+        {
+            storage->storage_slot_status[i] = STORAGE_SLOT_EMPTY;
+            storage->storage_slot_needed[i] = false;
+            storage->empty_detect_timer[i] = 0;
+            storage->used_detect_timer[i] = 0;
+        }
 
     // 计算已使用槽位数量
 

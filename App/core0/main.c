@@ -90,7 +90,7 @@ int main(void)
 
     xTaskCreate(behavior_task, "behavior_task", configMINIMAL_STACK_SIZE, NULL, BEHAVIOR_TASK_PRIORITY, NULL);
 
-    xTaskCreate(arm_task, "arm_task", configMINIMAL_STACK_SIZE + 768U, NULL, ARM_TASK_PRIORITY, NULL);
+    xTaskCreate(arm_task, "arm_task", configMINIMAL_STACK_SIZE + 1024U, NULL, ARM_TASK_PRIORITY, NULL);
     xTaskCreate(chassis_task, "chassis_task", configMINIMAL_STACK_SIZE + 512U, NULL, CHASSIS_TASK_PRIORITY, NULL);
 
     xTaskCreate(gimbal_task, "gimbal_task", configMINIMAL_STACK_SIZE + 256U, NULL, GIMBAL_TASK_PRIORITY, NULL);

@@ -78,6 +78,9 @@
 #define STORAGE_PUSH_STEP_PUSH_IN (3u)
 
 #define STORAGE_POP_STEP_INIT (0u)
+#define STORAGE_POP_STEP_START (1u)
+#define STORAGE_POP_STEP_SLOT (2u)
+#define STORAGE_POP_STEP_POP_OUT (3u)
 
 /**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量

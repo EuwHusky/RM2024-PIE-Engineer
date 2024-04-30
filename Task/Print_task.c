@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 10    // 输出数据的周期
+#define PRINT_TIME_MS 8     // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -232,12 +232,12 @@ void print_task(void *pvParameters)
             /**
              * @brief Storage
              */
-            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d\r\n", behavior_print->behavior,
-            //         behavior_print->last_behavior, storage_print->current_target_slot,
-            //         storage_print->storage_slot_status[STORAGE_BACK],
-            //         storage_print->storage_slot_status[STORAGE_FRONT],
-            //         storage_print->storage_slot_needed[STORAGE_BACK],
-            //         storage_print->storage_slot_needed[STORAGE_FRONT], storage_print->storage_used_num);
+            sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
+                    behavior_print->behavior == 8 ? 1 : (behavior_print->behavior == 9 ? 2 : 0),
+                    storage_print->storage_used_num, storage_print->current_target_slot,
+                    storage_print->storage_slot_status[STORAGE_BACK], storage_print->storage_slot_status[STORAGE_FRONT],
+                    storage_print->storage_slot_needed[STORAGE_BACK], storage_print->storage_slot_needed[STORAGE_FRONT],
+                    arm_print->storage_push_step, arm_print->storage_pop_step);
 
             /**
              * @brief Chassis
@@ -254,9 +254,9 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", gimbal_print->pitch_pwm_clk_freq,
             // gimbal_print->pitch_pwm_freq,
             //         gimbal_print->pitch_pwm_reload, gimbal_print->pitch_pwm_compare);
-            sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
-                    gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
-                    gimbal_print->yaw_motor.angle_.deg);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
+            //         gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
+            //         gimbal_print->yaw_motor.angle_.deg);
 
             /**
              * @brief Scara Arm
