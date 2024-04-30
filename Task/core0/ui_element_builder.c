@@ -65,23 +65,41 @@ void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_typ
                     1870, 584, 614);
 }
 
+#define AUTO_SILVER_MINING_AID_BOX_X_0 (900)
+#define AUTO_SILVER_MINING_AID_BOX_X_1 (1080)
+#define AUTO_SILVER_MINING_AID_BOX_Y_0 (630)
+#define AUTO_SILVER_MINING_AID_BOX_Y_1 (740)
+// #define AUTO_SILVER_MINING_AID_BOX_X_0 (915)
+// #define AUTO_SILVER_MINING_AID_BOX_X_1 (1100)
+// #define AUTO_SILVER_MINING_AID_BOX_Y_0 (612)
+// #define AUTO_SILVER_MINING_AID_BOX_Y_1 (712)
+
 void uiAutoSilverMiningAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sa0", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_GRAB_CALIBRAION_BOX_X_0,
-               AUTO_GRAB_CALIBRAION_BOX_X_1, AUTO_GRAB_CALIBRAION_BOX_Y_1, AUTO_GRAB_CALIBRAION_BOX_Y_1);
+    uiPlotLine(figure, "sa0", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
+               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_1, AUTO_SILVER_MINING_AID_BOX_Y_1);
 }
 
 void uiAutoSilverMiningAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sa1", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_GRAB_CALIBRAION_BOX_X_0,
-               AUTO_GRAB_CALIBRAION_BOX_X_0, AUTO_GRAB_CALIBRAION_BOX_Y_0, AUTO_GRAB_CALIBRAION_BOX_Y_1);
+    uiPlotLine(figure, "sa1", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
+               AUTO_SILVER_MINING_AID_BOX_X_0, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
 }
 
 void uiAutoSilverMiningAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sa2", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_GRAB_CALIBRAION_BOX_X_1,
-               AUTO_GRAB_CALIBRAION_BOX_X_1, AUTO_GRAB_CALIBRAION_BOX_Y_0, AUTO_GRAB_CALIBRAION_BOX_Y_1);
+    uiPlotLine(figure, "sa2", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_1,
+               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
 }
+
+#define AUTO_GOLD_MINING_AID_LEFT_INDICATOR_X_0 (360)
+#define AUTO_GOLD_MINING_AID_LEFT_INDICATOR_X_1 (560)
+#define AUTO_GOLD_MINING_AID_MID_INDICATOR_X_0 (860)
+#define AUTO_GOLD_MINING_AID_MID_INDICATOR_X_1 (1060)
+#define AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_0 (1360)
+#define AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_1 (1560)
+#define AUTO_GOLD_MINING_AID_INDICATOR_Y_0 (814)
+#define AUTO_GOLD_MINING_AID_INDICATOR_Y_1 (824)
 
 void uiAutoGoldMiningAidLeftIndicatorBuilder(interaction_figure_t *figure,
                                              figure_operation_type_e figure_operation_type)

@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 8     // 输出数据的周期
+#define PRINT_TIME_MS 10    // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -232,12 +232,14 @@ void print_task(void *pvParameters)
             /**
              * @brief Storage
              */
-            sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
-                    behavior_print->behavior == 8 ? 1 : (behavior_print->behavior == 9 ? 2 : 0),
-                    storage_print->storage_used_num, storage_print->current_target_slot,
-                    storage_print->storage_slot_status[STORAGE_BACK], storage_print->storage_slot_status[STORAGE_FRONT],
-                    storage_print->storage_slot_needed[STORAGE_BACK], storage_print->storage_slot_needed[STORAGE_FRONT],
-                    arm_print->storage_push_step, arm_print->storage_pop_step);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
+            //         behavior_print->behavior == 8 ? 1 : (behavior_print->behavior == 9 ? 2 : 0),
+            //         storage_print->storage_used_num, storage_print->current_target_slot,
+            //         storage_print->storage_slot_status[STORAGE_BACK],
+            //         storage_print->storage_slot_status[STORAGE_FRONT],
+            //         storage_print->storage_slot_needed[STORAGE_BACK],
+            //         storage_print->storage_slot_needed[STORAGE_FRONT], arm_print->storage_push_step,
+            //         arm_print->storage_pop_step);
 
             /**
              * @brief Chassis
@@ -266,9 +268,10 @@ void print_task(void *pvParameters)
             //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
             //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
-            // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->pose_6d[0], arm_print->pose_6d[1],
-            //         arm_print->pose_6d[2], arm_print->pose_6d[3], arm_print->pose_6d[4], arm_print->pose_6d[5],
-            //         arm_print->printer[0], arm_print->printer[1], arm_print->printer[2]);
+            sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
+                    arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
+                    arm_print->pose_6d[4], arm_print->pose_6d[5], arm_print->printer[0], arm_print->printer[1],
+                    arm_print->printer[2]);
             // sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
             //         arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1],
             //         arm_print->pose_6d[1], arm_print->set_pose_6d[2], arm_print->pose_6d[2],

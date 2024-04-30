@@ -405,37 +405,49 @@ static void pose_control(engineer_scara_arm_s *scara_arm)
 
 static void move_homing_control(engineer_scara_arm_s *scara_arm)
 {
-    scara_arm->set_pose_6d[0] = 0.122f;
-    scara_arm->set_pose_6d[1] = -0.267f;
-    scara_arm->set_pose_6d[2] = 0.0f;
-    scara_arm->set_pose_6d[3] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
-    scara_arm->set_pose_6d[4] = 0.0f;
-    scara_arm->set_pose_6d[5] = 0.0f;
+    if (scara_arm->grabbed)
+    {
+        scara_arm->set_pose_6d[POSE_X] = 0.2218f;
+        scara_arm->set_pose_6d[POSE_Y] = -0.1413f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+        scara_arm->set_pose_6d[POSE_YAW] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
+        scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
+    }
+    else
+    {
+        scara_arm->set_pose_6d[POSE_X] = 0.122f;
+        scara_arm->set_pose_6d[POSE_Y] = -0.267f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+        scara_arm->set_pose_6d[POSE_YAW] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
+        scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
+    }
 
-    if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[5] - scara_arm->set_pose_6d[5]) < TOLERABLE_ANGLE_DEVIATION)
+    if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_ROLL] - scara_arm->set_pose_6d[POSE_ROLL]) < TOLERABLE_ANGLE_DEVIATION)
         scara_arm->move_homing_success = true;
 }
 
 static void operation_homing_control(engineer_scara_arm_s *scara_arm)
 {
-    scara_arm->set_pose_6d[0] = 0.45f;
-    scara_arm->set_pose_6d[1] = 0.0f;
-    scara_arm->set_pose_6d[2] = OPERATION_MODE_DEFAULT_Z;
-    scara_arm->set_pose_6d[3] = 0.0f;
-    scara_arm->set_pose_6d[4] = 0.0f;
-    scara_arm->set_pose_6d[5] = 0.0f;
+    scara_arm->set_pose_6d[POSE_X] = 0.45f;
+    scara_arm->set_pose_6d[POSE_Y] = 0.0f;
+    scara_arm->set_pose_6d[POSE_Z] = OPERATION_MODE_DEFAULT_Z;
+    scara_arm->set_pose_6d[POSE_YAW] = 0.0f;
+    scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
+    scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
 
-    if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION &&
-        fabsf(scara_arm->pose_6d[5] - scara_arm->set_pose_6d[5]) < TOLERABLE_ANGLE_DEVIATION)
+    if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) < TOLERABLE_ANGLE_DEVIATION &&
+        fabsf(scara_arm->pose_6d[POSE_ROLL] - scara_arm->set_pose_6d[POSE_ROLL]) < TOLERABLE_ANGLE_DEVIATION)
         scara_arm->operation_homing_success = true;
 }
 
@@ -461,10 +473,10 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
             ;
 
-        scara_arm->set_pose_6d[0] = 0.45f;
-        scara_arm->set_pose_6d[1] = 0.0f;
-        scara_arm->set_pose_6d[2] = 0.45f;
-        scara_arm->set_pose_6d[4] = 0.0f;
+        scara_arm->set_pose_6d[POSE_X] = 0.45f;
+        scara_arm->set_pose_6d[POSE_Y] = 0.0f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.45f;
+        scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
         for (uint8_t i = 0; i < 6; i++)
         {
             scara_arm->silver_mining_pose_memory[i] = scara_arm->set_pose_6d[i];
@@ -473,25 +485,27 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         // 若已经取到矿，则直接上提
         if (scara_arm->grabbed)
         {
-            scara_arm->set_pose_6d[2] += 0.15f;
+            scara_arm->set_pose_6d[POSE_Z] += 0.15f;
             scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
         }
 
         // 普通完整流程
-        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
+        if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) < TOLERABLE_ANGLE_DEVIATION)
         {
             setArmGrabMode(true);
-            scara_arm->set_pose_6d[0] = 0.75f;
+
+            scara_arm->set_pose_6d[POSE_X] = 0.75f;
+
             scara_arm->silver_mining_step = SILVER_MINING_STEP_GRAB;
         }
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_GRAB)
     {
         // 判断前伸是否因为碰到矿石而无法前进
-        if (fabsf(scara_arm->pose_6d[0] - scara_arm->last_pose_6d[0]) < 0.002f)
+        if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->last_pose_6d[POSE_X]) < 0.002f)
             scara_arm->silver_mining_grab_detect_timer++;
         else
             scara_arm->silver_mining_grab_detect_timer = 0;
@@ -502,21 +516,23 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         {
             scara_arm->silver_mining_grab_detect_timer = 0;
             scara_arm->silver_mining_grab_end_timer = 0;
-            scara_arm->set_pose_6d[0] = scara_arm->pose_6d[0] - 0.05f;
-            scara_arm->set_pose_6d[2] = scara_arm->pose_6d[0] + 0.15f;
-            scara_arm->set_pose_6d[4] = scara_arm->pose_6d[4] + 10.0f * DEGREE_TO_RADIAN_FACTOR;
+
+            scara_arm->set_pose_6d[POSE_X] = scara_arm->pose_6d[POSE_X] - 0.05f;
+            scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.15f;
+            scara_arm->set_pose_6d[POSE_PITCH] = scara_arm->pose_6d[POSE_PITCH] + 10.0f * DEGREE_TO_RADIAN_FACTOR;
+
             scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
         }
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_WAIT)
     {
         if (checkIfRcKeyFallingEdgeDetected(RC_LEFT) &&
-            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
+            fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
         {
             scara_arm->silver_mining_step = SILVER_MINING_STEP_OK;
         }
         if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT) &&
-            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
+            fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
         {
             for (uint8_t i = 0; i < 6; i++)
             {
@@ -560,10 +576,10 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         else
             roll_sign = 0.0f;
 
-        scara_arm->set_pose_6d[1] += y_sign * SILVER_MINING_Y_CONTROL_SEN;
-        scara_arm->set_pose_6d[2] += z_sign * SILVER_MINING_Z_CONTROL_SEN;
-        scara_arm->set_pose_6d[3] += yaw_sign * SILVER_MINING_AY_CONTROL_SEN;
-        scara_arm->set_pose_6d[5] += roll_sign * SILVER_MINING_AR_CONTROL_SEN;
+        scara_arm->set_pose_6d[POSE_Y] += y_sign * SILVER_MINING_Y_CONTROL_SEN;
+        scara_arm->set_pose_6d[POSE_Z] += z_sign * SILVER_MINING_Z_CONTROL_SEN;
+        scara_arm->set_pose_6d[POSE_YAW] += yaw_sign * SILVER_MINING_AY_CONTROL_SEN;
+        scara_arm->set_pose_6d[POSE_ROLL] += roll_sign * SILVER_MINING_AR_CONTROL_SEN;
         for (uint8_t i = 0; i < 6; i++)
         {
             scara_arm->silver_mining_pose_memory[i] = scara_arm->set_pose_6d[i];
@@ -571,19 +587,19 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 
         if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
         {
-            scara_arm->set_pose_6d[0] = 0.75f;
+            scara_arm->set_pose_6d[POSE_X] = 0.75f;
             scara_arm->silver_mining_step = SILVER_MINING_STEP_GRAB;
         }
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_OK)
     {
-        scara_arm->set_pose_6d[0] = 0.4f;
-        scara_arm->set_pose_6d[1] = 0.0f;
+        scara_arm->set_pose_6d[POSE_X] = 0.4f;
+        scara_arm->set_pose_6d[POSE_Y] = 0.0f;
 
-        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION)
+        if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION)
         {
-            scara_arm->set_pose_6d[2] = 0.05f;
-            if (fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION)
+            scara_arm->set_pose_6d[POSE_Z] = 0.05f;
+            if (fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
                 scara_arm->silver_mining_success = true;
         }
     }
@@ -616,63 +632,64 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_START)
     {
-        scara_arm->set_pose_6d[0] = 0.15f;
-        scara_arm->set_pose_6d[1] = -0.4f;
-        scara_arm->set_pose_6d[2] = 0.04f;
-        scara_arm->set_pose_6d[3] = -135.0f * DEGREE_TO_RADIAN_FACTOR;
-        scara_arm->set_pose_6d[4] = 5.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_X] = 0.15f;
+        scara_arm->set_pose_6d[POSE_Y] = -0.4f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.04f;
+        scara_arm->set_pose_6d[POSE_YAW] = -135.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_PITCH] = 5.0f * DEGREE_TO_RADIAN_FACTOR;
 
-        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION)
+        if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION)
             scara_arm->storage_push_step = STORAGE_PUSH_STEP_SLOT;
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SLOT)
     {
-        scara_arm->set_pose_6d[1] = -0.4f;
-        scara_arm->set_pose_6d[2] = 0.04f;
-        scara_arm->set_pose_6d[3] = -184.0f * DEGREE_TO_RADIAN_FACTOR;
-        scara_arm->set_pose_6d[4] = 5.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_Y] = -0.4f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.04f;
+        scara_arm->set_pose_6d[POSE_YAW] = -184.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_PITCH] = 5.0f * DEGREE_TO_RADIAN_FACTOR;
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
-            scara_arm->set_pose_6d[0] = -0.35f;
+            scara_arm->set_pose_6d[POSE_X] = -0.35f;
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-            scara_arm->set_pose_6d[0] = -0.015f;
+            scara_arm->set_pose_6d[POSE_X] = -0.015f;
 
-        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
-        {
-            StorageConfirmOperation(STORAGE_PUSH_IN);
-
+        if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) < TOLERABLE_ANGLE_DEVIATION)
             scara_arm->storage_push_step = STORAGE_PUSH_STEP_PUSH_IN;
-        }
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_PUSH_IN)
     {
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
-            scara_arm->set_pose_6d[0] = -0.35f;
+            scara_arm->set_pose_6d[POSE_X] = -0.35f;
 
-            scara_arm->set_pose_6d[1] += 0.0005f;
+            scara_arm->set_pose_6d[POSE_Y] += 0.0005f;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
-            scara_arm->set_pose_6d[0] = -0.025f;
+            scara_arm->set_pose_6d[POSE_X] = -0.025f;
 
-            scara_arm->set_pose_6d[1] += 0.0003f;
+            scara_arm->set_pose_6d[POSE_Y] += 0.0003f;
         }
 
-        if (scara_arm->set_pose_6d[1] > -0.27)
-            scara_arm->set_pose_6d[1] = -0.27;
+        if (scara_arm->set_pose_6d[POSE_Y] > -0.25)
+            scara_arm->set_pose_6d[POSE_Y] = -0.25;
+
+        if (fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) > ANGLE_DEVIATION_THRESHOLD)
+            StorageConfirmOperation(STORAGE_PUSH_IN);
     }
 
     if (getStorageSlotStatus(getStorageCurrentTargetSlot()) == STORAGE_SLOT_USED)
     {
         setArmGrabMode(false);
-        scara_arm->set_pose_6d[0] = scara_arm->pose_6d[0] + 0.1f;
-        scara_arm->set_pose_6d[1] = scara_arm->pose_6d[1] - 0.1f;
+
+        scara_arm->set_pose_6d[POSE_X] = scara_arm->pose_6d[POSE_X] + 0.1f;
+        scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.1f;
+
         scara_arm->storage_push_success = true;
     }
 }
@@ -695,32 +712,38 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_START)
     {
-        scara_arm->set_pose_6d[0] = 0.06f;
-        scara_arm->set_pose_6d[1] = -0.3f;
-        scara_arm->set_pose_6d[2] = 0.0f;
-        scara_arm->set_pose_6d[3] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
-        scara_arm->set_pose_6d[4] = 0.0f;
+        scara_arm->set_pose_6d[POSE_X] = 0.06f;
+        scara_arm->set_pose_6d[POSE_Y] = -0.31f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+        scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
+        // scara_arm->set_pose_6d[POSE_ROLL] = scara_arm->pose_6d[POSE_ROLL] - 5.0f * DEGREE_TO_RADIAN_FACTOR;
 
-        if (fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION)
+        if (fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION)
             scara_arm->storage_pop_step = STORAGE_POP_STEP_SLOT;
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_SLOT)
     {
-        scara_arm->set_pose_6d[1] = -0.3f;
-        scara_arm->set_pose_6d[2] = 0.0f;
-        scara_arm->set_pose_6d[3] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
-        scara_arm->set_pose_6d[4] = 0.0f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+        scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
-            scara_arm->set_pose_6d[0] = -0.315f;
+        {
+            scara_arm->set_pose_6d[POSE_X] = -0.315f;
+            scara_arm->set_pose_6d[POSE_Y] = -0.32f;
+        }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-            scara_arm->set_pose_6d[0] = 0.015f;
+        {
+            scara_arm->set_pose_6d[POSE_X] = 0.015f;
+            scara_arm->set_pose_6d[POSE_Y] = -0.31f;
+        }
 
-        if (fabsf(scara_arm->pose_6d[0] - scara_arm->set_pose_6d[0]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[1] - scara_arm->set_pose_6d[1]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[2] - scara_arm->set_pose_6d[2]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[3] - scara_arm->set_pose_6d[3]) < TOLERABLE_ANGLE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[4] - scara_arm->set_pose_6d[4]) < TOLERABLE_ANGLE_DEVIATION)
+        if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) < TOLERABLE_ANGLE_DEVIATION)
         {
             setArmGrabMode(true);
             scara_arm->storage_pop_step = STORAGE_POP_STEP_POP_OUT;
@@ -728,26 +751,30 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_POP_OUT)
     {
-        scara_arm->set_pose_6d[0] -= 0.00025f;
+        scara_arm->set_pose_6d[POSE_X] -= 0.00025f;
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
-            if (scara_arm->set_pose_6d[0] < -0.4f)
-                scara_arm->set_pose_6d[0] = -0.4f;
+            if (scara_arm->set_pose_6d[POSE_X] < -0.4f)
+                scara_arm->set_pose_6d[POSE_X] = -0.4f;
+
+            scara_arm->set_pose_6d[POSE_Y] = -0.32f;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
-            if (scara_arm->set_pose_6d[0] < -0.07f)
-                scara_arm->set_pose_6d[0] = -0.07f;
-        }
+            if (scara_arm->set_pose_6d[POSE_X] < -0.07f)
+                scara_arm->set_pose_6d[POSE_X] = -0.07f;
 
-        scara_arm->set_pose_6d[1] = -0.3f;
+            scara_arm->set_pose_6d[POSE_Y] = -0.31f;
+        }
     }
 
     if (checkIfArmGrabbed())
     {
         StorageConfirmOperation(STORAGE_POP_OUT);
-        scara_arm->set_pose_6d[0] = scara_arm->pose_6d[0] + 0.1f;
-        scara_arm->set_pose_6d[1] = scara_arm->pose_6d[1] - 0.1f;
+
+        scara_arm->set_pose_6d[POSE_X] = scara_arm->pose_6d[POSE_X] + 0.1f;
+        scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.1f;
+
         scara_arm->storage_pop_success = true;
     }
 }

@@ -28,6 +28,16 @@ typedef enum EngineerScaraArmJoints
     JOINT_6,
 } engineer_scara_arm_joints_e;
 
+typedef enum EngineerScaraArmPose
+{
+    POSE_X = 0,
+    POSE_Y,
+    POSE_Z,
+    POSE_YAW,
+    POSE_PITCH,
+    POSE_ROLL,
+} engineer_scara_arm_pose_e;
+
 typedef enum EngineerScaraArmStartUpStatus
 {
     ARM_START_UP_OK = 0x00,
