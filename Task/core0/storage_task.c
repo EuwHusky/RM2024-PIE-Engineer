@@ -6,13 +6,13 @@
 #include "behavior_task.h"
 
 #define USED_DETECT_TIMER_THRESHOLD_VALUE (10)
-#define EMPTY_DETECT_TIMER_THRESHOLD_VALUE (10)
+#define EMPTY_DETECT_TIMER_THRESHOLD_VALUE (200)
 
 static void storage_init(engineer_storage_s *storage);
 static void storage_update(engineer_storage_s *storage);
 static void storage_execute(engineer_storage_s *storage);
 
-ATTR_PLACE_AT_NONCACHEABLE static engineer_storage_s storage;
+static engineer_storage_s storage;
 
 void storage_task(void *pvParameters)
 {
@@ -101,17 +101,7 @@ engineer_storage_slot_index_e getStoragePushInAvailableSlot(void)
 
     storage.current_target_slot = use_slot_index;
 
-    storage.storage_slot_needed[storage.current_target_slot] = true;
-
-    return use_slot_index;
-}
-
-/**
- * @brief 取消此次矿石存入
- */
-void StorageCancelPushIn(void)
-{
-    storage.storage_slot_needed[storage.current_target_slot] = false;
+    return storage.current_target_slot;
 }
 
 /**
@@ -135,11 +125,25 @@ engineer_storage_slot_index_e getStoragePopOutAvailableSlot(void)
 }
 
 /**
- * @brief 确认取出当前矿石
+ * @brief 对当前操作进行确认
+ * @note 当前为存入/取出操作，则打开/关闭对应槽位
  */
-void StorageConfirmPopOut(void)
+void StorageConfirmOperation(engineer_storage_operation_e operation)
 {
-    storage.storage_slot_needed[storage.current_target_slot] = false;
+    if (operation == STORAGE_PUSH_IN)
+        storage.storage_slot_needed[storage.current_target_slot] = true;
+    else if (operation == STORAGE_POP_OUT)
+        storage.storage_slot_needed[storage.current_target_slot] = false;
+}
+
+/**
+ * @brief 取消当前操作
+ * @note 当前为存入操作，则关闭对应槽位
+ */
+void StorageCancelOperation(engineer_storage_operation_e operation)
+{
+    if (operation == STORAGE_PUSH_IN)
+        storage.storage_slot_needed[storage.current_target_slot] = false;
 }
 
 static void storage_init(engineer_storage_s *storage)

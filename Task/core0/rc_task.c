@@ -18,11 +18,11 @@
 
 static void dbus_uart_init(void);
 
-ATTR_PLACE_AT_NONCACHEABLE static remote_control_s *rc_pointer = NULL;
+remote_control_s *rc_pointer;
 
 ATTR_PLACE_AT_NONCACHEABLE uint8_t dbus_rx_buf[DBUS_RX_BUF_NUM]; // 遥控器数据接收缓冲区
 volatile bool dbus_uart_rx_dma_done = true;                      // dma传输完成标志位
-ATTR_PLACE_AT_NONCACHEABLE static rfl_dt7_dr16_data_s dt7_dr16_prior_data;
+rfl_dt7_dr16_data_s dt7_dr16_prior_data;
 
 void dbus_dma_isr(void)
 {

@@ -183,6 +183,8 @@ typedef struct EngineerScaraArm
 extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
 
+extern void ArmControlStop(void);
+
 extern bool checkIfArmGrabbed(void);
 
 extern bool *getArmResetStatus(void);
@@ -240,7 +242,7 @@ extern bool *getStoragePopStatus(void);
 #define ENGINEER_ARM_ROLL_MIN_ANGLE (-720.0f)                                          /* 末端ROLL最小角度 */
 
 // 关节运行基准速度
-#define ENGINEER_ARM_MANUAL_OPERATION_BASE_SPEED (2.0f)
+#define ENGINEER_ARM_MANUAL_OPERATION_BASE_SPEED (1.6f)
 #define ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED (1.0f)
 
 // 正常运行时的关节可达范围
@@ -309,7 +311,7 @@ extern bool *getStoragePopStatus(void);
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KP (1200.0f)
-#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (1.0f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (1.2f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_IOUT (6000.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)

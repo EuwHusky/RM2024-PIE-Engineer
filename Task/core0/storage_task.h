@@ -26,6 +26,12 @@ typedef enum EngineerStorageSlotStatus
     STORAGE_SLOT_USED,
 } engineer_storage_slot_status_e;
 
+typedef enum EngineerStorageOperation
+{
+    STORAGE_PUSH_IN = 0,
+    STORAGE_POP_OUT,
+} engineer_storage_operation_e;
+
 typedef struct EngineerStorage
 {
     engineer_storage_slot_index_e current_target_slot;
@@ -57,21 +63,26 @@ extern engineer_storage_slot_index_e getStorageCurrentTargetSlot(void);
  *
  * @return engineer_storage_slot_index_e 存矿位置
  */
-engineer_storage_slot_index_e getStoragePushInAvailableSlot(void);
-/**
- * @brief 取消此次矿石存入
- */
-void StorageCancelPushIn(void);
+extern engineer_storage_slot_index_e getStoragePushInAvailableSlot(void);
+
 /**
  * @brief 获取可取矿石槽位 若无可取矿石则返回空槽位
  *
  * @return engineer_storage_slot_index_e 取矿位置
  */
-engineer_storage_slot_index_e getStoragePopOutAvailableSlot(void);
+extern engineer_storage_slot_index_e getStoragePopOutAvailableSlot(void);
+
 /**
- * @brief 确认取出当前矿石
+ * @brief 对当前操作进行确认
+ * @note 当前为存入/取出操作，则打开/关闭对应槽位
  */
-void StorageConfirmPopOut(void);
+extern void StorageConfirmOperation(engineer_storage_operation_e operation);
+
+/**
+ * @brief 取消当前操作
+ * @note 当前为存入操作，则关闭对应槽位
+ */
+extern void StorageCancelOperation(engineer_storage_operation_e operation);
 
 #define ENGINEER_STORAGE_POWER (0)
 #define ENGINEER_STORAGE_RELIEF (1)

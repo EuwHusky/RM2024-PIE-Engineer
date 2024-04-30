@@ -6,7 +6,7 @@
 
 #define PRESS_SEN 6
 
-ATTR_PLACE_AT_NONCACHEABLE static remote_control_s remote_control;
+static remote_control_s remote_control;
 
 void RemoteControlInit(void)
 {

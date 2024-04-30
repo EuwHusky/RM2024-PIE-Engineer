@@ -22,7 +22,7 @@ static void gimbal_steer_pitch_normal_control(engineer_gimbal_s *gimbal);
 static void gimbal_steer_pitch_reset_control(engineer_gimbal_s *gimbal);
 static void gimbal_motor_yaw_can_rx_callback(void);
 
-ATTR_PLACE_AT_NONCACHEABLE static engineer_gimbal_s gimbal;
+static engineer_gimbal_s gimbal;
 
 void gimbal_task(void *pvParameters)
 {
@@ -158,20 +158,24 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
 
         if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
         {
-            rflMotorSetMaxSpeed(&gimbal->yaw_motor, 3.2f);
-            gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_HOMING;
             rflMotorSetDegAngleLimit(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_GIMBAL_YAW_INITIAL_MAX_ANGLE,
                                      ENGINEER_GIMBAL_YAW_INITIAL_MIN_ANGLE);
+
+            gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_HOMING;
         }
         else if (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_RESET && gimbal->behavior != ENGINEER_BEHAVIOR_RESET)
         {
-            rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.8f);
             rflMotorSetDegAngleLimit(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_GIMBAL_YAW_MAX_ANGLE,
                                      ENGINEER_GIMBAL_YAW_MIN_ANGLE);
         }
     }
 
     // 根据不同模式使用不同控制
+
+    if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
+        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.0f);
+    else
+        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.5f);
 
     switch (gimbal->behavior)
     {
@@ -203,8 +207,8 @@ static void gimbal_update_and_execute(engineer_gimbal_s *gimbal)
 
     rflMotorUpdateStatus(&gimbal->yaw_motor);
     rflMotorUpdateControl(&gimbal->yaw_motor);
-    rflRmMotorControl(GIMBAL_MOTORS_CAN_ORDINAL, GIMBAL_MOTORS_CAN_SLAVE_ID, rflMotorGetOutput(&gimbal->yaw_motor), 0,
-                      0, 0);
+    rflRmMotorControl(GIMBAL_MOTORS_CAN_ORDINAL, GIMBAL_MOTORS_CAN_SLAVE_ID,
+                      (int16_t)rflMotorGetOutput(&gimbal->yaw_motor), 0, 0, 0);
 
     gimbal->pitch_pwm_compare =
         rflUint32Constrain(gimbal->pitch_pwm_compare, ENGINEER_GIMBAL_PITCH_PWM_CONPARE_VALUE_MIN,

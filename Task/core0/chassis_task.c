@@ -25,7 +25,7 @@ static void chassis_motor_1_can_rx_callback(void);
 static void chassis_motor_2_can_rx_callback(void);
 static void chassis_motor_3_can_rx_callback(void);
 
-ATTR_PLACE_AT_NONCACHEABLE static engineer_chassis_s chassis;
+static engineer_chassis_s chassis;
 
 void chassis_task(void *pvParameters)
 {
@@ -133,8 +133,7 @@ static void chassis_mode_control(engineer_chassis_s *chassis)
 
     if (chassis->last_behavior != chassis->behavior)
     {
-        if (chassis->behavior == ENGINEER_BEHAVIOR_DISABLE || chassis->behavior == ENGINEER_BEHAVIOR_RESET/*  ||
-            chassis->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING */)
+        if (chassis->behavior == ENGINEER_BEHAVIOR_DISABLE || chassis->behavior == ENGINEER_BEHAVIOR_RESET)
         {
             rflChassisSetBehavior(&chassis->model, RFL_CHASSIS_BEHAVIOR_NO_FORCE);
             for (uint8_t i = 0; i < 4; i++)
@@ -189,6 +188,8 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
 
     if (*getGimbalResetStatus())
         chassis->follow_offset = -getGimbalYawAngle(RFL_ANGLE_FORMAT_DEGREE);
+    else
+        chassis->follow_offset = -GIMBAL_YAW_START_ANGLE;
 
     if (chassis->model.mode_ != RFL_CHASSIS_BEHAVIOR_NO_FORCE)
     {
@@ -222,9 +223,9 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
         rflMotorUpdateControl(chassis->motor + i);
     }
 
-    rflRmMotorControl(CHASSIS_MOTORS_CAN_ORDINAL, CHASSIS_MOTORS_CAN_SLAVE_ID, rflMotorGetOutput(chassis->motor + 0),
-                      rflMotorGetOutput(chassis->motor + 1), rflMotorGetOutput(chassis->motor + 2),
-                      rflMotorGetOutput(chassis->motor + 3));
+    rflRmMotorControl(CHASSIS_MOTORS_CAN_ORDINAL, CHASSIS_MOTORS_CAN_SLAVE_ID,
+                      (int16_t)rflMotorGetOutput(chassis->motor + 0), (int16_t)rflMotorGetOutput(chassis->motor + 1),
+                      (int16_t)rflMotorGetOutput(chassis->motor + 2), (int16_t)rflMotorGetOutput(chassis->motor + 3));
 }
 
 static void chassis_stop_control(engineer_chassis_s *chassis)

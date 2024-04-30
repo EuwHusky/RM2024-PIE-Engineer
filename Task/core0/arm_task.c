@@ -20,7 +20,7 @@ static void arm_init(engineer_scara_arm_s *scara_arm);
 static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm);
 // static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 
-ATTR_PLACE_AT_NONCACHEABLE static engineer_scara_arm_s scara_arm;
+static engineer_scara_arm_s scara_arm;
 
 void arm_task(void *pvParameters)
 {
@@ -57,6 +57,12 @@ void arm_task(void *pvParameters)
 engineer_scara_arm_s *getArmDataPointer(void)
 {
     return &scara_arm;
+}
+
+void ArmControlStop(void)
+{
+    for (uint8_t i = 0; i < 6; i++)
+        scara_arm.set_pose_6d[i] = scara_arm.pose_6d[i];
 }
 
 bool checkIfArmGrabbed(void)

@@ -13,7 +13,7 @@
 #include "gimbal_task.h"
 #include "storage_task.h"
 
-ATTR_PLACE_AT_NONCACHEABLE static engineer_behavior_manager_s behavior_manager;
+engineer_behavior_manager_s behavior_manager;
 
 static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager);
 static void update_robot_status(engineer_behavior_manager_s *behavior_manager);
@@ -156,7 +156,25 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      */
     if (behavior_manager->last_dt7_behavior_switch_value != ENGINEER_DISABLE_DT7_SWITCH_VALUE &&
         behavior_manager->dt7_behavior_switch_value == ENGINEER_DISABLE_DT7_SWITCH_VALUE)
+    {
+        if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
+            *behavior_manager->arm_move_homing_success = false;
+        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING)
+            *behavior_manager->arm_operation_homing_success = false;
+        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+            *behavior_manager->silver_mining_success = false;
+        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+            *behavior_manager->gold_mining_success = false;
+        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+        {
+            *behavior_manager->storage_push_success = false;
+            StorageCancelOperation(STORAGE_PUSH_IN);
+        }
+        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+            *behavior_manager->storage_pop_success = false;
+
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
+    }
 
     /**
      * @brief 机动 -> 作业 / 作业 -> 机动
@@ -220,10 +238,11 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
             {
                 *behavior_manager->storage_push_success = false;
-                StorageCancelPushIn();
+                StorageCancelOperation(STORAGE_PUSH_IN);
             }
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
                 *behavior_manager->storage_pop_success = false;
+
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
         }
     }
@@ -278,10 +297,12 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
             {
                 *behavior_manager->storage_push_success = false;
-                StorageCancelPushIn();
+                StorageCancelOperation(STORAGE_PUSH_IN);
             }
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
                 *behavior_manager->storage_pop_success = false;
+
+            ArmControlStop();
 
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
         }
@@ -334,10 +355,12 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
             {
                 *behavior_manager->storage_push_success = false;
-                StorageCancelPushIn();
+                StorageCancelOperation(STORAGE_PUSH_IN);
             }
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
                 *behavior_manager->storage_pop_success = false;
+
+            ArmControlStop();
 
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
         }
