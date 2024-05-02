@@ -6,13 +6,6 @@
 
 #define STORAGE_MAX_LIMIT 2
 
-typedef enum EngineerStorageSlotIndex
-{
-    STORAGE_BACK = 0,
-    STORAGE_FRONT,
-    STORAGE_NULL,
-} engineer_storage_slot_index_e;
-
 typedef enum EngineerStorageStatus
 {
     STORAGE_EMPTY = 0,
@@ -20,11 +13,24 @@ typedef enum EngineerStorageStatus
     STORAGE_FULL,
 } engineer_storage_status_e;
 
+typedef enum EngineerStorageSlotIndex
+{
+    STORAGE_BACK = 0,
+    STORAGE_FRONT,
+    STORAGE_NULL,
+} engineer_storage_slot_index_e;
+
 typedef enum EngineerStorageSlotStatus
 {
     STORAGE_SLOT_EMPTY = 0,
     STORAGE_SLOT_USED,
 } engineer_storage_slot_status_e;
+
+typedef enum EngineerStorageNuggetType
+{
+    GOLD_NUGGET = 0,
+    SILVER_NUGGET,
+} engineer_storage_nugget_type_e;
 
 typedef enum EngineerStorageOperation
 {
@@ -39,10 +45,12 @@ typedef struct EngineerStorage
     uint8_t storage_used_num;
     engineer_storage_slot_status_e storage_slot_status[STORAGE_MAX_LIMIT];
     engineer_storage_slot_status_e last_storage_slot_status[STORAGE_MAX_LIMIT];
+    engineer_storage_nugget_type_e latest_nugget_type_to_grab;
+    engineer_storage_nugget_type_e slot_nugget_type[STORAGE_MAX_LIMIT];
+    bool storage_slot_needed[STORAGE_MAX_LIMIT];
+
     uint8_t empty_detect_timer[STORAGE_MAX_LIMIT];
     uint8_t used_detect_timer[STORAGE_MAX_LIMIT];
-
-    bool storage_slot_needed[STORAGE_MAX_LIMIT];
 
     uint32_t gpio_port[STORAGE_MAX_LIMIT][3];
     uint8_t gpio_pin[STORAGE_MAX_LIMIT][3];
@@ -53,9 +61,12 @@ extern void storage_task(void *pvParameters);
 extern const engineer_storage_s *getStorageDataPointer(void);
 
 extern engineer_storage_status_e getStorageStatus(void);
-extern engineer_storage_slot_status_e getStorageSlotStatus(engineer_storage_slot_index_e slot_index);
 
 extern engineer_storage_slot_index_e getStorageCurrentTargetSlot(void);
+extern engineer_storage_slot_status_e getStorageSlotStatus(engineer_storage_slot_index_e slot_index);
+extern engineer_storage_nugget_type_e getStorageSlotNuggetType(engineer_storage_slot_index_e slot_index);
+extern engineer_storage_nugget_type_e getLatestNuggetTypeToGrab(void);
+extern void setGrabNuggetType(engineer_storage_nugget_type_e nugget_type);
 
 /**
  * @brief 获取可存矿石槽位 若无可存槽位则返回空槽位

@@ -294,6 +294,21 @@ static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, co
  */
 static void set_pose_limiting(engineer_scara_arm_s *scara_arm)
 {
+    // 检查末端YAW角度是否超限
+
+    Yaw = rflFloatConstrain(Yaw, ENGINEER_ARM_YAW_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+                            ENGINEER_ARM_YAW_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+
+    // 检查末端PITCH角度是否超限
+
+    Pitch = rflFloatConstrain(Pitch, ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+                              ENGINEER_ARM_PITCH_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+
+    // 检查末端ROLL角度是否超限
+
+    Roll = rflFloatConstrain(Roll, ENGINEER_ARM_ROLL_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
+                             ENGINEER_ARM_ROLL_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
+
     // 检查关节4在XY平面上的位置是否超限
 
     float xy_56 = L4 * cosf(Pitch);
@@ -415,21 +430,6 @@ static void set_pose_limiting(engineer_scara_arm_s *scara_arm)
         Z = ENGINEER_ARM_JOINT_1_MAX_DISTANCE + z_56;
     else if (Z < (ENGINEER_ARM_JOINT_1_MIN_DISTANCE + z_56))
         Z = ENGINEER_ARM_JOINT_1_MIN_DISTANCE + z_56;
-
-    // 检查末端YAW角度是否超限
-
-    Yaw = rflFloatConstrain(Yaw, ENGINEER_ARM_YAW_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                            ENGINEER_ARM_YAW_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-
-    // 检查末端PITCH角度是否超限
-
-    Pitch = rflFloatConstrain(Pitch, ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                              ENGINEER_ARM_PITCH_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
-
-    // 检查末端ROLL角度是否超限
-
-    Roll = rflFloatConstrain(Roll, ENGINEER_ARM_ROLL_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR,
-                             ENGINEER_ARM_ROLL_MAX_ANGLE * DEGREE_TO_RADIAN_FACTOR);
 }
 
 /**

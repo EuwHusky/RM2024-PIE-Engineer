@@ -49,14 +49,29 @@ engineer_storage_status_e getStorageStatus(void)
     return STORAGE_AVAILABLE;
 }
 
+engineer_storage_slot_index_e getStorageCurrentTargetSlot(void)
+{
+    return storage.current_target_slot;
+}
+
 engineer_storage_slot_status_e getStorageSlotStatus(engineer_storage_slot_index_e slot_index)
 {
     return storage.storage_slot_status[slot_index];
 }
 
-engineer_storage_slot_index_e getStorageCurrentTargetSlot(void)
+engineer_storage_nugget_type_e getStorageSlotNuggetType(engineer_storage_slot_index_e slot_index)
 {
-    return storage.current_target_slot;
+    return storage.slot_nugget_type[slot_index];
+}
+
+engineer_storage_nugget_type_e getLatestNuggetTypeToGrab(void)
+{
+    return storage.latest_nugget_type_to_grab;
+}
+
+void setGrabNuggetType(engineer_storage_nugget_type_e nugget_type)
+{
+    storage.latest_nugget_type_to_grab = nugget_type;
 }
 
 /**
@@ -131,9 +146,15 @@ engineer_storage_slot_index_e getStoragePopOutAvailableSlot(void)
 void StorageConfirmOperation(engineer_storage_operation_e operation)
 {
     if (operation == STORAGE_PUSH_IN)
+    {
+        storage.slot_nugget_type[storage.current_target_slot] = storage.latest_nugget_type_to_grab;
         storage.storage_slot_needed[storage.current_target_slot] = true;
+    }
     else if (operation == STORAGE_POP_OUT)
+    {
+        storage.latest_nugget_type_to_grab = storage.slot_nugget_type[storage.current_target_slot];
         storage.storage_slot_needed[storage.current_target_slot] = false;
+    }
 }
 
 /**
@@ -155,10 +176,12 @@ static void storage_init(engineer_storage_s *storage)
     for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
     {
         storage->storage_slot_status[i] = STORAGE_SLOT_EMPTY;
+        storage->slot_nugget_type[i] = SILVER_NUGGET;
         storage->storage_slot_needed[i] = false;
         storage->empty_detect_timer[i] = 0;
         storage->used_detect_timer[i] = 0;
     }
+    storage->latest_nugget_type_to_grab = SILVER_NUGGET;
 
     storage->gpio_port[STORAGE_FRONT][ENGINEER_STORAGE_POWER] = ENGINEER_STORAGE_FRONT_POWER_VALVE_GPIO_PORT;
     storage->gpio_port[STORAGE_FRONT][ENGINEER_STORAGE_RELIEF] = ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PORT;

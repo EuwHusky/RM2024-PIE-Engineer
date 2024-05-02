@@ -241,6 +241,8 @@ void print_task(void *pvParameters)
             //         storage_print->storage_slot_needed[STORAGE_BACK],
             //         storage_print->storage_slot_needed[STORAGE_FRONT], arm_print->storage_push_step,
             //         arm_print->storage_pop_step);
+            // sprintf((char *)test_txt, "%d,%d,%d\r\n", storage_print->latest_nugget_type_to_grab,
+            //         storage_print->slot_nugget_type[0], storage_print->slot_nugget_type[1]);
 
             /**
              * @brief Chassis
@@ -265,11 +267,12 @@ void print_task(void *pvParameters)
              * @brief Scara Arm
              */
             /*设定/测量位姿*/
-            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-                    arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
-                    arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
-                    arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
-                    arm_print->pose_6d[4], arm_print->pose_6d[5]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
+            //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
+            //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
+            //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
+            sprintf((char *)test_txt, "%6.3f,%6.3f\r\n", arm_print->set_joints_value[0], arm_print->joints_value[0]);
             /*测量位姿及关节4平面坐标*/
             // sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
