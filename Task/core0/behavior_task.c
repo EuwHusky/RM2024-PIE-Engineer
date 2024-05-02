@@ -101,7 +101,6 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_move_homing_success = getArmMoveHomingStatue();
     behavior_manager->arm_operation_homing_success = getArmOperationHomingStatus();
     behavior_manager->silver_mining_success = getSilverMiningStatus();
-    behavior_manager->gold_mining_success = getGoldMiningStatus();
     behavior_manager->storage_push_success = getStoragePushStatus();
     behavior_manager->storage_pop_success = getStoragePopStatus();
     behavior_manager->gimbal_reset_success = getGimbalResetStatus();
@@ -163,8 +162,6 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             *behavior_manager->arm_operation_homing_success = false;
         else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
             *behavior_manager->silver_mining_success = false;
-        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
-            *behavior_manager->gold_mining_success = false;
         else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
         {
             *behavior_manager->storage_push_success = false;
@@ -233,8 +230,6 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
                 *behavior_manager->arm_operation_homing_success = false;
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
                 *behavior_manager->silver_mining_success = false;
-            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
-                *behavior_manager->gold_mining_success = false;
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
             {
                 *behavior_manager->storage_push_success = false;
@@ -281,19 +276,17 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_GOLD_MINING);
 
         /**
-         * @brief 立即停止自动取金/银矿、自动存/取矿 切换到作业预归位模式
+         * @brief 立即停止自动取银矿、自动存/取矿 并切换到作业预归位模式
          * 键鼠 Ctrl+C 触发
          */
         if (checkIfRcKeyFallingEdgeDetected(RC_C) &&
-            (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
-             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING ||
+            (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION ||
+             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
              behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
              behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP))
         {
             if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
                 *behavior_manager->silver_mining_success = false;
-            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
-                *behavior_manager->gold_mining_success = false;
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
             {
                 *behavior_manager->storage_push_success = false;
@@ -350,8 +343,6 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         {
             if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
                 *behavior_manager->silver_mining_success = false;
-            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
-                *behavior_manager->gold_mining_success = false;
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
             {
                 *behavior_manager->storage_push_success = false;
@@ -503,16 +494,11 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     }
 
     /**
-     * @brief 自动取金/银矿成功后自动切换到作业模式
+     * @brief 自动取银矿成功后自动切换到作业模式
      */
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING && *behavior_manager->silver_mining_success)
     {
         *behavior_manager->silver_mining_success = false;
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
-    }
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING && *behavior_manager->gold_mining_success)
-    {
-        *behavior_manager->gold_mining_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
     }
 

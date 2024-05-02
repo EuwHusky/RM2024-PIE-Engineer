@@ -90,7 +90,7 @@ typedef enum EngineerScaraArmSolution
     (scara_arm->start_up_status &= (~((1 << (joint_index)) & 0xffff)))
 
 /**
- * @brief 获取机械臂某一关节的启动状态 若未成功启动则返回非零
+ * @brief 获取机械臂某一关节的启动状态 若未成功启动则返回真
  * @param[in] joint_index 机械臂关节号
  * @param[in] arm_start_up_status 机械臂状态簇
  */
@@ -110,7 +110,6 @@ typedef struct EngineerScaraArm
     bool move_homing_success;
     bool operation_homing_success;
     bool silver_mining_success;
-    bool gold_mining_success;
     bool storage_push_success;
     bool storage_pop_success;
 
@@ -203,7 +202,6 @@ extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);
 extern bool *getArmOperationHomingStatus(void);
 extern bool *getSilverMiningStatus(void);
-extern bool *getGoldMiningStatus(void);
 extern bool *getStoragePushStatus(void);
 extern bool *getStoragePopStatus(void);
 

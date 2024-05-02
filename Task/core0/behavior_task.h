@@ -18,8 +18,8 @@ typedef enum EngineerBehavior
     ENGINEER_BEHAVIOR_MOVE,             // 机动
 
     ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING, // 自动归位 到作业模式默认位置
-    ENGINEER_BEHAVIOR_AUTO_SILVER_MINING,    // 自动作业 取银矿
-    ENGINEER_BEHAVIOR_AUTO_GOLD_MINING,      // 自动作业 取金矿
+    ENGINEER_BEHAVIOR_AUTO_SILVER_MINING,    // 半自动作业 取银矿
+    ENGINEER_BEHAVIOR_AUTO_GOLD_MINING,      // 半自动作业 取金矿
     ENGINEER_BEHAVIOR_MANUAL_OPERATION,      // 手动作业
 
     ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH, // 自动存矿
@@ -53,7 +53,6 @@ typedef struct EngineerBehaviorManager
     bool *arm_move_homing_success;
     bool *arm_operation_homing_success;
     bool *silver_mining_success;
-    bool *gold_mining_success;
     bool *storage_push_success;
     bool *storage_pop_success;
     bool *gimbal_reset_success;

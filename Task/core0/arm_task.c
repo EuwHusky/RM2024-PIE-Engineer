@@ -90,11 +90,6 @@ bool *getSilverMiningStatus(void)
     return &scara_arm.silver_mining_success;
 }
 
-bool *getGoldMiningStatus(void)
-{
-    return &scara_arm.gold_mining_success;
-}
-
 bool *getStoragePushStatus(void)
 {
     return &scara_arm.storage_push_success;
@@ -117,7 +112,6 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->move_homing_success = false;
     scara_arm->operation_homing_success = false;
     scara_arm->silver_mining_success = false;
-    scara_arm->gold_mining_success = false;
     scara_arm->storage_push_success = false;
     scara_arm->storage_pop_success = false;
 

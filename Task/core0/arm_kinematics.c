@@ -113,11 +113,20 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
  */
 void arm_model_update_control(engineer_scara_arm_s *scara_arm)
 {
-    if (scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
+    if (scara_arm->behavior != ENGINEER_BEHAVIOR_RESET && scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
     {
 #if !USE_JOINTS_CONTROL
         solve_inverse_kinematics(scara_arm);
 #endif
+    }
+    else
+    {
+        for (uint8_t i = 0; i < 6; i++)
+            scara_arm->set_pose_6d[i] = scara_arm->pose_6d[i];
+    }
+
+    if (scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
+    {
 
         scara_arm->set_joints_value[JOINT_1] = rflFloatConstrain(
             scara_arm->set_joints_value[JOINT_1], ENGINEER_ARM_JOINT_1_MIN_DISTANCE, ENGINEER_ARM_JOINT_1_MAX_DISTANCE);

@@ -73,10 +73,10 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define JOINT_1_HOMING_TORQUE_THRESHOLD (2.0f)
 #define JOINT_1_HOMING_ANGLE (-13.021768f)
 
-#define JOINT_2_START_WAIT_ANGLE (48.0f)
+#define JOINT_2_START_WAIT_ANGLE (40.0f)
 #define JOINT_2_START_ANGLE (64.0f)
 
-#define JOINT_3_START_WAIT_ANGLE (-138.0f)
+#define JOINT_3_START_WAIT_ANGLE (-130.0f)
 #define JOINT_3_START_ANGLE (-154.0f)
 
 #define JOINT_4_HOMING_STEP_ANGLE (0.005f)
@@ -94,10 +94,18 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 /* =============================================== 自动控制 银矿参数 =============================================== */
 
 #define SILVER_MINING_STEP_INIT (0u)
-#define SILVER_MINING_STEP_READY (1u)
-#define SILVER_MINING_STEP_GRAB (2u)
-#define SILVER_MINING_STEP_WAIT (3u)
-#define SILVER_MINING_STEP_OK (4u)
+#define SILVER_MINING_STEP_START (1u)
+#define SILVER_MINING_STEP_READY (2u)
+#define SILVER_MINING_STEP_GRAB (3u)
+#define SILVER_MINING_STEP_WAIT (4u)
+#define SILVER_MINING_STEP_OK (5u)
+
+/* =============================================== 自动控制 金矿参数 =============================================== */
+
+#define GOLD_MINING_STEP_INIT (0u)
+#define GOLD_MINING_STEP_START (1u)
+#define GOLD_MINING_STEP_OPERATION (2u)
+#define GOLD_MINING_STEP_PULL_OUT (3u)
 
 /* =============================================== 自动控制 存矿参数 =============================================== */
 

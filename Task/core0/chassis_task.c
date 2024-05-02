@@ -161,6 +161,7 @@ static void chassis_mode_control(engineer_chassis_s *chassis)
         break;
     case ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING:
     case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    case ENGINEER_BEHAVIOR_AUTO_GOLD_MINING:
     case ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH:
     case ENGINEER_BEHAVIOR_AUTO_STORAGE_POP:
         chassis_slowly_control(chassis);
