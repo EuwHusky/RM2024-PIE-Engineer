@@ -14,6 +14,9 @@
 #define MID_GOLD_INDICATOR_AID_UI_INDEX (11)
 #define RIGHT_GOLD_INDICATOR_AID_UI_INDEX (12)
 
+#define SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX (13)
+#define DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX (14)
+
 extern void referee_task(void *pvParameters);
 
 #endif

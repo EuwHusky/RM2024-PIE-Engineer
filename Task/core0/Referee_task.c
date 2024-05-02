@@ -80,7 +80,7 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 17, 13, 0);
+    refereeInitRobotInteractionManager(&step_clock, 17, 15, 0);
     refereeSetRobotInteractionFigureBuilder(0, uiModeIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(1, uiSplitLine0Builder);
     refereeSetRobotInteractionFigureBuilder(2, uiGrabberPoweredBuilder);
@@ -95,6 +95,10 @@ void referee_task(void *pvParameters)
     refereeSetRobotInteractionFigureBuilder(MID_GOLD_INDICATOR_AID_UI_INDEX, uiAutoGoldMiningAidMidIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(RIGHT_GOLD_INDICATOR_AID_UI_INDEX,
                                             uiAutoGoldMiningAidRightIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
+                                            uiSafeRightBarrierWarningLineBuilder);
+    refereeSetRobotInteractionFigureBuilder(DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
+                                            uiDangerRightBarrierWarningLineBuilder);
 
     while (1)
     {
@@ -188,6 +192,18 @@ static void client_ui(void)
         refereeClientUiOperate(UI_DISPLAY_FIGURE, LEFT_GOLD_INDICATOR_AID_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, MID_GOLD_INDICATOR_AID_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, RIGHT_GOLD_INDICATOR_AID_UI_INDEX);
+    }
+
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE ||
+        getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
+    {
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
+    }
+    else
+    {
+        refereeClientUiOperate(UI_HIDE_FIGURE, SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
     }
 }
 

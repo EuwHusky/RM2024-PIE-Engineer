@@ -126,3 +126,25 @@ void uiAutoGoldMiningAidRightIndicatorBuilder(interaction_figure_t *figure,
                     AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_0, AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_1,
                     AUTO_GOLD_MINING_AID_INDICATOR_Y_0, AUTO_GOLD_MINING_AID_INDICATOR_Y_1);
 }
+
+#define SAFE_RIGHT_BARRIER_WARNING_LINE_X_0 (1147)
+#define SAFE_RIGHT_BARRIER_WARNING_LINE_X_1 (1288)
+#define SAFE_RIGHT_BARRIER_WARNING_LINE_Y_0 (226)
+#define SAFE_RIGHT_BARRIER_WARNING_LINE_Y_1 (0)
+#define DANGER_RIGHT_BARRIER_WARNING_LINE_X_0 (1057)
+#define DANGER_RIGHT_BARRIER_WARNING_LINE_X_1 (1152)
+#define DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0 (232)
+#define DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1 (0)
+
+void uiSafeRightBarrierWarningLineBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    uiPlotLine(figure, "sbw", figure_operation_type, 9, FIGURE_GREEN, 5, SAFE_RIGHT_BARRIER_WARNING_LINE_X_0,
+               SAFE_RIGHT_BARRIER_WARNING_LINE_X_1, SAFE_RIGHT_BARRIER_WARNING_LINE_Y_0,
+               SAFE_RIGHT_BARRIER_WARNING_LINE_Y_1);
+}
+void uiDangerRightBarrierWarningLineBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    uiPlotLine(figure, "dbw", figure_operation_type, 9, FIGURE_ORANGE, 5, DANGER_RIGHT_BARRIER_WARNING_LINE_X_0,
+               DANGER_RIGHT_BARRIER_WARNING_LINE_X_1, DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0,
+               DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1);
+}
