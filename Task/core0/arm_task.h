@@ -38,7 +38,7 @@ typedef enum EngineerScaraArmPose
     POSE_ROLL,
 } engineer_scara_arm_pose_e;
 
-typedef enum EngineerScaraArmStartUpStatus
+enum EngineerScaraArmStartUpStatus
 {
     ARM_START_UP_OK = 0x00,
 
@@ -49,13 +49,14 @@ typedef enum EngineerScaraArmStartUpStatus
     ARM_START_UP_JOINT_5_FAILED = 0x10, // 归位失败
     ARM_START_UP_JOINT_6_FAILED = 0x20, // 归位失败
 
-    ARM_START_UP_JOINT_4_STEP1_FAILED = 0x40, // 机械限位获取角度失败
-    ARM_START_UP_JOINT_5_STEP1_FAILED = 0x80, // 机械限位获取角度失败
+    ARM_START_UP_JOINT_3_STEP1_FAILED = 0x40,  // 机械限位获取角度失败
+    ARM_START_UP_JOINT_4_STEP1_FAILED = 0x80,  // 机械限位获取角度失败
+    ARM_START_UP_JOINT_5_STEP1_FAILED = 0x100, // 机械限位获取角度失败
 
-    ARM_NOT_START_UP = 0xff,
-} engineer_scara_arm_start_up_status_e;
+    ARM_NOT_START_UP = 0x1ff,
+};
 
-#define JOINT45_START_UP_STEP1_BIT_OFFSET 3
+#define JOINT345_START_UP_STEP1_BIT_OFFSET 4
 
 typedef enum EngineerScaraArmJointsMotorsIndex
 {
@@ -86,7 +87,7 @@ typedef enum EngineerScaraArmSolution
  * @param[out] arm_start_up_status 机械臂状态簇
  */
 #define setJointStartUpStateOk(joint_index, arm_start_up_status)                                                       \
-    (scara_arm->start_up_status &= (~((1 << (joint_index)) & 0xff)))
+    (scara_arm->start_up_status &= (~((1 << (joint_index)) & 0xffff)))
 
 /**
  * @brief 获取机械臂某一关节的启动状态 若未成功启动则返回非零
@@ -104,7 +105,7 @@ typedef struct EngineerScaraArm
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
 
-    uint8_t start_up_status;
+    uint16_t start_up_status;
     bool reset_success;
     bool move_homing_success;
     bool operation_homing_success;
@@ -185,6 +186,7 @@ typedef struct EngineerScaraArm
     // sliding_window_filter_s_t joint_6_encoder_angle_filter;
 
     rfl_motor_s joints_motors[7];
+    float joint_23_front_motor_angle_offset;
 
     float printer[6]; // 只是方便把数发出来
 
@@ -284,8 +286,8 @@ extern bool *getStoragePopStatus(void);
 #define ENGINEER_ARM_MOTOR_JOINT_1_MIN_ANGLE (ENGINEER_ARM_JOINT_1_MIN_DISTANCE * LIFTER_DISTANCE_TO_DEGREE_FACTOR)
 #define ENGINEER_ARM_MOTOR_JOINT_23_BACK_MAX_ANGLE (ENGINEER_ARM_JOINT_2_MAX_ANGLE * JOINT2_REDUCTION)
 #define ENGINEER_ARM_MOTOR_JOINT_23_BACK_MIN_ANGLE (ENGINEER_ARM_JOINT_2_MIN_ANGLE * JOINT2_REDUCTION)
-#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE (173.0f)
-#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE (-173.0f)
+#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE (180.0f)
+#define ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE (-180.0f)
 #define ENGINEER_ARM_MOTOR_JOINT_4_MAX_ANGLE (ENGINEER_ARM_JOINT_4_MAX_ANGLE)
 #define ENGINEER_ARM_MOTOR_JOINT_4_MIN_ANGLE (ENGINEER_ARM_JOINT_4_MIN_ANGLE)
 #define ENGINEER_ARM_MOTOR_JOINT_56_MAX_ANGLE                                                                          \
@@ -298,6 +300,8 @@ extern bool *getStoragePopStatus(void);
     (ENGINEER_ARM_JOINT_1_INITIAL_MAX_DISTANCE * LIFTER_DISTANCE_TO_DEGREE_FACTOR)
 #define ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MIN_ANGLE                                                                   \
     (ENGINEER_ARM_JOINT_1_INITIAL_MIN_DISTANCE * LIFTER_DISTANCE_TO_DEGREE_FACTOR)
+#define ENGINEER_ARM_JOINT_23_FRONT_MOTOR_INITIAL_MAX_ANGLE (540.0f)
+#define ENGINEER_ARM_JOINT_23_FRONT_MOTOR_INITIAL_MIN_ANGLE (-540.0f)
 #define ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MAX_ANGLE (ENGINEER_ARM_JOINT_4_INITIAL_MAX_ANGLE)
 #define ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_4_INITIAL_MIN_ANGLE)
 #define ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MAX_ANGLE (ENGINEER_ARM_JOINT_5_INITIAL_MAX_ANGLE * 2.0f)

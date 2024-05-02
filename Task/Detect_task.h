@@ -22,6 +22,8 @@ enum Detect_List
 
     ARM_JOINT_1_L_DH,
     ARM_JOINT_1_R_DH,
+    ARM_JOINT_2_DH,
+    ARM_JOINT_3_DH,
     ARM_JOINT_4_DH,
     ARM_JOINT_56_L_DH,
     ARM_JOINT_56_R_DH,

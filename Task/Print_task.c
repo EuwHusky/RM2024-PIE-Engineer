@@ -22,6 +22,7 @@
 #include "arm_task.h"
 #include "behavior_task.h"
 #include "chassis_task.h"
+#include "detect_task.h"
 #include "gimbal_task.h"
 #include "storage_task.h"
 
@@ -268,10 +269,10 @@ void print_task(void *pvParameters)
             //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
             //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
-            sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
-                    arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
-                    arm_print->pose_6d[4], arm_print->pose_6d[5], arm_print->printer[0], arm_print->printer[1],
-                    arm_print->printer[2]);
+            // sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
+            //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
+            //         arm_print->pose_6d[4], arm_print->pose_6d[5], arm_print->printer[0], arm_print->printer[1],
+            //         arm_print->printer[2]);
             // sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
             //         arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1],
             //         arm_print->pose_6d[1], arm_print->set_pose_6d[2], arm_print->pose_6d[2],
@@ -292,6 +293,9 @@ void print_task(void *pvParameters)
             //         getCustomerControllerData()->pose[5], arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1],
             //         arm_print->cc_pose_6d[2], arm_print->cc_pose_6d[3], arm_print->cc_pose_6d[4],
             //         arm_print->cc_pose_6d[5]);
+
+            sprintf((char *)test_txt, "%f,%f\r\n", arm_print->joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_print->joints_value[JOINT_3] * RADIAN_TO_DEGREE_FACTOR);
 
             /**
              * @brief Motor PID

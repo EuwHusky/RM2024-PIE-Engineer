@@ -14,6 +14,8 @@
 
 static void arm_joint_1_l_can_rx_callback(void);
 static void arm_joint_1_r_can_rx_callback(void);
+static void arm_joint_2_can_rx_callback(void);
+static void arm_joint_3_can_rx_callback(void);
 static void arm_joint_4_can_rx_callback(void);
 static void arm_joint_56_l_can_rx_callback(void);
 static void arm_joint_56_r_can_rx_callback(void);
@@ -98,6 +100,9 @@ void arm_motor_init(engineer_scara_arm_s *scara_arm)
     config.slave_can_id = 0x01;
     rflMotorInit(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], &config);
 
+    rflCanRxMessageBoxAddRxCallbackFunc(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, 0x02, arm_joint_2_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, 0x03, arm_joint_3_can_rx_callback);
+
     /* 关节4 一个电机 */
 
     rflMotorGetDefaultConfig(&config, RFL_MOTOR_RM_M3508, RFL_MOTOR_CONTROLLER_PID);
@@ -166,7 +171,8 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
                      scara_arm->set_joints_value[JOINT_2] * JOINT2_REDUCTION);
 
     rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN,
-                     scara_arm->set_joints_value[JOINT_2] + scara_arm->set_joints_value[JOINT_3]);
+                     (scara_arm->set_joints_value[JOINT_2] + scara_arm->set_joints_value[JOINT_3]) -
+                         scara_arm->joint_23_front_motor_angle_offset);
 
     rflMotorSetAngle(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_RADIAN,
                      scara_arm->set_joints_value[JOINT_4]);
@@ -220,18 +226,38 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
 /**
  * @brief 设置机械臂电机控制模式
  */
-void arm_motor_set_mode(engineer_scara_arm_s *scara_arm, rfl_motor_control_mode_e mode)
+void arm_motor_set_mode(engineer_scara_arm_s *scara_arm)
 {
-    if (mode != RFL_MOTOR_CONTROL_MODE_NO_FORCE && mode != RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE)
-        return;
-
-    rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], mode);
-    rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], mode);
-    rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], mode);
-    rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], mode);
-    rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT4], mode);
-    rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], mode);
-    rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], mode);
+    if (scara_arm->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    {
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+    }
+    else if (scara_arm->behavior == ENGINEER_BEHAVIOR_RESET)
+    {
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+    }
+    else
+    {
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+    }
 }
 
 /**
@@ -329,12 +355,9 @@ void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, bool is_to_reset
 {
     if (is_to_reset)
     {
-        // rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
-        //                          ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MAX_ANGLE,
-        //                          ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MIN_ANGLE);
-        // rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
-        //                          ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MAX_ANGLE,
-        //                          ENGINEER_ARM_JOINT_1_MOTOR_INITIAL_MIN_ANGLE);
+        rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_DEGREE,
+                                 ENGINEER_ARM_JOINT_23_FRONT_MOTOR_INITIAL_MAX_ANGLE,
+                                 ENGINEER_ARM_JOINT_23_FRONT_MOTOR_INITIAL_MIN_ANGLE);
 
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_DEGREE,
                                  ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MAX_ANGLE,
@@ -359,8 +382,10 @@ void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, bool is_to_reset
                                  ENGINEER_ARM_MOTOR_JOINT_23_BACK_MIN_ANGLE);
 
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_DEGREE,
-                                 ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE,
-                                 ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE);
+                                 ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MAX_ANGLE -
+                                     (scara_arm->joint_23_front_motor_angle_offset * RADIAN_TO_DEGREE_FACTOR),
+                                 ENGINEER_ARM_MOTOR_JOINT_23_FRONT_MIN_ANGLE -
+                                     (scara_arm->joint_23_front_motor_angle_offset * RADIAN_TO_DEGREE_FACTOR));
 
         rflMotorSetDegAngleLimit(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_DEGREE,
                                  ENGINEER_ARM_MOTOR_JOINT_4_MAX_ANGLE, ENGINEER_ARM_MOTOR_JOINT_4_MIN_ANGLE);
@@ -379,6 +404,14 @@ static void arm_joint_1_l_can_rx_callback(void)
 static void arm_joint_1_r_can_rx_callback(void)
 {
     detect_hook(ARM_JOINT_1_R_DH);
+}
+static void arm_joint_2_can_rx_callback(void)
+{
+    detect_hook(ARM_JOINT_2_DH);
+}
+static void arm_joint_3_can_rx_callback(void)
+{
+    detect_hook(ARM_JOINT_3_DH);
 }
 static void arm_joint_4_can_rx_callback(void)
 {

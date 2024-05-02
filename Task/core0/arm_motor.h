@@ -21,7 +21,7 @@ extern void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm);
 /**
  * @brief 设置机械臂电机控制模式
  */
-extern void arm_motor_set_mode(engineer_scara_arm_s *scara_arm, rfl_motor_control_mode_e mode);
+extern void arm_motor_set_mode(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 设置机械臂电机运动速度
