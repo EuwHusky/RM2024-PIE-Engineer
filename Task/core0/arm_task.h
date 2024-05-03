@@ -119,6 +119,7 @@ typedef struct EngineerScaraArm
     uint16_t silver_mining_grab_end_timer;
     uint8_t gold_mining_step;
     uint8_t storage_push_step;
+    uint16_t storage_push_end_timer;
     uint8_t storage_pop_step;
 
     float silver_mining_pose_memory[6]; // 机械臂位置记忆

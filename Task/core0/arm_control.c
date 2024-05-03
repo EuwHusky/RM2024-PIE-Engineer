@@ -658,7 +658,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
         // 若已经取到矿，则直接上提
         if (scara_arm->grabbed)
         {
-            scara_arm->set_joints_value[JOINT_1] += 0.08f;
+            scara_arm->set_joints_value[JOINT_1] += 0.065f;
             scara_arm->set_joints_value[JOINT_5] = 12.0f * DEGREE_TO_RADIAN_FACTOR;
 
             scara_arm->gold_mining_step = GOLD_MINING_STEP_PULL_OUT;
@@ -666,7 +666,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
         // 普通完整流程
         else
         {
-            scara_arm->set_joints_value[JOINT_1] = 0.118f;
+            scara_arm->set_joints_value[JOINT_1] = 0.03f;
             scara_arm->set_joints_value[JOINT_2] = 0.0f;
             scara_arm->set_joints_value[JOINT_3] = 0.0f;
             scara_arm->set_joints_value[JOINT_4] = 0.0f;
@@ -699,7 +699,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
     {
         if (scara_arm->grabbed)
         {
-            scara_arm->set_joints_value[JOINT_1] += 0.08f;
+            scara_arm->set_joints_value[JOINT_1] += 0.065f;
             scara_arm->set_joints_value[JOINT_5] = 12.0f * DEGREE_TO_RADIAN_FACTOR;
 
             scara_arm->gold_mining_step = GOLD_MINING_STEP_PULL_OUT;
@@ -726,6 +726,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
             StorageCancelOperation(STORAGE_PUSH_IN);
             scara_arm->storage_push_success = true;
         }
+
+        scara_arm->storage_push_end_timer = 0;
 
         scara_arm->solution = JOINT_3_ON_THE_LEFT;
 
@@ -766,8 +768,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_PUSH_IN)
     {
-        if (fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) > ANGLE_DEVIATION_THRESHOLD)
-            StorageConfirmOperation(STORAGE_PUSH_IN);
+        scara_arm->storage_push_end_timer++;
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
@@ -784,6 +785,10 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
 
         if (scara_arm->set_pose_6d[POSE_Y] > -0.25)
             scara_arm->set_pose_6d[POSE_Y] = -0.25;
+
+        if (fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) > ANGLE_DEVIATION_THRESHOLD ||
+            scara_arm->storage_push_end_timer > 500)
+            StorageConfirmOperation(STORAGE_PUSH_IN);
     }
 
     if (getStorageSlotStatus(getStorageCurrentTargetSlot()) == STORAGE_SLOT_USED)
