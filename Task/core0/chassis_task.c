@@ -272,7 +272,7 @@ static void chassis_normal_control(engineer_chassis_s *chassis)
         if (checkIsRcKeyPressed(RC_SHIFT))
         {
             shift_speed_multiplier = 1.0f;
-            shift_accel_multiplier = 1.5f;
+            shift_accel_multiplier = 0.8f;
         }
 
         chassis->set_speed_vector[0] =
@@ -300,10 +300,14 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
     else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
         y_sign = -1.0f;
 
-    chassis->set_speed_vector[0] =
-        rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f, x_sign * CHASSIS_VX_MAX / 12.0f);
-    chassis->set_speed_vector[1] =
-        rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 2.0f, y_sign * CHASSIS_VY_MAX / 24.0f);
+    float shift_speed_multiplier = 0.42f;
+    if (checkIsRcKeyPressed(RC_SHIFT))
+        shift_speed_multiplier = 1.0f;
+
+    chassis->set_speed_vector[0] = rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f,
+                                               x_sign * CHASSIS_VX_MAX / 15.0f * shift_speed_multiplier);
+    chassis->set_speed_vector[1] = rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 2.0f,
+                                               y_sign * CHASSIS_VY_MAX / 10.0f * shift_speed_multiplier);
     chassis->set_speed_vector[2] = rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
                                                -((float)(getRcMouseX()) / 24.0f) * CHASSIS_WZ_MAX / 6.0f);
 }
