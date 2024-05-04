@@ -42,7 +42,7 @@ extern float getGimbalYawAngle(rfl_angle_format_e angle_format);
 
 #define GIMBAL_YAW_HOMING_STEP_ANGLE (1.0f)
 #define GIMBAL_YAW_HOMING_TORQUE_THRESHOLD (3.6f)
-#define GIMBAL_YAW_HOMING_ANGLE (70.0f)
+#define GIMBAL_YAW_HOMING_ANGLE (72.0f)
 #define GIMBAL_YAW_START_ANGLE (-90.0f)
 
 #define ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE (GIMBAL_YAW_START_ANGLE)

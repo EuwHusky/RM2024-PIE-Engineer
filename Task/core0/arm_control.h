@@ -80,8 +80,8 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define JOINT_3_START_ANGLE (-154.0f)
 
 #define JOINT_4_HOMING_STEP_ANGLE (0.005f)
-#define JOINT_4_HOMING_TORQUE_THRESHOLD (1.5f)
-#define JOINT_4_HOMING_ANGLE (-124.480934f)
+#define JOINT_4_HOMING_TORQUE_THRESHOLD (1.6f)
+#define JOINT_4_HOMING_ANGLE (-127.0f)
 #define JOINT_4_START_ANGLE (0.0f)
 
 #define JOINT_5_HOMING_STEP_ANGLE (0.005f)
