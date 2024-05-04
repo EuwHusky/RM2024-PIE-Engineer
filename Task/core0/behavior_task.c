@@ -20,6 +20,7 @@ static void update_robot_status(engineer_behavior_manager_s *behavior_manager);
 static void update_behavior(engineer_behavior_manager_s *behavior_manager, engineer_behavior_e new_behavior);
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager);
 static void auto_operation(engineer_behavior_manager_s *behavior_manager);
+static void status_display(engineer_behavior_manager_s *behavior_manager);
 
 void behavior_task(void *pvParameters)
 {
@@ -37,6 +38,8 @@ void behavior_task(void *pvParameters)
 
         operator_manual_operation(&behavior_manager);
         auto_operation(&behavior_manager);
+
+        status_display(&behavior_manager);
 
         rflOsDelayMs(10);
     }
@@ -83,6 +86,11 @@ bool checkIfNeedResetUi(void)
     return false;
 }
 
+bool checkIfNeedRebootCore(void)
+{
+    return behavior_manager.need_reboot;
+}
+
 engineer_visual_aid_ui_type_e getVisualAidUi(void)
 {
     return behavior_manager.visual_aid_ui;
@@ -96,6 +104,11 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
 
     behavior_manager->robot_survival_status = false;
+    behavior_manager->last_robot_survival_status = false;
+    behavior_manager->need_reboot = false;
+    behavior_manager->reboot_timer = 0;
+    behavior_manager->buzzer_beep = false;
+    behavior_manager->buzzer_timer = 0;
 
     behavior_manager->arm_reset_success = getArmResetStatus();
     behavior_manager->arm_move_homing_success = getArmMoveHomingStatue();
@@ -121,6 +134,9 @@ static void update_behavior(engineer_behavior_manager_s *behavior_manager, engin
 {
     behavior_manager->last_behavior = behavior_manager->behavior;
     behavior_manager->behavior = new_behavior;
+
+    if (new_behavior == ENGINEER_BEHAVIOR_DISABLE || new_behavior == ENGINEER_BEHAVIOR_MOVE)
+        behavior_manager->buzzer_beep = true;
 }
 
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager)
@@ -453,13 +469,15 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     if (checkIsRcKeyPressed(RC_B))
     {
         behavior_manager->km_reboot_trigger_timer++;
-        if (behavior_manager->km_reboot_trigger_timer == 30)
-        {
-            ppor_sw_reset(HPM_PPOR, 10);
-        }
+        if (behavior_manager->km_reboot_trigger_timer > 20)
+            behavior_manager->need_reboot = true;
     }
-    else
-        behavior_manager->km_reboot_trigger_timer = 0;
+    if (behavior_manager->need_reboot)
+    {
+        behavior_manager->reboot_timer++;
+        if (behavior_manager->reboot_timer > 50)
+            ppor_sw_reset(HPM_PPOR, 10);
+    }
 }
 
 static void auto_operation(engineer_behavior_manager_s *behavior_manager)
@@ -470,9 +488,10 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_RESET && *behavior_manager->arm_reset_success &&
         *behavior_manager->gimbal_reset_success)
     {
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
         board_write_led_b(LED_OFF);
     }
+
     /**
      * @brief 机动/作业模式互相切换 自动归位
      */
@@ -534,6 +553,10 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
         can_reset(BOARD_CAN3, false);
         can_reset(BOARD_CAN4, false);
     }
+}
+
+static void status_display(engineer_behavior_manager_s *behavior_manager)
+{
     if (behavior_manager->robot_survival_status == false)
     {
         board_write_led_r(LED_ON);
@@ -541,5 +564,20 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     else if (behavior_manager->robot_survival_status == true)
     {
         board_write_led_r(LED_OFF);
+    }
+
+    if (behavior_manager->buzzer_beep)
+    {
+        board_beep_open();
+
+        behavior_manager->buzzer_timer++;
+        if (behavior_manager->buzzer_timer > 10)
+            behavior_manager->buzzer_beep = false;
+    }
+    else
+    {
+        board_beep_close();
+
+        behavior_manager->buzzer_timer = 0;
     }
 }

@@ -172,11 +172,15 @@ static void client_ui(void)
     {
         refereeClientUiOperate(UI_DISPLAY_FIGURE, SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
     }
     else
     {
         refereeClientUiOperate(UI_HIDE_FIGURE, SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
         refereeClientUiOperate(UI_HIDE_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
     }
 
     if (getVisualAidUi() == VAU_NONE)

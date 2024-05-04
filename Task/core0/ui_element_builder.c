@@ -28,6 +28,9 @@ void uiModeIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_
     else
         color = FIGURE_ORANGE;
 
+    if (checkIfNeedRebootCore())
+        color = FIGURE_BLACK;
+
     uiPlotRectangle(figure, "mod", figure_operation_type, 9, color, 9, 1840, 1870, 804, 834);
 }
 

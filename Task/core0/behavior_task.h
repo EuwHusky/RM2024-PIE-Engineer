@@ -46,6 +46,12 @@ typedef struct EngineerBehaviorManager
     bool robot_survival_status; // 存活为真
     bool last_robot_survival_status;
 
+    bool need_reboot;
+    uint8_t reboot_timer;
+
+    bool buzzer_beep;
+    uint8_t buzzer_timer;
+
     /* 模块状态输入 */
 
     bool *arm_reset_success;
@@ -91,6 +97,7 @@ extern void setArmGrabMode(bool enable);
 extern bool checkIfArmNeedSwitchSolution(void);
 extern bool getArmGrabMode(void);
 extern bool checkIfNeedResetUi(void);
+extern bool checkIfNeedRebootCore(void);
 extern engineer_visual_aid_ui_type_e getVisualAidUi(void);
 
 #endif /* _BEHAVIOR_TASK_H__ */
