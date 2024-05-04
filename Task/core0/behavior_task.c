@@ -300,18 +300,11 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
         }
 
-        /**
-         * @brief 切换机械臂解算
-         * 键鼠 Ctrl+Q/E 触发切换
-         */
-        if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-        {
-            behavior_manager->arm_switch_solution = true;
-        }
-        if (checkIfRcKeyFallingEdgeDetected(RC_E) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-        {
-            behavior_manager->arm_switch_solution = true;
-        }
+        // 清除按下标志位 防止松开CTRL后误触发
+        if (checkIfRcKeyFallingEdgeDetected(RC_Q))
+            ;
+        if (checkIfRcKeyFallingEdgeDetected(RC_E))
+            ;
     }
     else if (!checkIsRcKeyPressed(RC_CTRL))
     {
@@ -360,33 +353,36 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
          * @brief 切换视觉辅助UI类型
          * 键鼠 短按Q键触发切换
          */
-        if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        if (checkIfRcKeyFallingEdgeDetected(RC_Q))
         {
-            if (behavior_manager->visual_aid_ui == VAU_NONE)
-                behavior_manager->visual_aid_ui = VAU_SILVER;
-            else if (behavior_manager->visual_aid_ui == VAU_SILVER)
-                behavior_manager->visual_aid_ui = VAU_MID_GOLD;
-            else if (behavior_manager->visual_aid_ui == VAU_LEFT_GOLD ||
-                     behavior_manager->visual_aid_ui == VAU_MID_GOLD ||
-                     behavior_manager->visual_aid_ui == VAU_RIGHT_GOLD)
-                behavior_manager->visual_aid_ui = VAU_NONE;
-            else
-                behavior_manager->visual_aid_ui = VAU_NONE;
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
+            {
+                if (behavior_manager->visual_aid_ui == VAU_NONE)
+                    behavior_manager->visual_aid_ui = VAU_GOLD_PRE;
+                else if (behavior_manager->visual_aid_ui == VAU_GOLD_PRE)
+                    behavior_manager->visual_aid_ui = VAU_SILVER_PRE;
+                else
+                    behavior_manager->visual_aid_ui = VAU_NONE;
+            }
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            {
+                if (behavior_manager->visual_aid_ui == VAU_NONE)
+                    behavior_manager->visual_aid_ui = VAU_SILVER;
+                else
+                    behavior_manager->visual_aid_ui = VAU_NONE;
+            }
         }
-        else if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        else if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MOVE &&
+                 behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION)
             behavior_manager->visual_aid_ui = VAU_NONE;
 
         /**
-         * @brief 切换取金矿的位置选择和视觉辅助UI位置
+         * @brief 切换机械臂解算
          * 键鼠 短按E键触发切换
          */
         if (checkIfRcKeyFallingEdgeDetected(RC_E) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
         {
-            if (behavior_manager->visual_aid_ui == VAU_LEFT_GOLD || behavior_manager->visual_aid_ui == VAU_MID_GOLD ||
-                behavior_manager->visual_aid_ui == VAU_RIGHT_GOLD)
-                behavior_manager->visual_aid_ui = behavior_manager->visual_aid_ui == VAU_RIGHT_GOLD
-                                                      ? VAU_LEFT_GOLD
-                                                      : behavior_manager->visual_aid_ui + 1;
+            behavior_manager->arm_switch_solution = true;
         }
     }
 

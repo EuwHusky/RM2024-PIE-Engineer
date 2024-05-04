@@ -80,7 +80,7 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 17, 15, 0);
+    refereeInitRobotInteractionManager(&step_clock, 17, 14, 0);
     refereeSetRobotInteractionFigureBuilder(0, uiModeIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(1, uiSplitLine0Builder);
     refereeSetRobotInteractionFigureBuilder(2, uiGrabberPoweredBuilder);
@@ -88,13 +88,11 @@ void referee_task(void *pvParameters)
     refereeSetRobotInteractionFigureBuilder(4, uiSplitLine1Builder);
     refereeSetRobotInteractionFigureBuilder(5, uiStorageFrontUsedBuilder);
     refereeSetRobotInteractionFigureBuilder(6, uiStorageBackUsedBuilder);
-    refereeSetRobotInteractionFigureBuilder(SILVER_AID_0_UI_INDEX, uiAutoSilverMiningAid0Builder);
-    refereeSetRobotInteractionFigureBuilder(SILVER_AID_1_UI_INDEX, uiAutoSilverMiningAid1Builder);
-    refereeSetRobotInteractionFigureBuilder(SILVER_AID_2_UI_INDEX, uiAutoSilverMiningAid2Builder);
-    refereeSetRobotInteractionFigureBuilder(LEFT_GOLD_INDICATOR_AID_UI_INDEX, uiAutoGoldMiningAidLeftIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(MID_GOLD_INDICATOR_AID_UI_INDEX, uiAutoGoldMiningAidMidIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(RIGHT_GOLD_INDICATOR_AID_UI_INDEX,
-                                            uiAutoGoldMiningAidRightIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(VAU_AID_0_UI_INDEX, uiVauAid0Builder);
+    refereeSetRobotInteractionFigureBuilder(VAU_AID_1_UI_INDEX, uiVauAid1Builder);
+    refereeSetRobotInteractionFigureBuilder(VAU_AID_2_UI_INDEX, uiVauAid2Builder);
+    refereeSetRobotInteractionFigureBuilder(AIM_SIGHT_0_UI_INDEX, uiAimSight0Builder);
+    refereeSetRobotInteractionFigureBuilder(AIM_SIGHT_1_UI_INDEX, uiAimSight1Builder);
     refereeSetRobotInteractionFigureBuilder(SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
                                             uiSafeRightBarrierWarningLineBuilder);
     refereeSetRobotInteractionFigureBuilder(DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
@@ -165,35 +163,6 @@ static void client_ui(void)
         refereeClientUiOperate(UI_RESET_ALL, 0);
     }
 
-    if (getVisualAidUi() == VAU_NONE)
-    {
-        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_0_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_1_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_2_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, LEFT_GOLD_INDICATOR_AID_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, MID_GOLD_INDICATOR_AID_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, RIGHT_GOLD_INDICATOR_AID_UI_INDEX);
-    }
-    else if (getVisualAidUi() == VAU_SILVER)
-    {
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, SILVER_AID_0_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, SILVER_AID_1_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, SILVER_AID_2_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, LEFT_GOLD_INDICATOR_AID_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, MID_GOLD_INDICATOR_AID_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, RIGHT_GOLD_INDICATOR_AID_UI_INDEX);
-    }
-    else if (getVisualAidUi() == VAU_LEFT_GOLD || getVisualAidUi() == VAU_MID_GOLD ||
-             getVisualAidUi() == VAU_RIGHT_GOLD)
-    {
-        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_0_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_1_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, SILVER_AID_2_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, LEFT_GOLD_INDICATOR_AID_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, MID_GOLD_INDICATOR_AID_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, RIGHT_GOLD_INDICATOR_AID_UI_INDEX);
-    }
-
     if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE ||
         getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
     {
@@ -204,6 +173,31 @@ static void client_ui(void)
     {
         refereeClientUiOperate(UI_HIDE_FIGURE, SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
         refereeClientUiOperate(UI_HIDE_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
+    }
+
+    if (getVisualAidUi() == VAU_NONE)
+    {
+        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_0_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_1_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_2_UI_INDEX);
+    }
+    else
+    {
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_0_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_1_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_2_UI_INDEX);
+    }
+
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
+        getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+    {
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, AIM_SIGHT_0_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, AIM_SIGHT_1_UI_INDEX);
+    }
+    else
+    {
+        refereeClientUiOperate(UI_HIDE_FIGURE, AIM_SIGHT_0_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, AIM_SIGHT_1_UI_INDEX);
     }
 }
 

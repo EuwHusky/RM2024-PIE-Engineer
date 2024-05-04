@@ -15,16 +15,12 @@ extern void uiSplitLine1Builder(interaction_figure_t *figure, figure_operation_t
 extern void uiStorageFrontUsedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 extern void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
-extern void uiAutoSilverMiningAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
-extern void uiAutoSilverMiningAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
-extern void uiAutoSilverMiningAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+extern void uiVauAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+extern void uiVauAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+extern void uiVauAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
-extern void uiAutoGoldMiningAidLeftIndicatorBuilder(interaction_figure_t *figure,
-                                                    figure_operation_type_e figure_operation_type);
-extern void uiAutoGoldMiningAidMidIndicatorBuilder(interaction_figure_t *figure,
-                                                   figure_operation_type_e figure_operation_type);
-extern void uiAutoGoldMiningAidRightIndicatorBuilder(interaction_figure_t *figure,
-                                                     figure_operation_type_e figure_operation_type);
+extern void uiAimSight0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+extern void uiAimSight1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
 extern void uiSafeRightBarrierWarningLineBuilder(interaction_figure_t *figure,
                                                  figure_operation_type_e figure_operation_type);

@@ -65,66 +65,95 @@ void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_typ
                     1870, 584, 614);
 }
 
+#define GOLD_PRE_AIM_BOX_X_0 (800)
+#define GOLD_PRE_AIM_BOX_X_1 (900)
+#define GOLD_PRE_AIM_BOX_Y_0 (440)
+#define GOLD_PRE_AIM_BOX_Y_1 (640)
+
+#define SILVER_PRE_AIM_BOX_X_0 (800)
+#define SILVER_PRE_AIM_BOX_X_1 (900)
+#define SILVER_PRE_AIM_BOX_Y_0 (540)
+#define SILVER_PRE_AIM_BOX_Y_1 (640)
+
 #define AUTO_SILVER_MINING_AID_BOX_X_0 (900)
 #define AUTO_SILVER_MINING_AID_BOX_X_1 (1080)
 #define AUTO_SILVER_MINING_AID_BOX_Y_0 (630)
 #define AUTO_SILVER_MINING_AID_BOX_Y_1 (740)
-// #define AUTO_SILVER_MINING_AID_BOX_X_0 (915)
-// #define AUTO_SILVER_MINING_AID_BOX_X_1 (1100)
-// #define AUTO_SILVER_MINING_AID_BOX_Y_0 (612)
-// #define AUTO_SILVER_MINING_AID_BOX_Y_1 (712)
 
-void uiAutoSilverMiningAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+void uiVauAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sa0", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
-               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_1, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    if (getVisualAidUi() == VAU_GOLD_PRE)
+    {
+        uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 3, GOLD_PRE_AIM_BOX_X_1, GOLD_PRE_AIM_BOX_X_1,
+                   GOLD_PRE_AIM_BOX_Y_0, GOLD_PRE_AIM_BOX_Y_1);
+    }
+    else if (getVisualAidUi() == VAU_SILVER_PRE)
+    {
+        uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 3, SILVER_PRE_AIM_BOX_X_1,
+                   SILVER_PRE_AIM_BOX_X_1, SILVER_PRE_AIM_BOX_Y_0, SILVER_PRE_AIM_BOX_Y_1);
+    }
+    else
+    {
+        uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
+                   AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_1, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    }
 }
 
-void uiAutoSilverMiningAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+void uiVauAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sa1", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
-               AUTO_SILVER_MINING_AID_BOX_X_0, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    if (getVisualAidUi() == VAU_GOLD_PRE)
+    {
+        uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 3, GOLD_PRE_AIM_BOX_X_0, GOLD_PRE_AIM_BOX_X_1,
+                   GOLD_PRE_AIM_BOX_Y_0, GOLD_PRE_AIM_BOX_Y_0);
+    }
+    else if (getVisualAidUi() == VAU_SILVER_PRE)
+    {
+        uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 3, SILVER_PRE_AIM_BOX_X_0,
+                   SILVER_PRE_AIM_BOX_X_1, SILVER_PRE_AIM_BOX_Y_0, SILVER_PRE_AIM_BOX_Y_0);
+    }
+    else
+    {
+        uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
+                   AUTO_SILVER_MINING_AID_BOX_X_0, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    }
 }
 
-void uiAutoSilverMiningAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+void uiVauAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sa2", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_1,
-               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    if (getVisualAidUi() == VAU_GOLD_PRE)
+    {
+        uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 3, GOLD_PRE_AIM_BOX_X_0, GOLD_PRE_AIM_BOX_X_1,
+                   GOLD_PRE_AIM_BOX_Y_1, GOLD_PRE_AIM_BOX_Y_1);
+    }
+    else if (getVisualAidUi() == VAU_SILVER_PRE)
+    {
+        uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 3, SILVER_PRE_AIM_BOX_X_0,
+                   SILVER_PRE_AIM_BOX_X_1, SILVER_PRE_AIM_BOX_Y_1, SILVER_PRE_AIM_BOX_Y_1);
+    }
+    else
+    {
+        uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_1,
+                   AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    }
 }
 
-#define AUTO_GOLD_MINING_AID_LEFT_INDICATOR_X_0 (360)
-#define AUTO_GOLD_MINING_AID_LEFT_INDICATOR_X_1 (560)
-#define AUTO_GOLD_MINING_AID_MID_INDICATOR_X_0 (860)
-#define AUTO_GOLD_MINING_AID_MID_INDICATOR_X_1 (1060)
-#define AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_0 (1360)
-#define AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_1 (1560)
-#define AUTO_GOLD_MINING_AID_INDICATOR_Y_0 (814)
-#define AUTO_GOLD_MINING_AID_INDICATOR_Y_1 (824)
+#define AIM_SIGHT_X (987)
+#define AIM_SIGHT_Y (484)
+#define AIM_SIGHT_LENGTH (24)
+#define AIM_SIGHT_WIDTH (6)
+#define AIM_LINE_K (-7.2894736842105f)
+#define AIM_LINE_B (7678.460526315789f)
 
-void uiAutoGoldMiningAidLeftIndicatorBuilder(interaction_figure_t *figure,
-                                             figure_operation_type_e figure_operation_type)
+void uiAimSight0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotRectangle(figure, "gil", figure_operation_type, 9,
-                    getVisualAidUi() == VAU_LEFT_GOLD ? FIGURE_CYAN : FIGURE_BLACK, 5,
-                    AUTO_GOLD_MINING_AID_LEFT_INDICATOR_X_0, AUTO_GOLD_MINING_AID_LEFT_INDICATOR_X_1,
-                    AUTO_GOLD_MINING_AID_INDICATOR_Y_0, AUTO_GOLD_MINING_AID_INDICATOR_Y_1);
+    uiPlotLine(figure, "cs0", figure_operation_type, 9, FIGURE_CYAN, 2, AIM_SIGHT_X - AIM_SIGHT_LENGTH,
+               AIM_SIGHT_X + AIM_SIGHT_LENGTH, AIM_SIGHT_Y, AIM_SIGHT_Y);
 }
 
-void uiAutoGoldMiningAidMidIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+void uiAimSight1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotRectangle(figure, "gim", figure_operation_type, 9,
-                    getVisualAidUi() == VAU_MID_GOLD ? FIGURE_CYAN : FIGURE_BLACK, 5,
-                    AUTO_GOLD_MINING_AID_MID_INDICATOR_X_0, AUTO_GOLD_MINING_AID_MID_INDICATOR_X_1,
-                    AUTO_GOLD_MINING_AID_INDICATOR_Y_0, AUTO_GOLD_MINING_AID_INDICATOR_Y_1);
-}
-
-void uiAutoGoldMiningAidRightIndicatorBuilder(interaction_figure_t *figure,
-                                              figure_operation_type_e figure_operation_type)
-{
-    uiPlotRectangle(figure, "gir", figure_operation_type, 9,
-                    getVisualAidUi() == VAU_RIGHT_GOLD ? FIGURE_CYAN : FIGURE_BLACK, 5,
-                    AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_0, AUTO_GOLD_MINING_AID_RIGHT_INDICATOR_X_1,
-                    AUTO_GOLD_MINING_AID_INDICATOR_Y_0, AUTO_GOLD_MINING_AID_INDICATOR_Y_1);
+    uiPlotLine(figure, "cs1", figure_operation_type, 9, FIGURE_CYAN, 3, AIM_SIGHT_X, AIM_SIGHT_X + AIM_SIGHT_WIDTH,
+               AIM_SIGHT_Y, (uint32_t)(AIM_LINE_K * (AIM_SIGHT_X + AIM_SIGHT_WIDTH) + AIM_LINE_B));
 }
 
 #define SAFE_RIGHT_BARRIER_WARNING_LINE_X_0 (1147)

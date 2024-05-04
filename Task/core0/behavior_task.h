@@ -30,9 +30,8 @@ typedef enum EngineerVisualAidUiType
 {
     VAU_NONE = 0,
     VAU_SILVER,
-    VAU_LEFT_GOLD,
-    VAU_MID_GOLD,
-    VAU_RIGHT_GOLD,
+    VAU_GOLD_PRE,
+    VAU_SILVER_PRE,
 } engineer_visual_aid_ui_type_e;
 
 typedef struct EngineerBehaviorManager
