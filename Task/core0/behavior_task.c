@@ -295,7 +295,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
                 *behavior_manager->storage_pop_success = false;
 
-            ArmControlStop();
+            resetArmPose();
 
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
         }
@@ -344,7 +344,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
                 *behavior_manager->storage_pop_success = false;
 
-            ArmControlStop();
+            resetArmPose();
 
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
         }
