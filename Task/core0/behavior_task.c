@@ -1,10 +1,10 @@
 #include "behavior_task.h"
 
 #include "board.h"
+#include "hpm_can_drv.h"
 #include "hpm_ppor_drv.h"
 
-#include "FreeRTOS.h"
-#include "task.h"
+#include "drv_delay.h"
 
 #include "referee.h"
 
@@ -23,11 +23,11 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager);
 
 void behavior_task(void *pvParameters)
 {
-    vTaskDelay(1200);
+    rflOsDelayMs(1200);
 
     while (!INS_init_finished)
-        vTaskDelay(2);
-    vTaskDelay(10);
+        rflOsDelayMs(2);
+    rflOsDelayMs(10);
 
     behavior_manager_init(&behavior_manager);
 
@@ -38,7 +38,7 @@ void behavior_task(void *pvParameters)
         operator_manual_operation(&behavior_manager);
         auto_operation(&behavior_manager);
 
-        vTaskDelay(10);
+        rflOsDelayMs(10);
     }
 }
 
@@ -524,9 +524,21 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
         *behavior_manager->arm_reset_success = false;
         *behavior_manager->gimbal_reset_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_DISABLE);
-        ppor_sw_reset(HPM_PPOR, 10);
     }
-    else if (behavior_manager->robot_survival_status == false)
+    else if (behavior_manager->robot_survival_status == true && behavior_manager->last_robot_survival_status == false)
+    {
+        can_reset(BOARD_CAN1, true);
+        can_reset(BOARD_CAN2, true);
+        can_reset(BOARD_CAN3, true);
+        can_reset(BOARD_CAN4, true);
+        for (uint16_t i = 0, j = 0; i < 60000; i++) // 哈哈傻逼
+            j++;
+        can_reset(BOARD_CAN1, false);
+        can_reset(BOARD_CAN2, false);
+        can_reset(BOARD_CAN3, false);
+        can_reset(BOARD_CAN4, false);
+    }
+    if (behavior_manager->robot_survival_status == false)
     {
         board_write_led_r(LED_ON);
     }
