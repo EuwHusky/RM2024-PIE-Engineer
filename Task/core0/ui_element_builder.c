@@ -1,5 +1,7 @@
 #include "ui_element_builder.h"
 
+#include "algo_data_limiting.h"
+
 #include "client_ui_plot.h"
 
 #include "arm_task.h"
@@ -176,4 +178,29 @@ void uiDangerRightBarrierWarningLineBuilder(interaction_figure_t *figure, figure
     uiPlotLine(figure, "dbw", figure_operation_type, 9, FIGURE_ORANGE, 5, DANGER_RIGHT_BARRIER_WARNING_LINE_X_0,
                DANGER_RIGHT_BARRIER_WARNING_LINE_X_1, DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0,
                DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1);
+}
+
+void uiLifterLeftMotorOverheatWarningBuilder(interaction_figure_t *figure,
+                                             figure_operation_type_e figure_operation_type)
+{
+    uiPlotArc(figure, "loh", figure_operation_type, 9,
+              (getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 75.0f)
+                  ? FIGURE_MAGENTA
+                  : ((getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 50.0f) ? FIGURE_ORANGE : FIGURE_GREEN),
+              7, 960 - 230, 140, 180,
+              (uint32_t)rflFloatLoopConstrain(getArmMotorTemperature(MOTOR_JOINT1_LEFT) / 125.0f * 360.0f + 180.0f,
+                                              0.0f, 360.0f),
+              24, 24);
+}
+void uiLifterRightMotorOverheatWarningBuilder(interaction_figure_t *figure,
+                                              figure_operation_type_e figure_operation_type)
+{
+    uiPlotArc(figure, "roh", figure_operation_type, 9,
+              (getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 75.0f)
+                  ? FIGURE_MAGENTA
+                  : ((getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 50.0f) ? FIGURE_ORANGE : FIGURE_GREEN),
+              7, 960 + 230, 140, 180,
+              (uint32_t)rflFloatLoopConstrain(getArmMotorTemperature(MOTOR_JOINT1_RIGHT) / 125.0f * 360.0f + 180.0f,
+                                              0.0f, 360.0f),
+              24, 24);
 }

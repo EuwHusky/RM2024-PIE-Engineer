@@ -195,9 +195,11 @@ typedef struct EngineerScaraArm
 extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
 
-extern void ArmControlStop(void);
+extern void resetArmPose(void);
 
 extern bool checkIfArmGrabbed(void);
+extern bool checkIfLifterMotorOverheat(void);
+extern float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index);
 
 extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);

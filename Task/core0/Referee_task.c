@@ -80,7 +80,7 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
     vt_uart_fifo = get_vt_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 17, 14, 0);
+    refereeInitRobotInteractionManager(&step_clock, 17, 16, 0);
     refereeSetRobotInteractionFigureBuilder(0, uiModeIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(1, uiSplitLine0Builder);
     refereeSetRobotInteractionFigureBuilder(2, uiGrabberPoweredBuilder);
@@ -97,6 +97,10 @@ void referee_task(void *pvParameters)
                                             uiSafeRightBarrierWarningLineBuilder);
     refereeSetRobotInteractionFigureBuilder(DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
                                             uiDangerRightBarrierWarningLineBuilder);
+    refereeSetRobotInteractionFigureBuilder(LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
+                                            uiLifterLeftMotorOverheatWarningBuilder);
+    refereeSetRobotInteractionFigureBuilder(LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
+                                            uiLifterRightMotorOverheatWarningBuilder);
 
     while (1)
     {

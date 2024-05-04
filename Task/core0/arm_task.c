@@ -59,7 +59,7 @@ engineer_scara_arm_s *getArmDataPointer(void)
     return &scara_arm;
 }
 
-void ArmControlStop(void)
+void resetArmPose(void)
 {
     for (uint8_t i = 0; i < 6; i++)
         scara_arm.set_pose_6d[i] = scara_arm.pose_6d[i];
@@ -68,6 +68,20 @@ void ArmControlStop(void)
 bool checkIfArmGrabbed(void)
 {
     return scara_arm.grabbed;
+}
+
+bool checkIfLifterMotorOverheat(void)
+{
+    if (rflMotorGetTemperature(&scara_arm.joints_motors[MOTOR_JOINT1_LEFT]) > 65 ||
+        rflMotorGetTemperature(&scara_arm.joints_motors[MOTOR_JOINT1_RIGHT]) > 65)
+        return true;
+
+    return false;
+}
+
+float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index)
+{
+    return rflMotorGetTemperature(&scara_arm.joints_motors[motor_index]);
 }
 
 bool *getArmResetStatus(void)
