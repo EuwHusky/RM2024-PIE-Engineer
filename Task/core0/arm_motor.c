@@ -191,9 +191,6 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
     rflMotorUpdateControl(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT]);
     rflMotorUpdateControl(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT]);
 
-    for (uint16_t i = 0; i < 1000; i++) // 检查发送缓冲区是否已满，满则循环延时
-        if (!can_is_secondary_transmit_buffer_full(BOARD_CAN1))
-            break;
     rflRmMotorControl(ENGINEER_ARM_JOINTS_123_MOTORS_CAN_ORDINAL, ENGINEER_ARM_JOINTS_123_RM_MOTORS_CAN_SLAVE_ID,
                       (int16_t)rflMotorGetOutput(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT]),
                       (int16_t)rflMotorGetOutput(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT]), 0, 0);
@@ -214,9 +211,6 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
     rflMotorUpdateControl(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT]);
     rflMotorUpdateControl(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT]);
 
-    for (uint16_t i = 0; i < 1000; i++) // 检查发送缓冲区是否已满，满则循环延时
-        if (!can_is_secondary_transmit_buffer_full(BOARD_CAN2))
-            break;
     rflRmMotorControl(ENGINEER_ARM_JOINTS_456_MOTORS_CAN_ORDINAL, ENGINEER_ARM_JOINTS_456_RM_MOTORS_CAN_SLAVE_ID,
                       (int16_t)rflMotorGetOutput(&scara_arm->joints_motors[MOTOR_JOINT4]),
                       (int16_t)rflMotorGetOutput(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT]),

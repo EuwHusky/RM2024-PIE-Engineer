@@ -10,6 +10,8 @@
 
 #if !BOARD_RUNNING_CORE // core0
 
+#include "hpm_can_drv.h"
+
 #include "drv_dma.h"
 
 #include "referee.h"
@@ -272,7 +274,7 @@ void print_task(void *pvParameters)
             //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
             //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
-            sprintf((char *)test_txt, "%6.3f,%6.3f\r\n", arm_print->set_joints_value[0], arm_print->joints_value[0]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f\r\n", arm_print->set_joints_value[0], arm_print->joints_value[0]);
             /*测量位姿及关节4平面坐标*/
             // sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
@@ -295,6 +297,13 @@ void print_task(void *pvParameters)
             //         getCustomerControllerData()->pose[5], arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1],
             //         arm_print->cc_pose_6d[2], arm_print->cc_pose_6d[3], arm_print->cc_pose_6d[4],
             //         arm_print->cc_pose_6d[5]);
+            /*电机温度*/
+            // sprintf((char *)test_txt, "%d,%d,%7.4f,%7.4f,%7.4f,%7.4f\r\n", detect_error(ARM_JOINT_2_DH),
+            //         detect_error(ARM_JOINT_3_DH),
+            //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT23_BACK]),
+            //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT23_FRONT]),
+            //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]),
+            //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_RIGHT]));
 
             /**
              * @brief Motor PID
@@ -330,10 +339,18 @@ void print_task(void *pvParameters)
             // behavior_print->last_behavior,
             //         *behavior_print->arm_reset_success, *behavior_print->gimbal_reset_success,
             //         *behavior_print->arm_move_homing_success, *behavior_print->arm_operation_homing_success);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
+            //         can_is_primary_transmit_buffer_full(HPM_CAN0), can_is_secondary_transmit_buffer_full(HPM_CAN0),
+            //         can_is_in_bus_off_mode(HPM_CAN0), can_is_primary_transmit_buffer_full(HPM_CAN1),
+            //         can_is_secondary_transmit_buffer_full(HPM_CAN1), can_is_in_bus_off_mode(HPM_CAN1),
+            //         can_is_primary_transmit_buffer_full(HPM_CAN2), can_is_secondary_transmit_buffer_full(HPM_CAN2),
+            //         can_is_in_bus_off_mode(HPM_CAN2), can_is_primary_transmit_buffer_full(HPM_CAN3),
+            //         can_is_secondary_transmit_buffer_full(HPM_CAN3), can_is_in_bus_off_mode(HPM_CAN3),
+            //         (uint8_t)rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]));
 
-            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                strlen((char *)test_txt));
+            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+            //                     strlen((char *)test_txt));
         }
 
         /**
