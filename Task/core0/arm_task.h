@@ -181,9 +181,9 @@ typedef struct EngineerScaraArm
     float local_pos_memory[3]; // 机械臂位置记忆
     float cc_pos_memory[3];    // 自定义控制器位置记忆
 
-    // uint16_t joint_6_encoder_value;
-    // float joint_6_encoder_angle; // 磁编获取到的关节6的绝对角度，逆时针为正，单位为角度deg
-    // sliding_window_filter_s_t joint_6_encoder_angle_filter;
+    uint16_t joint_6_encoder_value;
+    float joint_6_encoder_angle; // 磁编获取到的关节6的绝对角度，逆时针为正，单位为角度deg
+    sliding_window_filter_s_t joint_6_encoder_angle_filter;
 
     rfl_motor_s joints_motors[7];
     float joint_23_front_motor_angle_offset;
@@ -247,10 +247,10 @@ extern bool *getStoragePopStatus(void);
 #define ENGINEER_ARM_Z_MAX_DISTANCE (0.625f)                                           /*关节1的最大伸展距离*/
 #define ENGINEER_ARM_Z_MIN_DISTANCE (0.0f)                                             /*关节1最小伸展距离*/
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/
-#define ENGINEER_ARM_YAW_MAX_ANGLE (185.0f)                                            /* 末端YAW最大角度 */
-#define ENGINEER_ARM_YAW_MIN_ANGLE (-185.0f)                                           /* 末端YAW最小角度 */
+#define ENGINEER_ARM_YAW_MAX_ANGLE (210.0f)                                            /* 末端YAW最大角度 */
+#define ENGINEER_ARM_YAW_MIN_ANGLE (-210.0f)                                           /* 末端YAW最小角度 */
 #define ENGINEER_ARM_PITCH_MAX_ANGLE (48.0f)                                           /* 末端PITCH最大角度 */
-#define ENGINEER_ARM_PITCH_MIN_ANGLE (-75.0f)                                          /* 末端PITCH最小角度 */
+#define ENGINEER_ARM_PITCH_MIN_ANGLE (-83.0f)                                          /* 末端PITCH最小角度 */
 #define ENGINEER_ARM_ROLL_MAX_ANGLE (720.0f)                                           /* 末端ROLL最大角度 */
 #define ENGINEER_ARM_ROLL_MIN_ANGLE (-720.0f)                                          /* 末端ROLL最小角度 */
 

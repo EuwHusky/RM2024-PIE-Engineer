@@ -183,27 +183,35 @@ void uiDangerRightBarrierWarningLineBuilder(interaction_figure_t *figure, figure
                DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1);
 }
 
+#define LIFTER_MOTORS_SAFE_TEMPERATURE (50.0f)
+#define LIFTER_MOTORS_DANGER_TEMPERATURE (75.0f)
+#define LIFTER_MOTORS_MAX_TEMPERATURE (125.0f)
+
 void uiLifterLeftMotorOverheatWarningBuilder(interaction_figure_t *figure,
                                              figure_operation_type_e figure_operation_type)
 {
-    uiPlotArc(figure, "loh", figure_operation_type, 9,
-              (getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 75.0f)
-                  ? FIGURE_MAGENTA
-                  : ((getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 50.0f) ? FIGURE_ORANGE : FIGURE_GREEN),
-              7, 960 - 230, 140, 180,
-              (uint32_t)rflFloatLoopConstrain(getArmMotorTemperature(MOTOR_JOINT1_LEFT) / 125.0f * 360.0f + 180.0f,
-                                              0.0f, 360.0f),
-              24, 24);
+    uiPlotArc(
+        figure, "loh", figure_operation_type, 9,
+        (getArmMotorTemperature(MOTOR_JOINT1_LEFT) > LIFTER_MOTORS_DANGER_TEMPERATURE)
+            ? FIGURE_MAGENTA
+            : ((getArmMotorTemperature(MOTOR_JOINT1_LEFT) > LIFTER_MOTORS_SAFE_TEMPERATURE) ? FIGURE_ORANGE
+                                                                                            : FIGURE_GREEN),
+        7, 960 + 230, 140, 180,
+        (uint32_t)rflFloatLoopConstrain(
+            getArmMotorTemperature(MOTOR_JOINT1_LEFT) / LIFTER_MOTORS_MAX_TEMPERATURE * 360.0f + 180.0f, 0.0f, 360.0f),
+        24, 24);
 }
 void uiLifterRightMotorOverheatWarningBuilder(interaction_figure_t *figure,
                                               figure_operation_type_e figure_operation_type)
 {
-    uiPlotArc(figure, "roh", figure_operation_type, 9,
-              (getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 75.0f)
-                  ? FIGURE_MAGENTA
-                  : ((getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > 50.0f) ? FIGURE_ORANGE : FIGURE_GREEN),
-              7, 960 + 230, 140, 180,
-              (uint32_t)rflFloatLoopConstrain(getArmMotorTemperature(MOTOR_JOINT1_RIGHT) / 125.0f * 360.0f + 180.0f,
-                                              0.0f, 360.0f),
-              24, 24);
+    uiPlotArc(
+        figure, "roh", figure_operation_type, 9,
+        (getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > LIFTER_MOTORS_DANGER_TEMPERATURE)
+            ? FIGURE_MAGENTA
+            : ((getArmMotorTemperature(MOTOR_JOINT1_RIGHT) > LIFTER_MOTORS_SAFE_TEMPERATURE) ? FIGURE_ORANGE
+                                                                                             : FIGURE_GREEN),
+        7, 960 - 230, 140, 180,
+        (uint32_t)rflFloatLoopConstrain(
+            getArmMotorTemperature(MOTOR_JOINT1_RIGHT) / LIFTER_MOTORS_MAX_TEMPERATURE * 360.0f + 180.0f, 0.0f, 360.0f),
+        24, 24);
 }

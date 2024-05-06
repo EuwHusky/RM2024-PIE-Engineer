@@ -18,7 +18,7 @@
 
 static void arm_init(engineer_scara_arm_s *scara_arm);
 static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm);
-// static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
+static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 
 static engineer_scara_arm_s scara_arm;
 
@@ -40,8 +40,8 @@ void arm_task(void *pvParameters)
         // 抓取机构更新与执行
         update_and_execute_grabber(&scara_arm);
 
-        // // 更新磁编码器反馈
-        // update_mag_encoder_ma600_feedback(&scara_arm);
+        // 更新磁编码器反馈
+        update_mag_encoder_ma600_feedback(&scara_arm);
 
         // 机械臂模型更新
         arm_model_update_status(&scara_arm);
@@ -169,8 +169,8 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     HPM_IOC->PAD[IOC_PAD_PA05].FUNC_CTL = IOC_PA05_FUNC_CTL_GPIO_A_05;
     gpio_set_pin_input(HPM_GPIO0, ENGINEER_ARM_SENSOR_GPIO_PORT, ENGINEER_ARM_SENSOR_GPIO_PIN);
 
-    // MA600_init();
-    // rflSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
+    MA600_init();
+    rflSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
 }
 
 static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm)
@@ -187,18 +187,18 @@ static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm)
                    getArmGrabMode() ? 0 : 1); // 电磁阀
 }
 
-// static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
-// {
-//     bool is_error = false;
-//     float angle_offset = ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET;
+static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
+{
+    bool is_error = false;
 
-//     if (scara_arm->joint_6_encoder_value = MA600_read_with_check(&is_error), is_error == false)
-//     {
-//         scara_arm->joint_6_encoder_angle = rflSlidingWindowFilterCalc(
-//             &scara_arm->joint_6_encoder_angle_filter,
-//             rflFloatLoopConstrain(((float)scara_arm->joint_6_encoder_value * 0.005493248f) - 180.0f - angle_offset,
-//                                   -DEG_PI, DEG_PI));
-//     }
+    if (scara_arm->joint_6_encoder_value = MA600_read_with_check(&is_error), is_error == false)
+    {
+        scara_arm->joint_6_encoder_angle = (float)scara_arm->joint_6_encoder_value * 0.005493248f;
+        // rflSlidingWindowFilterCalc(&scara_arm->joint_6_encoder_angle_filter,
+        //                            rflFloatLoopConstrain(((float)scara_arm->joint_6_encoder_value * 0.005493248f) -
+        //                                                      180.0f - ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET,
+        //                                                  -DEG_PI, DEG_PI));
+    }
 
-//     scara_arm->joint_6_encoder_angle = 0.0f; // 还没装磁编，暂时这样，记得删
-// }
+    // scara_arm->joint_6_encoder_angle = 0.0f; // 还没装磁编，暂时这样，记得删
+}

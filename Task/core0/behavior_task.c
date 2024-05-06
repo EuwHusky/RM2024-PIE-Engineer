@@ -571,7 +571,7 @@ static void status_display(engineer_behavior_manager_s *behavior_manager)
         board_beep_open();
 
         behavior_manager->buzzer_timer++;
-        if (behavior_manager->buzzer_timer > 10)
+        if (behavior_manager->buzzer_timer > 8)
             behavior_manager->buzzer_beep = false;
     }
     else

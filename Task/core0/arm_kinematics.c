@@ -270,6 +270,8 @@ static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, co
 #define L3 ENGINEER_ARM_3_LENGTH
 #define L4 ENGINEER_ARM_4_LENGTH
 
+// 手动作业限幅参数
+
 #define X_L (-0.3f)
 
 #define X_B (-0.3f)
@@ -285,6 +287,11 @@ static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, co
 
 #define Y_C (ENGINEER_ARM_1_LENGTH)
 #define Y_C_ (-ENGINEER_ARM_1_LENGTH)
+
+// 自动作业限幅参数
+
+#define X_M (-0.305f)
+#define Y_INNER_BORDER (0.276f)
 
 /**
  * @brief 期望位姿限幅
@@ -318,97 +325,147 @@ static void set_pose_limiting(engineer_scara_arm_s *scara_arm)
     float y_45 = L3 * sinf(Yaw);
     float x_24 = X - x_56 - x_45;
     float y_24 = Y - y_56 - y_45;
-    // scara_arm->printer[0] = x_24;
-    // scara_arm->printer[1] = y_24;
     float xy_24 = sqrtf(x_24 * x_24 + y_24 * y_24);
-    // scara_arm->printer[2] = xy_24;
 
-    if (x_24 < X_L)
-        x_24 = X_L;
-
-    if (y_24 >= 0.0f)
+    if (scara_arm->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
     {
-        float x_B_4 = x_24 - X_B;
-        float y_B_4 = y_24 - Y_B;
-        float xy_B_4 = sqrtf(x_B_4 * x_B_4 + y_B_4 * y_B_4);
-        if (xy_B_4 < L1)
-        {
-            float t_x_B_4 = atan2f(y_B_4, x_B_4);
-            x_24 = cosf(t_x_B_4) * L1 + X_B;
-            y_24 = sinf(t_x_B_4) * L1 + Y_B;
-        }
+        if (x_24 < X_L)
+            x_24 = X_L;
 
-        float GK_y_4 = K_GK * x_24 + B_GK; // 经过关节4且平行与Y轴的直线与直线GK的交点Y坐标
-        if (x_24 < X_GH && y_24 < GK_y_4)
+        if (y_24 >= 0.0f)
         {
-            float xy_4_GK = fabsf(K_GK * x_24 - y_24 + B_GK) / sqrtf(1 + K_GK * K_GK);
-            float x_4_GH = X_GH - x_24;
-            if (xy_4_GK < x_4_GH)
+            float x_B_4 = x_24 - X_B;
+            float y_B_4 = y_24 - Y_B;
+            float xy_B_4 = sqrtf(x_B_4 * x_B_4 + y_B_4 * y_B_4);
+            if (xy_B_4 < L1)
             {
-                y_24 = GK_y_4;
-                // float temp_x_24 = x_24;
-                // float temp_y_24 = y_24;
-                // x_24 = (temp_x_24 - K_GK * B_GK + K_GK * temp_y_24) / (1 + K_GK * K_GK);
-                // y_24 = (K_GK * temp_x_24 + K_GK * K_GK * temp_y_24 + B_GK) / (1 + K_GK * K_GK);
+                float t_x_B_4 = atan2f(y_B_4, x_B_4);
+                x_24 = cosf(t_x_B_4) * L1 + X_B;
+                y_24 = sinf(t_x_B_4) * L1 + Y_B;
             }
-            else
+
+            float GK_y_4 = K_GK * x_24 + B_GK; // 经过关节4且平行与Y轴的直线与直线GK的交点Y坐标
+            if (x_24 < X_GH && y_24 < GK_y_4)
             {
-                x_24 = X_GH;
+                float xy_4_GK = fabsf(K_GK * x_24 - y_24 + B_GK) / sqrtf(1 + K_GK * K_GK);
+                float x_4_GH = X_GH - x_24;
+                if (xy_4_GK < x_4_GH)
+                {
+                    y_24 = GK_y_4;
+                    // float temp_x_24 = x_24;
+                    // float temp_y_24 = y_24;
+                    // x_24 = (temp_x_24 - K_GK * B_GK + K_GK * temp_y_24) / (1 + K_GK * K_GK);
+                    // y_24 = (K_GK * temp_x_24 + K_GK * K_GK * temp_y_24 + B_GK) / (1 + K_GK * K_GK);
+                }
+                else
+                {
+                    x_24 = X_GH;
+                }
+            }
+
+            else if (x_24 < 0.0f)
+            {
+                float y_C_4 = y_24 - Y_C;
+                float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
+                if (xy_C_4 > L2)
+                {
+                    float t_x_C_4 = atan2f(y_C_4, x_24);
+                    x_24 = cosf(t_x_C_4) * L2;
+                    y_24 = sinf(t_x_C_4) * L2 + Y_C;
+                }
             }
         }
-
-        else if (x_24 < 0.0f)
+        else
         {
-            float y_C_4 = y_24 - Y_C;
-            float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
-            if (xy_C_4 > L2)
+            float x_B_4 = x_24 - X_B;
+            float y_B_4 = y_24 - Y_B_;
+            float xy_B_4 = sqrtf(x_B_4 * x_B_4 + y_B_4 * y_B_4);
+            if (xy_B_4 < L1)
             {
-                float t_x_C_4 = atan2f(y_C_4, x_24);
-                x_24 = cosf(t_x_C_4) * L2;
-                y_24 = sinf(t_x_C_4) * L2 + Y_C;
+                float t_x_B_4 = atan2f(y_B_4, x_B_4);
+                x_24 = cosf(t_x_B_4) * L1 + X_B;
+                y_24 = sinf(t_x_B_4) * L1 + Y_B_;
+            }
+
+            float HM_y_4 = K_HM * x_24 + B_HM; // 经过关节4且平行与Y轴的直线与直线HM的交点Y坐标
+            if (x_24 < X_GH && y_24 > HM_y_4)
+            {
+                float xy_4_HM = fabsf(K_HM * x_24 - y_24 + B_HM) / sqrtf(1 + K_HM * K_HM);
+                float x_4_GH = X_GH - x_24;
+                if (xy_4_HM < x_4_GH)
+                {
+                    y_24 = HM_y_4;
+                    // float temp_x_24 = x_24;
+                    // float temp_y_24 = y_24;
+                    // x_24 = (temp_x_24 - K_HM * B_HM + K_HM * temp_y_24) / (1 + K_HM * K_HM);
+                    // y_24 = (K_HM * temp_x_24 + K_HM * K_HM * temp_y_24 + B_GK) / (1 + K_HM * K_HM);
+                }
+                else
+                {
+                    x_24 = X_GH;
+                }
+            }
+
+            else if (x_24 < 0.0f)
+            {
+                float y_C_4 = y_24 - Y_C_;
+                float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
+                if (xy_C_4 > L2)
+                {
+                    float t_x_C_4 = atan2f(y_C_4, x_24);
+                    x_24 = cosf(t_x_C_4) * L2;
+                    y_24 = sinf(t_x_C_4) * L2 + Y_C_;
+                }
             }
         }
     }
     else
     {
-        float x_B_4 = x_24 - X_B;
-        float y_B_4 = y_24 - Y_B_;
-        float xy_B_4 = sqrtf(x_B_4 * x_B_4 + y_B_4 * y_B_4);
-        if (xy_B_4 < L1)
-        {
-            float t_x_B_4 = atan2f(y_B_4, x_B_4);
-            x_24 = cosf(t_x_B_4) * L1 + X_B;
-            y_24 = sinf(t_x_B_4) * L1 + Y_B_;
-        }
+        if (x_24 < X_M)
+            x_24 = X_M;
 
-        float HM_y_4 = K_HM * x_24 + B_HM; // 经过关节4且平行与Y轴的直线与直线HM的交点Y坐标
-        if (x_24 < X_GH && y_24 > HM_y_4)
+        if (y_24 > 0.0f)
         {
-            float xy_4_HM = fabsf(K_HM * x_24 - y_24 + B_HM) / sqrtf(1 + K_HM * K_HM);
-            float x_4_GH = X_GH - x_24;
-            if (xy_4_HM < x_4_GH)
+            if (x_24 < X_GH && y_24 < Y_INNER_BORDER)
             {
-                y_24 = HM_y_4;
-                // float temp_x_24 = x_24;
-                // float temp_y_24 = y_24;
-                // x_24 = (temp_x_24 - K_HM * B_HM + K_HM * temp_y_24) / (1 + K_HM * K_HM);
-                // y_24 = (K_HM * temp_x_24 + K_HM * K_HM * temp_y_24 + B_GK) / (1 + K_HM * K_HM);
+                if (fabsf(X_GH - x_24) < fabsf(Y_INNER_BORDER - y_24))
+                    x_24 = X_GH;
+                else
+                    y_24 = Y_INNER_BORDER;
             }
-            else
+
+            else if (x_24 < 0.0f)
             {
-                x_24 = X_GH;
+                float y_C_4 = y_24 - Y_C;
+                float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
+                if (xy_C_4 > L2)
+                {
+                    float t_x_C_4 = atan2f(y_C_4, x_24);
+                    x_24 = cosf(t_x_C_4) * L2;
+                    y_24 = sinf(t_x_C_4) * L2 + Y_C;
+                }
             }
         }
-
-        else if (x_24 < 0.0f)
+        else
         {
-            float y_C_4 = y_24 - Y_C_;
-            float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
-            if (xy_C_4 > L2)
+            if (x_24 < X_GH && y_24 > -Y_INNER_BORDER)
             {
-                float t_x_C_4 = atan2f(y_C_4, x_24);
-                x_24 = cosf(t_x_C_4) * L2;
-                y_24 = sinf(t_x_C_4) * L2 + Y_C_;
+                if (fabsf(X_GH - x_24) < fabsf(-Y_INNER_BORDER - y_24))
+                    x_24 = X_GH;
+                else
+                    y_24 = -Y_INNER_BORDER;
+            }
+
+            else if (x_24 < 0.0f)
+            {
+                float y_C_4 = y_24 - Y_C_;
+                float xy_C_4 = sqrtf(x_24 * x_24 + y_C_4 * y_C_4);
+                if (xy_C_4 > L2)
+                {
+                    float t_x_C_4 = atan2f(y_C_4, x_24);
+                    x_24 = cosf(t_x_C_4) * L2;
+                    y_24 = sinf(t_x_C_4) * L2 + Y_C_;
+                }
             }
         }
     }

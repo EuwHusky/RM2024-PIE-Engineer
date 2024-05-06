@@ -120,5 +120,6 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define STORAGE_POP_STEP_START (1u)
 #define STORAGE_POP_STEP_SLOT (2u)
 #define STORAGE_POP_STEP_POP_OUT (3u)
+#define STORAGE_POP_STEP_END (4u)
 
 #endif /* _ARM_CONTROL_H__ */

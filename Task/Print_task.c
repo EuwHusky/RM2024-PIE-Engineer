@@ -274,7 +274,6 @@ void print_task(void *pvParameters)
             //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
             //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
-            // sprintf((char *)test_txt, "%6.3f,%6.3f\r\n", arm_print->set_joints_value[0], arm_print->joints_value[0]);
             /*测量位姿及关节4平面坐标*/
             // sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
@@ -288,6 +287,14 @@ void print_task(void *pvParameters)
             /*金矿动作调试*/
             // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", behavior_print->behavior, arm_print->gold_mining_step,
             //         arm_print->set_joints_value[JOINT_1], arm_print->joints_value[JOINT_1]);
+            /*存/取矿动作调试*/
+            // sprintf((char *)test_txt,
+            //         "%d,%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_print->storage_push_step, arm_print->storage_pop_step, arm_print->set_pose_6d[0],
+            //         arm_print->set_pose_6d[1], arm_print->set_pose_6d[2], arm_print->set_pose_6d[3],
+            //         arm_print->set_pose_6d[4], arm_print->set_pose_6d[5], arm_print->pose_6d[0],
+            //         arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3], arm_print->pose_6d[4],
+            //         arm_print->pose_6d[5]);
             /*自定义控制器调试*/
             // sprintf((char *)test_txt,
             // "%d,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f\r\n",
@@ -304,6 +311,8 @@ void print_task(void *pvParameters)
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT23_FRONT]),
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]),
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_RIGHT]));
+            /*磁编码器*/
+            sprintf((char *)test_txt, "%d,%f\r\n", arm_print->joint_6_encoder_value, arm_print->joint_6_encoder_angle);
 
             /**
              * @brief Motor PID
