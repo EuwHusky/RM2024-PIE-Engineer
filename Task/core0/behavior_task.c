@@ -65,17 +65,17 @@ void setArmGrabMode(bool enable)
     behavior_manager.arm_grab = enable;
 }
 
+bool getArmGrabMode(void)
+{
+    return behavior_manager.arm_grab;
+}
+
 bool checkIfArmNeedSwitchSolution(void)
 {
     if (behavior_manager.arm_switch_solution)
         return behavior_manager.arm_switch_solution = false, true;
 
     return false;
-}
-
-bool getArmGrabMode(void)
-{
-    return behavior_manager.arm_grab;
 }
 
 bool checkIfNeedResetUi(void)
@@ -321,6 +321,15 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             ;
         if (checkIfRcKeyFallingEdgeDetected(RC_E))
             ;
+
+        // /**
+        //  * @brief 切换机械臂解算
+        //  * 键鼠 Ctrl+E 触发切换
+        //  */
+        // if (checkIfRcKeyFallingEdgeDetected(RC_E))
+        // {
+        //     switchVtLinkControl();
+        // }
     }
     else if (!checkIsRcKeyPressed(RC_CTRL))
     {

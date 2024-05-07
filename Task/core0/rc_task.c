@@ -67,7 +67,7 @@ void rc_task(void *pvParameters)
             dbus_uart_rx_dma_done = false;
         }
 
-        RemoteControlUpdate();
+        RemoteControlUpdate(!detect_error(DBUS_DH), !detect_error(VT_REFEREE_DH));
 
         vTaskDelay(5);
     }

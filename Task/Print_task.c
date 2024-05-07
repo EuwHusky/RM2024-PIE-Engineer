@@ -312,7 +312,9 @@ void print_task(void *pvParameters)
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]),
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_RIGHT]));
             /*磁编码器*/
-            sprintf((char *)test_txt, "%d,%f\r\n", arm_print->joint_6_encoder_value, arm_print->joint_6_encoder_angle);
+            sprintf((char *)test_txt, "%d,%f,%d,%d,%d,%d,%d\r\n", arm_print->joint_6_encoder_value,
+                    arm_print->joint_6_encoder_angle, test_pm, test_vt, rc_print->use_vt_link_control,
+                    detect_error(DBUS_DH), detect_error(VT_REFEREE_DH));
 
             /**
              * @brief Motor PID
@@ -331,8 +333,8 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->pose[0],
             //         customer_controller->pose[1], customer_controller->pose[2], customer_controller->pose[3],
             //         customer_controller->pose[4], customer_controller->pose[5], customer_controller->key);
-            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", getArmGrabMode(), test_all, test_pm, test_vt, test_ui,
-            //         test_reset);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", test_all, test_pm, test_vt, test_ui, test_reset);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", test_all, test_pm, test_vt, vt_link_rc_p->keyboard_value);
 
             /**
              * @brief Remote Control

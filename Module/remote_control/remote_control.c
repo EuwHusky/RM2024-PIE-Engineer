@@ -12,46 +12,60 @@ void RemoteControlInit(void)
 {
     memset(&remote_control, 0, sizeof(remote_control_s));
 
+    remote_control.use_vt_link_control = USE_VT_LINK;
+
     remote_control.vt_link_data = getVtLinkRemoteControlData();
 
     remote_control.cc_data = getCustomerControllerData();
 }
 
-void RemoteControlUpdate(void)
+void RemoteControlUpdate(bool is_dt7_connected, bool is_vt_connected)
 {
+    if (is_dt7_connected)
+        remote_control.status = RC_USE_DT7;
+    else if (is_vt_connected)
+        remote_control.status = RC_USE_VT_LINK;
+    else
+        remote_control.status = RC_LOSE;
+
+    remote_control.use_vt_link_control = is_dt7_connected ? false : true;
+
     // 常规遥控控制器
 
-#if USE_VT_LINK
-    int temp_value = 0;
-    remote_control.mouse_x = (temp_value = remote_control.dt7_dr16_data.mouse.x,
-                              temp_value ? temp_value : (remote_control.vt_link_data->mouse_x));
-    remote_control.mouse_y = (temp_value = remote_control.dt7_dr16_data.mouse.y,
-                              temp_value ? temp_value : (remote_control.vt_link_data->mouse_y));
-    remote_control.mouse_z = (temp_value = remote_control.dt7_dr16_data.mouse.z,
-                              temp_value ? temp_value : (remote_control.vt_link_data->mouse_z));
-    remote_control.rc_keys[RC_LEFT].is_pressed =
-        (temp_value = remote_control.dt7_dr16_data.mouse.press_l,
-         temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->left_button_down));
-    remote_control.rc_keys[RC_RIGHT].is_pressed =
-        (temp_value = remote_control.dt7_dr16_data.mouse.press_r,
-         temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->right_button_down));
-    for (uint8_t i = RC_W; i <= RC_B; i++)
+    if (remote_control.use_vt_link_control)
     {
-        remote_control.rc_keys[i].is_pressed =
-            (temp_value = ((remote_control.dt7_dr16_data.key.v >> (i - RC_W)) & 1),
-             temp_value ? temp_value : ((remote_control.vt_link_data->keyboard_value >> (i - RC_W)) & 1));
+        int temp_value = 0;
+        remote_control.mouse_x = (temp_value = remote_control.dt7_dr16_data.mouse.x,
+                                  temp_value ? temp_value : (remote_control.vt_link_data->mouse_x));
+        remote_control.mouse_y = (temp_value = remote_control.dt7_dr16_data.mouse.y,
+                                  temp_value ? temp_value : (remote_control.vt_link_data->mouse_y));
+        remote_control.mouse_z = (temp_value = remote_control.dt7_dr16_data.mouse.z,
+                                  temp_value ? temp_value : (remote_control.vt_link_data->mouse_z));
+        remote_control.rc_keys[RC_LEFT].is_pressed =
+            (temp_value = remote_control.dt7_dr16_data.mouse.press_l,
+             temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->left_button_down));
+        remote_control.rc_keys[RC_RIGHT].is_pressed =
+            (temp_value = remote_control.dt7_dr16_data.mouse.press_r,
+             temp_value ? temp_value : ((uint8_t)remote_control.vt_link_data->right_button_down));
+        for (uint8_t i = RC_W; i <= RC_B; i++)
+        {
+            remote_control.rc_keys[i].is_pressed =
+                (temp_value = ((remote_control.dt7_dr16_data.key.v >> (i - RC_W)) & 1),
+                 temp_value ? temp_value : ((remote_control.vt_link_data->keyboard_value >> (i - RC_W)) & 1));
+        }
     }
-#else
-    remote_control.mouse_x = remote_control.dt7_dr16_data.mouse.x;
-    remote_control.mouse_y = remote_control.dt7_dr16_data.mouse.y;
-    remote_control.mouse_z = remote_control.dt7_dr16_data.mouse.z;
-    remote_control.rc_keys[RC_LEFT].is_pressed = remote_control.dt7_dr16_data.mouse.press_l;
-    remote_control.rc_keys[RC_RIGHT].is_pressed = remote_control.dt7_dr16_data.mouse.press_r;
-    for (uint8_t i = RC_W; i <= RC_B; i++)
+    else
     {
-        remote_control.rc_keys[i].is_pressed = ((remote_control.dt7_dr16_data.key.v >> (i - RC_W)) & 1);
+        remote_control.mouse_x = remote_control.dt7_dr16_data.mouse.x;
+        remote_control.mouse_y = remote_control.dt7_dr16_data.mouse.y;
+        remote_control.mouse_z = remote_control.dt7_dr16_data.mouse.z;
+        remote_control.rc_keys[RC_LEFT].is_pressed = remote_control.dt7_dr16_data.mouse.press_l;
+        remote_control.rc_keys[RC_RIGHT].is_pressed = remote_control.dt7_dr16_data.mouse.press_r;
+        for (uint8_t i = RC_W; i <= RC_B; i++)
+        {
+            remote_control.rc_keys[i].is_pressed = ((remote_control.dt7_dr16_data.key.v >> (i - RC_W)) & 1);
+        }
     }
-#endif
 
     for (uint8_t i = 0; i < RC_KEY_NUM; i++)
     {
@@ -108,6 +122,11 @@ void RemoteControlUpdate(void)
             remote_control.cc_keys[i].was_pressed = 0;
         }
     }
+}
+
+remote_control_status_e getRemoteControlStatus(void)
+{
+    return remote_control.status;
 }
 
 int16_t getRcMouseX(void)

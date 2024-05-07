@@ -19,6 +19,8 @@
 #define LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX (14)
 #define LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX (15)
 
+#define VT_LINK_INDICATOR_UI_INDEX (17)
+
 extern void referee_task(void *pvParameters);
 
 #endif

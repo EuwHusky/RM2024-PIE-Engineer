@@ -4,6 +4,8 @@
 
 #include "client_ui_plot.h"
 
+#include "remote_control.h"
+
 #include "arm_task.h"
 #include "behavior_task.h"
 #include "storage_task.h"
@@ -68,6 +70,20 @@ void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_typ
     uiPlotRectangle(figure, "sbu", figure_operation_type, 9,
                     getStorageSlotStatus(STORAGE_BACK) == STORAGE_SLOT_USED ? FIGURE_GREEN : FIGURE_MAGENTA, 9, 1840,
                     1870, 584, 614);
+}
+
+void uiSplitLine2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    uiPlotLine(figure, "sp2", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 564, 564);
+}
+
+void uiVtlinkIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    uiPlotRectangle(figure, "vti", figure_operation_type, 9,
+                    getRemoteControlStatus() == RC_USE_DT7
+                        ? FIGURE_GREEN
+                        : (getRemoteControlStatus() == RC_USE_VT_LINK ? FIGURE_ORANGE : FIGURE_MAGENTA),
+                    9, 1840, 1870, 514, 544);
 }
 
 #define GOLD_PRE_AIM_BOX_X_0 (800)

@@ -15,6 +15,13 @@
 
 #define RC_DT7_ROCKER_DEADLINE (2)
 
+typedef enum RemoteControlStatus
+{
+    RC_USE_DT7 = 0,
+    RC_USE_VT_LINK,
+    RC_LOSE,
+} remote_control_status_e;
+
 typedef enum RemoteControlKey
 {
     RC_W = 0,
@@ -51,6 +58,9 @@ typedef struct RemoteControlKeyStatus
 
 typedef struct RemoteControl
 {
+    remote_control_status_e status;
+    bool use_vt_link_control;
+
     rfl_dt7_dr16_data_s dt7_dr16_data;
     const vt_link_remote_control_t *vt_link_data;
     const custom_robot_data_t *cc_data;
@@ -64,7 +74,9 @@ typedef struct RemoteControl
 } remote_control_s;
 
 extern void RemoteControlInit(void);
-extern void RemoteControlUpdate(void);
+extern void RemoteControlUpdate(bool is_dt7_connected, bool is_vt_connected);
+
+extern remote_control_status_e getRemoteControlStatus(void);
 
 extern int16_t getRcMouseX(void);
 extern int16_t getRcMouseY(void);

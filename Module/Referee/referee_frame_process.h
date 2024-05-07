@@ -6,7 +6,7 @@
 #include "fifo.h"
 
 #define PM_FIFO_BUF_LENGTH 1024 // 电管链路裁判系统数据fifo数组大小
-#define VT_FIFO_BUF_LENGTH 240  // 图传链路裁判系统数据fifo数组大小
+#define VT_FIFO_BUF_LENGTH 512  // 图传链路裁判系统数据fifo数组大小
 
 typedef enum RefereeLinkType
 {

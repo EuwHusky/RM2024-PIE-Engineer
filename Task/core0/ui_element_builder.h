@@ -15,6 +15,10 @@ extern void uiSplitLine1Builder(interaction_figure_t *figure, figure_operation_t
 extern void uiStorageFrontUsedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 extern void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
+extern void uiSplitLine2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
+extern void uiVtlinkIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
 extern void uiVauAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 extern void uiVauAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 extern void uiVauAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
