@@ -712,7 +712,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_START)
     {
-        scara_arm->set_pose_6d[POSE_X] = -0.015f;
+        scara_arm->set_pose_6d[POSE_X] = -0.02f;
         scara_arm->set_pose_6d[POSE_Y] = -0.425f;
         scara_arm->set_pose_6d[POSE_Z] = 0.0f;
         scara_arm->set_pose_6d[POSE_YAW] = -150.0f * DEGREE_TO_RADIAN_FACTOR;
@@ -727,14 +727,14 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SLOT)
     {
-        scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
-
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
+            scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_pose_6d[POSE_PITCH] = ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
+            scara_arm->set_pose_6d[POSE_YAW] = -190.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_pose_6d[POSE_PITCH] = 10.0f * DEGREE_TO_RADIAN_FACTOR;
         }
 
@@ -756,7 +756,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
-            scara_arm->set_pose_6d[POSE_X] = -0.015f;
+            scara_arm->set_pose_6d[POSE_X] = -0.02f;
             scara_arm->set_pose_6d[POSE_Z] = getLatestNuggetTypeToGrab() == GOLD_NUGGET ? 0.0f : 0.04f;
         }
         scara_arm->set_pose_6d[POSE_Y] = -0.425f;
@@ -771,9 +771,9 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
-            scara_arm->set_pose_6d[POSE_X] = -0.015f;
+            scara_arm->set_pose_6d[POSE_X] = -0.02f;
 
-            scara_arm->set_pose_6d[POSE_Y] += 0.0003f;
+            scara_arm->set_pose_6d[POSE_Y] += 0.0004f;
         }
 
         if (scara_arm->set_pose_6d[POSE_Y] > -0.276f)
@@ -805,7 +805,7 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
         scara_arm->solution = JOINT_3_ON_THE_LEFT;
 
         if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-            scara_arm->set_pose_6d[POSE_ROLL] = scara_arm->pose_6d[POSE_ROLL] - 0.1f;
+            scara_arm->set_pose_6d[POSE_ROLL] = scara_arm->pose_6d[POSE_ROLL] - 0.18f;
 
         scara_arm->storage_pop_step = STORAGE_POP_STEP_START;
     }
@@ -829,7 +829,7 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
-            scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_YAW] = -190.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
         }
 
@@ -853,24 +853,25 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
             scara_arm->set_pose_6d[POSE_X] = 0.05f;
-            scara_arm->set_pose_6d[POSE_Y] = -0.313f;
+            scara_arm->set_pose_6d[POSE_Y] = -0.28f;
             scara_arm->set_pose_6d[POSE_Z] = 0.0f;
         }
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_POP_OUT)
     {
-        scara_arm->set_pose_6d[POSE_Y] = -0.313f;
-
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
+            scara_arm->set_pose_6d[POSE_Y] = -0.313f;
+
             scara_arm->set_pose_6d[POSE_Z] -= 0.0001;
             if (scara_arm->set_pose_6d[POSE_Z] < -0.03f)
                 scara_arm->set_pose_6d[POSE_Z] = -0.03f;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
-            scara_arm->set_pose_6d[POSE_X] -= 0.00025f;
+            scara_arm->set_pose_6d[POSE_Y] = -0.28f;
 
+            scara_arm->set_pose_6d[POSE_X] -= 0.00025f;
             if (scara_arm->set_pose_6d[POSE_X] < -0.07f)
                 scara_arm->set_pose_6d[POSE_X] = -0.07f;
         }
