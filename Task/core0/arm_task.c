@@ -29,7 +29,7 @@ static engineer_scara_arm_s scara_arm;
 // 图传链路串口初始化
 static void vt_uart_init(void);
 
-#define VT_UART_RX_BUF_LENGHT 42 // 图传链路裁判系统数据接收数组大小
+#define VT_UART_RX_BUF_LENGHT 99 // 图传链路裁判系统数据接收数组大小
 
 // 图传链路裁判系统数据相关变量和结构
 ATTR_PLACE_AT_NONCACHEABLE uint8_t vt_rx_buf[VT_UART_RX_BUF_LENGHT]; // 接收原始数据

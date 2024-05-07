@@ -163,24 +163,21 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     // setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status); // 只是测试时用来关掉这个关节的归中
     if (checkIfJointNotStartUp(JOINT_1, scara_arm->start_up_status))
     {
-        if (fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT])) < 0.02f)
-        {
-            scara_arm->joint_1_homing_timer =
-                scara_arm->joint_1_homing_timer > 254 ? 255 : scara_arm->joint_1_homing_timer + 1;
+        scara_arm->set_joints_value[JOINT_1] -= JOINT_1_HOMING_STEP_DISTANCE;
 
-            if (scara_arm->joint_1_homing_timer == 255)
-            {
-                rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
-                                   JOINT_1_HOMING_ANGLE, false);
-                rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
-                                   JOINT_1_HOMING_ANGLE, false);
-                scara_arm->joint_1_homing_timer = 0;
-                setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status);
-            }
-        }
-        else
+        if (rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT]) < -JOINT_1_HOMING_TORQUE_THRESHOLD &&
+            rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT]) < -JOINT_1_HOMING_TORQUE_THRESHOLD &&
+            (fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT])) < 0.1f) &&
+            (fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT])) < 0.1f))
         {
-            scara_arm->joint_1_homing_timer = 0;
+            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE,
+                               JOINT_1_HOMING_ANGLE, false);
+            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE,
+                               JOINT_1_HOMING_ANGLE, false);
+
+            scara_arm->set_joints_value[JOINT_1] = 0.0f;
+
+            setJointStartUpStateOk(JOINT_1, scara_arm->start_up_status);
         }
     }
 
@@ -587,41 +584,19 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_READY)
     {
-        float y_sign = 0.0f;
-        float z_sign = 0.0f;
-        float yaw_sign = 0.0f;
         float roll_sign = 0.0f;
-
-        if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
-            y_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
-            y_sign = -1.0f;
-        else
-            y_sign = 0.0f;
-
-        if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
-            z_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
-            z_sign = -1.0f;
-        else
-            z_sign = 0.0f;
-
         if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
-            yaw_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
-            yaw_sign = -1.0f;
-        else
-            yaw_sign = 0.0f;
-
-        if (checkIsRcKeyPressed(RC_Z) && !checkIsRcKeyPressed(RC_X))
             roll_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_Z) && checkIsRcKeyPressed(RC_X))
+        else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
             roll_sign = -1.0f;
-        else
-            roll_sign = 0.0f;
 
-        scara_arm->set_pose_6d[POSE_Y] += y_sign * SILVER_MINING_Y_CONTROL_SEN;
-        scara_arm->set_pose_6d[POSE_Z] += z_sign * SILVER_MINING_Z_CONTROL_SEN;
+        float yaw_sign = 0.0f;
+        if (checkIsRcKeyPressed(RC_Z) && !checkIsRcKeyPressed(RC_X))
+            yaw_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_Z) && checkIsRcKeyPressed(RC_X))
+            yaw_sign = -1.0f;
+
+        scara_arm->set_pose_6d[POSE_Z] += ((float)getRcMouseZ() * 0.00004);
         scara_arm->set_pose_6d[POSE_YAW] += yaw_sign * SILVER_MINING_AY_CONTROL_SEN;
         scara_arm->set_pose_6d[POSE_ROLL] += roll_sign * SILVER_MINING_AR_CONTROL_SEN;
         for (uint8_t i = 0; i < 6; i++)
@@ -697,6 +672,8 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->gold_mining_step == GOLD_MINING_STEP_OPERATION)
     {
+        scara_arm->set_joints_value[JOINT_1] += ((float)getRcMouseZ() * 0.00004);
+
         if (scara_arm->grabbed)
         {
             scara_arm->set_joints_value[JOINT_1] += 0.065f;
@@ -710,7 +687,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
         // 无力末端yaw轴以防矿石与隧道挤压
         rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
 
-        scara_arm->set_joints_value[JOINT_1] += (-(float)getRcMouseZ() * 0.00001);
+        scara_arm->set_joints_value[JOINT_1] += ((float)getRcMouseZ() * 0.00004);
     }
 }
 

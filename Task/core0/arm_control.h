@@ -69,8 +69,8 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 
 /* =============================================== 自动控制 复位参数 =============================================== */
 
-#define JOINT_1_HOMING_STEP_ANGLE (0.01f)
-#define JOINT_1_HOMING_TORQUE_THRESHOLD (2.0f)
+#define JOINT_1_HOMING_STEP_DISTANCE (0.001f)
+#define JOINT_1_HOMING_TORQUE_THRESHOLD (5.0f)
 #define JOINT_1_HOMING_ANGLE (-13.021768f)
 
 #define JOINT_2_START_WAIT_ANGLE (40.0f)

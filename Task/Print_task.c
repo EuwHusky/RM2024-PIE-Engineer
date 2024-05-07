@@ -312,17 +312,25 @@ void print_task(void *pvParameters)
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]),
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_RIGHT]));
             /*磁编码器*/
-            sprintf((char *)test_txt, "%d,%f,%d,%d,%d,%d,%d\r\n", arm_print->joint_6_encoder_value,
-                    arm_print->joint_6_encoder_angle, test_pm, test_vt, rc_print->use_vt_link_control,
-                    detect_error(DBUS_DH), detect_error(VT_REFEREE_DH));
+            // sprintf((char *)test_txt, "%d,%f\r\n", arm_print->joint_6_encoder_value,
+            // arm_print->joint_6_encoder_angle);
 
             /**
-             * @brief Motor PID
+             * @brief Motor
              */
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", motor_controller_test->angle_pid.set,
             //         motor_controller_test->angle_pid.fdb, motor_controller_test->angle_pid.out,
             //         motor_controller_test->speed_pid.set, motor_controller_test->speed_pid.fdb,
             //         motor_controller_test->speed_pid.out);
+            sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
+                    arm_print->joints_motors[MOTOR_JOINT1_LEFT].set_angle_.deg,
+                    arm_print->joints_motors[MOTOR_JOINT1_LEFT].angle_.deg,
+                    arm_print->joints_motors[MOTOR_JOINT1_LEFT].speed_,
+                    arm_print->joints_motors[MOTOR_JOINT1_LEFT].torque_,
+                    arm_print->joints_motors[MOTOR_JOINT1_RIGHT].set_angle_.deg,
+                    arm_print->joints_motors[MOTOR_JOINT1_RIGHT].angle_.deg,
+                    arm_print->joints_motors[MOTOR_JOINT1_RIGHT].speed_,
+                    arm_print->joints_motors[MOTOR_JOINT1_RIGHT].torque_);
 
             /**
              * @brief Referee System Comm
@@ -342,6 +350,8 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", getRcMouseX(), getRcMouseY(), getRcMouseZ(),
             //         checkIsRcKeyPressed(RC_F), checkIfRcKeyFallingEdgeDetected(RC_F),
             //         checkIfRcKeyRisingEdgeDetected(RC_F));
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", test_pm, test_vt, rc_print->use_vt_link_control,
+            //         detect_error(DBUS_DH), detect_error(VT_REFEREE_DH));
 
             /**
              * @brief Behavior Manager
