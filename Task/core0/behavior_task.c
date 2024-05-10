@@ -10,6 +10,7 @@
 
 #include "INS_task.h"
 #include "arm_task.h"
+#include "detect_task.h"
 #include "gimbal_task.h"
 #include "storage_task.h"
 
@@ -96,8 +97,15 @@ engineer_visual_aid_ui_type_e getVisualAidUi(void)
     return behavior_manager.visual_aid_ui;
 }
 
+bool checkIfMotorFailureDetected(void)
+{
+    return behavior_manager.motor_failure_detected;
+}
+
 static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
 {
+    memset(behavior_manager, 0, sizeof(engineer_behavior_manager_s));
+
     behavior_manager->rc = getRemoteControlPointer();
 
     behavior_manager->behavior = ENGINEER_BEHAVIOR_DISABLE;
@@ -122,6 +130,7 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_switch_solution = false;
     behavior_manager->reset_ui = false;
     behavior_manager->visual_aid_ui = VAU_NONE;
+    behavior_manager->motor_failure_detected = false;
 }
 
 static void update_robot_status(engineer_behavior_manager_s *behavior_manager)
@@ -158,6 +167,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         {
             *behavior_manager->arm_reset_success = false;
             *behavior_manager->gimbal_reset_success = false;
+            behavior_manager->motor_failure_detected = false;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_RESET);
             board_write_led_b(LED_ON);
         }
@@ -224,6 +234,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         {
             *behavior_manager->arm_reset_success = false;
             *behavior_manager->gimbal_reset_success = false;
+            behavior_manager->motor_failure_detected = false;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_RESET);
             board_write_led_b(LED_ON);
         }
@@ -316,20 +327,18 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
         }
 
-        // 清除按下标志位 防止松开CTRL后误触发
-        if (checkIfRcKeyFallingEdgeDetected(RC_Q))
-            ;
-        if (checkIfRcKeyFallingEdgeDetected(RC_E))
-            ;
-
-        // /**
-        //  * @brief 切换机械臂解算
-        //  * 键鼠 Ctrl+E 触发切换
-        //  */
-        // if (checkIfRcKeyFallingEdgeDetected(RC_E))
-        // {
-        //     switchVtLinkControl();
-        // }
+        /**
+         * @brief 手动作业 准备兑矿
+         * 键鼠 Ctrl+Q/E 触发
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        {
+            ArmReadyToExchangePose(JOINT_3_ON_THE_LEFT);
+        }
+        if (checkIfRcKeyFallingEdgeDetected(RC_E) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        {
+            ArmReadyToExchangePose(JOINT_3_ON_THE_RIGHT);
+        }
     }
     else if (!checkIsRcKeyPressed(RC_CTRL))
     {
@@ -453,13 +462,18 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     {
         behavior_manager->arm_grab = !behavior_manager->arm_grab;
     }
+
     /**
-     * @brief 机械臂吸取工作模式切换
-     * 自定义控制器 短按CC_PUMP键触发切换
+     * @brief 手动作业 准备兑矿
+     * 自定义控制器 短按CC_LEFT/CC_RIGHT键触发切换
      */
-    if (checkIfCcKeyFallingEdgeDetected(CC_PUMP))
+    if (checkIfCcKeyFallingEdgeDetected(CC_LEFT) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
     {
-        behavior_manager->arm_grab = !behavior_manager->arm_grab;
+        ArmReadyToExchangePose(JOINT_3_ON_THE_LEFT);
+    }
+    if (checkIfCcKeyFallingEdgeDetected(CC_RIGHT) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+    {
+        ArmReadyToExchangePose(JOINT_3_ON_THE_RIGHT);
     }
 
     /**
@@ -561,6 +575,23 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
         can_reset(BOARD_CAN2, false);
         can_reset(BOARD_CAN3, false);
         can_reset(BOARD_CAN4, false);
+    }
+
+    /**
+     * @brief 电机堵转检测
+     */
+    if (behavior_manager->behavior != ENGINEER_BEHAVIOR_DISABLE &&
+        (detect_error(ARM_JOINT_56_L_DH) || detect_error(ARM_JOINT_56_R_DH)))
+    {
+        behavior_manager->motor_failure_detect_timer++;
+        if (behavior_manager->motor_failure_detect_timer > 3)
+        {
+            behavior_manager->motor_failure_detected = true;
+        }
+    }
+    else
+    {
+        behavior_manager->motor_failure_detect_timer = 0;
     }
 }
 

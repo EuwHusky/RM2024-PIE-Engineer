@@ -291,7 +291,7 @@ static void calc_joint_dh_to_transform_matrix(rfl_matrix_instance *trans_mat, co
 // 自动作业限幅参数
 
 #define X_M (-0.305f)
-#define Y_INNER_BORDER (0.276f)
+#define Y_INNER_BORDER (0.26f)
 
 /**
  * @brief 期望位姿限幅

@@ -19,6 +19,12 @@ extern void uiSplitLine2Builder(interaction_figure_t *figure, figure_operation_t
 
 extern void uiVtlinkIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 
+extern void uiSplitLine3Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
+extern void uiMotorStatusIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
+extern void uiSplitLine4Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
 extern void uiVauAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 extern void uiVauAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
 extern void uiVauAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);

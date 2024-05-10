@@ -196,6 +196,7 @@ extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
 
 extern void resetArmPose(void);
+extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 
 extern bool checkIfArmGrabbed(void);
 extern bool checkIfLifterMotorOverheat(void);

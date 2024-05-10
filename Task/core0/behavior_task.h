@@ -68,6 +68,8 @@ typedef struct EngineerBehaviorManager
     bool arm_grab;
     bool reset_ui;
     engineer_visual_aid_ui_type_e visual_aid_ui;
+    bool motor_failure_detected;
+    uint32_t motor_failure_detect_timer;
 
     /* 设备 */
 
@@ -99,5 +101,6 @@ extern bool getArmGrabMode(void);
 extern bool checkIfNeedResetUi(void);
 extern bool checkIfNeedRebootCore(void);
 extern engineer_visual_aid_ui_type_e getVisualAidUi(void);
+extern bool checkIfMotorFailureDetected(void);
 
 #endif /* _BEHAVIOR_TASK_H__ */

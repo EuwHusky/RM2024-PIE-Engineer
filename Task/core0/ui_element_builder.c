@@ -36,10 +36,14 @@ void uiModeIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_
     uiPlotRectangle(figure, "mod", figure_operation_type, 9, color, 9, 1840, 1870, 804, 834);
 }
 
+/* ================================================================================================================== */
+
 void uiSplitLine0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
     uiPlotLine(figure, "sp0", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 784, 784);
 }
+
+/* ================================================================================================================== */
 
 void uiGrabberPoweredBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
@@ -53,10 +57,14 @@ void uiGrabbedBuilder(interaction_figure_t *figure, figure_operation_type_e figu
                     1840, 1870, 694, 724);
 }
 
+/* ================================================================================================================== */
+
 void uiSplitLine1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
     uiPlotLine(figure, "sp1", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 674, 674);
 }
+
+/* ================================================================================================================== */
 
 void uiStorageFrontUsedBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
@@ -72,10 +80,14 @@ void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_typ
                     1870, 584, 614);
 }
 
+/* ================================================================================================================== */
+
 void uiSplitLine2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
     uiPlotLine(figure, "sp2", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 564, 564);
 }
+
+/* ================================================================================================================== */
 
 void uiVtlinkIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
@@ -85,6 +97,29 @@ void uiVtlinkIndicatorBuilder(interaction_figure_t *figure, figure_operation_typ
                         : (getRemoteControlStatus() == RC_USE_VT_LINK ? FIGURE_ORANGE : FIGURE_MAGENTA),
                     9, 1840, 1870, 514, 544);
 }
+
+/* ================================================================================================================== */
+
+void uiSplitLine3Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    uiPlotLine(figure, "sp3", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 494, 494);
+}
+/* ================================================================================================================== */
+
+void uiMotorStatusIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    uiPlotRectangle(figure, "msi", figure_operation_type, 9,
+                    checkIfMotorFailureDetected() ? FIGURE_ORANGE : FIGURE_GREEN, 9, 1840, 1870, 444, 474);
+}
+
+/* ================================================================================================================== */
+
+void uiSplitLine4Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    uiPlotLine(figure, "sp4", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1890, 1890, 434, 844);
+}
+
+/* ================================================================================================================== */
 
 #define GOLD_PRE_AIM_BOX_X_0 (800)
 #define GOLD_PRE_AIM_BOX_X_1 (900)
@@ -158,6 +193,8 @@ void uiVauAid2Builder(interaction_figure_t *figure, figure_operation_type_e figu
     }
 }
 
+/* ================================================================================================================== */
+
 #define AIM_SIGHT_X (987)
 #define AIM_SIGHT_Y (484)
 #define AIM_SIGHT_LENGTH (24)
@@ -176,6 +213,8 @@ void uiAimSight1Builder(interaction_figure_t *figure, figure_operation_type_e fi
     uiPlotLine(figure, "cs1", figure_operation_type, 9, FIGURE_CYAN, 3, AIM_SIGHT_X, AIM_SIGHT_X + AIM_SIGHT_WIDTH,
                AIM_SIGHT_Y, (uint32_t)(AIM_LINE_K * (AIM_SIGHT_X + AIM_SIGHT_WIDTH) + AIM_LINE_B));
 }
+
+/* ================================================================================================================== */
 
 #define SAFE_RIGHT_BARRIER_WARNING_LINE_X_0 (1147)
 #define SAFE_RIGHT_BARRIER_WARNING_LINE_X_1 (1288)
@@ -198,6 +237,8 @@ void uiDangerRightBarrierWarningLineBuilder(interaction_figure_t *figure, figure
                DANGER_RIGHT_BARRIER_WARNING_LINE_X_1, DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0,
                DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1);
 }
+
+/* ================================================================================================================== */
 
 #define LIFTER_MOTORS_SAFE_TEMPERATURE (50.0f)
 #define LIFTER_MOTORS_DANGER_TEMPERATURE (75.0f)

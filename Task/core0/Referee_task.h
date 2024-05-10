@@ -21,6 +21,8 @@
 
 #define VT_LINK_INDICATOR_UI_INDEX (17)
 
+#define MOTOR_STATUS_INDICATOR_UI_INDEX (18)
+
 extern void referee_task(void *pvParameters);
 
 #endif

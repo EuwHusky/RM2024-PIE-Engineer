@@ -102,6 +102,13 @@ void resetArmPose(void)
         scara_arm.set_pose_6d[i] = scara_arm.pose_6d[i];
 }
 
+void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution)
+{
+    scara_arm.solution = solution;
+
+    scara_arm.set_pose_6d[POSE_Z] = ENGINEER_ARM_Z_MAX_DISTANCE;
+}
+
 bool checkIfArmGrabbed(void)
 {
     return scara_arm.grabbed;

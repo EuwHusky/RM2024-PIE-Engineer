@@ -369,10 +369,15 @@ void print_task(void *pvParameters)
             //         can_is_in_bus_off_mode(HPM_CAN2), can_is_primary_transmit_buffer_full(HPM_CAN3),
             //         can_is_secondary_transmit_buffer_full(HPM_CAN3), can_is_in_bus_off_mode(HPM_CAN3),
             //         (uint8_t)rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]));
+            sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n", behavior_print->motor_failure_detected,
+                    detect_error(ARM_JOINT_1_L_DH), detect_error(ARM_JOINT_1_R_DH), detect_error(ARM_JOINT_2_DH),
+                    detect_error(ARM_JOINT_3_DH), detect_error(ARM_JOINT_4_DH), detect_error(ARM_JOINT_56_L_DH),
+                    detect_error(ARM_JOINT_56_R_DH), detect_error(CHASSIS_MOTOR_0_DH), detect_error(CHASSIS_MOTOR_1_DH),
+                    detect_error(CHASSIS_MOTOR_2_DH), detect_error(CHASSIS_MOTOR_3_DH));
 
-            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-            //                     strlen((char *)test_txt));
+            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                strlen((char *)test_txt));
         }
 
         /**
