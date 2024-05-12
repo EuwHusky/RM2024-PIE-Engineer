@@ -296,11 +296,11 @@ void print_task(void *pvParameters)
             //         arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3], arm_print->pose_6d[4],
             //         arm_print->pose_6d[5]);
             /*自定义控制器调试*/
-            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-                    arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1], arm_print->cc_pose_6d[2],
-                    arm_print->cc_pose_6d[3], arm_print->cc_pose_6d[4], arm_print->cc_pose_6d[5],
-                    arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
-                    arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1], arm_print->cc_pose_6d[2],
+            //         arm_print->cc_pose_6d[3], arm_print->cc_pose_6d[4], arm_print->cc_pose_6d[5],
+            //         arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
+            //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5]);
             /*电机温度*/
             // sprintf((char *)test_txt, "%d,%d,%7.4f,%7.4f,%7.4f,%7.4f\r\n", detect_error(ARM_JOINT_2_DH),
             //         detect_error(ARM_JOINT_3_DH),
@@ -309,9 +309,9 @@ void print_task(void *pvParameters)
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]),
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_RIGHT]));
             /*磁编码器*/
-            // sprintf((char *)test_txt, "%d,%f,%f,%d,%f\r\n", arm_print->start_up_status,
-            //         arm_print->set_joints_value[JOINT_6], arm_print->joints_value[JOINT_6],
-            //         arm_print->joint_6_encoder_value, arm_print->joint_6_encoder_angle);
+            sprintf((char *)test_txt, "%d,%f,%f,%d,%f\r\n", arm_print->start_up_status,
+                    arm_print->set_joints_value[JOINT_6], arm_print->joints_value[JOINT_6],
+                    arm_print->joint_6_encoder_value, arm_print->joint_6_encoder_angle);
 
             /**
              * @brief Motor

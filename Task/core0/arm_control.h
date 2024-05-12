@@ -90,8 +90,8 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define JOINT_5_START_ANGLE (0.0f)
 
 #define JOINT_6_HOMING_STEP_ANGLE (0.005f)
-#define JOINT_6_START_DETECT_ANGLE_0 (21.2f)
-#define JOINT_6_START_DETECT_ANGLE_1 (196.2f)
+#define JOINT_6_START_DETECT_ANGLE_0 (66.3f)
+#define JOINT_6_START_DETECT_ANGLE_1 (240.9f)
 
 /* =============================================== 自动控制 银矿参数 =============================================== */
 
