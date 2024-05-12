@@ -296,14 +296,11 @@ void print_task(void *pvParameters)
             //         arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3], arm_print->pose_6d[4],
             //         arm_print->pose_6d[5]);
             /*自定义控制器调试*/
-            // sprintf((char *)test_txt,
-            // "%d,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f,%7.5f\r\n",
-            //         arm_print->customer_controller->key, getCustomerControllerData()->pose[0],
-            //         getCustomerControllerData()->pose[1], getCustomerControllerData()->pose[2],
-            //         getCustomerControllerData()->pose[3], getCustomerControllerData()->pose[4],
-            //         getCustomerControllerData()->pose[5], arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1],
-            //         arm_print->cc_pose_6d[2], arm_print->cc_pose_6d[3], arm_print->cc_pose_6d[4],
-            //         arm_print->cc_pose_6d[5]);
+            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+                    arm_print->cc_pose_6d[0], arm_print->cc_pose_6d[1], arm_print->cc_pose_6d[2],
+                    arm_print->cc_pose_6d[3], arm_print->cc_pose_6d[4], arm_print->cc_pose_6d[5],
+                    arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
+                    arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5]);
             /*电机温度*/
             // sprintf((char *)test_txt, "%d,%d,%7.4f,%7.4f,%7.4f,%7.4f\r\n", detect_error(ARM_JOINT_2_DH),
             //         detect_error(ARM_JOINT_3_DH),
@@ -369,11 +366,13 @@ void print_task(void *pvParameters)
             //         can_is_in_bus_off_mode(HPM_CAN2), can_is_primary_transmit_buffer_full(HPM_CAN3),
             //         can_is_secondary_transmit_buffer_full(HPM_CAN3), can_is_in_bus_off_mode(HPM_CAN3),
             //         (uint8_t)rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]));
-            sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n", behavior_print->motor_failure_detected,
-                    detect_error(ARM_JOINT_1_L_DH), detect_error(ARM_JOINT_1_R_DH), detect_error(ARM_JOINT_2_DH),
-                    detect_error(ARM_JOINT_3_DH), detect_error(ARM_JOINT_4_DH), detect_error(ARM_JOINT_56_L_DH),
-                    detect_error(ARM_JOINT_56_R_DH), detect_error(CHASSIS_MOTOR_0_DH), detect_error(CHASSIS_MOTOR_1_DH),
-                    detect_error(CHASSIS_MOTOR_2_DH), detect_error(CHASSIS_MOTOR_3_DH));
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
+            // behavior_print->motor_failure_detected,
+            //         detect_error(ARM_JOINT_1_L_DH), detect_error(ARM_JOINT_1_R_DH), detect_error(ARM_JOINT_2_DH),
+            //         detect_error(ARM_JOINT_3_DH), detect_error(ARM_JOINT_4_DH), detect_error(ARM_JOINT_56_L_DH),
+            //         detect_error(ARM_JOINT_56_R_DH), detect_error(CHASSIS_MOTOR_0_DH),
+            //         detect_error(CHASSIS_MOTOR_1_DH), detect_error(CHASSIS_MOTOR_2_DH),
+            //         detect_error(CHASSIS_MOTOR_3_DH));
 
             uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
