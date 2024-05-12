@@ -529,13 +529,6 @@ static void solve_inverse_kinematics(engineer_scara_arm_s *scara_arm)
             scara_arm->solution =
                 (scara_arm->solution == JOINT_3_ON_THE_LEFT) ? JOINT_3_ON_THE_RIGHT : JOINT_3_ON_THE_LEFT;
         }
-        // if (xy24 > (L1 + L2) / 2.0f)
-        // {
-        //     if (rflFloatLoopConstrain(angle_x24, -RAD_PI, RAD_PI) > 0.7853982f)
-        //         scara_arm->solution = JOINT_3_ON_THE_RIGHT;
-        //     else if (rflFloatLoopConstrain(angle_x24, -RAD_PI, RAD_PI) < -0.7853982f)
-        //         scara_arm->solution = JOINT_3_ON_THE_LEFT;
-        // }
     }
     else
         scara_arm->solution = JOINT_3_ON_THE_LEFT;
