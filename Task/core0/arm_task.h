@@ -256,7 +256,7 @@ extern bool *getStoragePopStatus(void);
 #define ENGINEER_ARM_ROLL_MIN_ANGLE (-720.0f)                                          /* 末端ROLL最小角度 */
 
 // 关节运行基准速度
-#define ENGINEER_ARM_MANUAL_OPERATION_BASE_SPEED (1.6f)
+#define ENGINEER_ARM_MANUAL_OPERATION_BASE_SPEED (1.4f)
 #define ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED (1.0f)
 
 // 正常运行时的关节可达范围
