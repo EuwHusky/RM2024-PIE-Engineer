@@ -9,7 +9,7 @@ typedef enum
     CC_TRIGGER = 0,
     CC_LEFT,
     CC_RIGHT,
-    CC_RESET,
+    CC_RESET = 4,
     CC_KEY_NUM,
 } customer_controller_key_index_e;
 
