@@ -113,7 +113,7 @@ typedef struct EngineerScaraArm
     bool storage_push_success;
     bool storage_pop_success;
 
-    uint8_t joint_1_homing_timer;
+    uint16_t joint_6_homing_timer;
     uint8_t silver_mining_step;
     uint16_t silver_mining_grab_detect_timer;
     uint16_t silver_mining_grab_end_timer;

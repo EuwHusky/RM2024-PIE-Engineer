@@ -52,6 +52,7 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
         if (scara_arm->behavior == ENGINEER_BEHAVIOR_RESET)
         {
             resetArmStartUpStatus(scara_arm->start_up_status);
+            scara_arm->joint_6_homing_timer = 0;
             arm_motor_set_angle_limit(scara_arm, true);
         }
         else if (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_RESET && scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
@@ -290,8 +291,11 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     {
         scara_arm->set_joints_value[JOINT_6] += JOINT_6_HOMING_STEP_ANGLE;
 
-        if ((fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_0) < 1.0f) ||
-            (fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_1) < 1.0f))
+        scara_arm->joint_6_homing_timer++;
+
+        if ((fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_0) < 2.4f) ||
+            (fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_1) < 2.4f) ||
+            scara_arm->joint_6_homing_timer > 1200)
         {
             rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, true);
             rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, true);
