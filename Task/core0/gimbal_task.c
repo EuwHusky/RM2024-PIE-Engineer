@@ -149,7 +149,7 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
     if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET || gimbal->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
         rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.0f);
     else
-        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.64f);
+        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.8f);
 
     switch (gimbal->behavior)
     {

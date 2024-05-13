@@ -280,10 +280,9 @@ void print_task(void *pvParameters)
             //         arm_print->pose_6d[4], arm_print->pose_6d[5], arm_print->printer[0], arm_print->printer[1],
             //         arm_print->printer[2]);
             /*银矿动作调试*/
-            // sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
-            //         arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1],
-            //         arm_print->pose_6d[1], arm_print->set_pose_6d[2], arm_print->pose_6d[2],
-            //         arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
+            sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
+                    arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1],
+                    arm_print->set_pose_6d[2], arm_print->pose_6d[2], arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
             /*金矿动作调试*/
             // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", behavior_print->behavior, arm_print->gold_mining_step,
             //         arm_print->set_joints_value[JOINT_1], arm_print->joints_value[JOINT_1]);
@@ -309,9 +308,9 @@ void print_task(void *pvParameters)
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_LEFT]),
             //         rflMotorGetTemperature(&arm_print->joints_motors[MOTOR_JOINT1_RIGHT]));
             /*磁编码器*/
-            sprintf((char *)test_txt, "%d,%f,%f,%d,%f\r\n", arm_print->start_up_status,
-                    arm_print->set_joints_value[JOINT_6], arm_print->joints_value[JOINT_6],
-                    arm_print->joint_6_encoder_value, arm_print->joint_6_encoder_angle);
+            // sprintf((char *)test_txt, "%d,%f,%f,%d,%f\r\n", arm_print->start_up_status,
+            //         arm_print->set_joints_value[JOINT_6], arm_print->joints_value[JOINT_6],
+            //         arm_print->joint_6_encoder_value, arm_print->joint_6_encoder_angle);
 
             /**
              * @brief Motor

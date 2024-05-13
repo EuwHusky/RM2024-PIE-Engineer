@@ -500,7 +500,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 
             scara_arm->silver_mining_pose_memory[POSE_X] = 0.45f;
             scara_arm->silver_mining_pose_memory[POSE_Y] = 0.0f;
-            scara_arm->silver_mining_pose_memory[POSE_Z] = 0.45f;
+            scara_arm->silver_mining_pose_memory[POSE_Z] = 0.21f;
             scara_arm->silver_mining_pose_memory[POSE_PITCH] = 0.0f;
 
             scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
@@ -510,7 +510,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         {
             scara_arm->set_pose_6d[POSE_X] = 0.45f;
             scara_arm->set_pose_6d[POSE_Y] = 0.0f;
-            scara_arm->set_pose_6d[POSE_Z] = 0.45f;
+            scara_arm->set_pose_6d[POSE_Z] = 0.21f;
             scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
             for (uint8_t i = 0; i < 6; i++)
             {
