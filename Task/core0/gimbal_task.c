@@ -153,7 +153,7 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
 
     // 根据不同模式使用不同控制
 
-    if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET || gimbal->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+    if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
         rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.0f);
     else if (gimbal->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
              getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
