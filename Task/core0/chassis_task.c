@@ -190,16 +190,11 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
 
     if (*getGimbalResetStatus())
     {
-        if (chassis->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        if ((chassis->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION) ||
+            (chassis->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
+             getEngineerLastBehavior() == ENGINEER_BEHAVIOR_MANUAL_OPERATION))
         {
             chassis->follow_offset = 0.0f;
-        }
-        else if (chassis->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
-        {
-            if (getGimbalYawAngle(RFL_ANGLE_FORMAT_DEGREE) < 0.0f)
-                chassis->follow_offset = 0.0f;
-            else
-                chassis->follow_offset = -getGimbalYawAngle(RFL_ANGLE_FORMAT_DEGREE);
         }
         else
         {

@@ -200,6 +200,7 @@ extern float getArmJointsValue(engineer_scara_arm_joints_e joint);
 extern float getArmSetJointsValue(engineer_scara_arm_joints_e joint);
 extern float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index);
 
+extern bool checkIfArmInDefaultPose(void);
 extern bool checkIfArmGrabbed(void);
 extern bool checkIfLifterMotorOverheat(void);
 

@@ -116,6 +116,16 @@ float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_inde
     return rflMotorGetTemperature(&scara_arm.joints_motors[motor_index]);
 }
 
+bool checkIfArmInDefaultPose(void)
+{
+    return (fabsf(scara_arm.pose_6d[POSE_X] - 0.45f) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm.pose_6d[POSE_Y] - 0.0f) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm.pose_6d[POSE_Z] - OPERATION_MODE_DEFAULT_Z) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm.pose_6d[POSE_YAW] - 0.0f) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm.pose_6d[POSE_PITCH] - 0.0f) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm.pose_6d[POSE_ROLL] - 0.0f) < TOLERABLE_ANGLE_DEVIATION);
+}
+
 bool checkIfArmGrabbed(void)
 {
     return scara_arm.grabbed;

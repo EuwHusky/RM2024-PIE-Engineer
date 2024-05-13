@@ -215,13 +215,30 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
         }
         else if ((behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-                  behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION) &&
+                  (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION && checkIfArmInDefaultPose())) &&
                  behavior_manager->last_dt7_behavior_switch_value != ENGINEER_MOVE_DT7_SWITCH_VALUE &&
                  behavior_manager->dt7_behavior_switch_value == ENGINEER_MOVE_DT7_SWITCH_VALUE)
         {
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
         }
     }
+
+    /**
+     * @brief 机械臂回到默认位姿
+     * DT7 长拨拨轮触发切换
+     */
+    behavior_manager->dt7_arm_switch_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
+        behavior_manager->dt7_arm_switch_trigger_value > 600)
+    {
+        behavior_manager->dt7_arm_switch_trigger_timer++;
+        if (behavior_manager->dt7_arm_switch_trigger_timer == 10)
+        {
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+        }
+    }
+    else
+        behavior_manager->dt7_arm_switch_trigger_timer = 0;
 
     /* ================================================== 键鼠 ================================================== */
 
@@ -281,7 +298,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         *behavior_manager->gimbal_reset_success)
     {
         if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-            behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION && checkIfArmInDefaultPose()))
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
         else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
                  behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
@@ -421,23 +438,6 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     }
 
     /* ================================================== 下级模块 ================================================== */
-
-    /**
-     * @brief 切换机械臂解算
-     * DT7 长拨拨轮触发切换
-     */
-    behavior_manager->dt7_arm_switch_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
-        behavior_manager->dt7_arm_switch_trigger_value > 600)
-    {
-        behavior_manager->dt7_arm_switch_trigger_timer++;
-        if (behavior_manager->dt7_arm_switch_trigger_timer == 10)
-        {
-            behavior_manager->arm_switch_solution = true;
-        }
-    }
-    else
-        behavior_manager->dt7_arm_switch_trigger_timer = 0;
 
     /**
      * @brief 机械臂吸取工作模式切换
