@@ -96,17 +96,19 @@ engineer_scara_arm_s *getArmDataPointer(void)
     return &scara_arm;
 }
 
-void resetArmPose(void)
+float getArmTargetDirection(void)
 {
-    for (uint8_t i = 0; i < 6; i++)
-        scara_arm.set_pose_6d[i] = scara_arm.pose_6d[i];
+    return atan2f(scara_arm.pose_6d[POSE_Y], scara_arm.pose_6d[POSE_X]);
 }
 
-void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution)
+float getArmJointsValue(engineer_scara_arm_joints_e joint)
 {
-    scara_arm.solution = solution;
+    return scara_arm.joints_value[joint];
+}
 
-    scara_arm.set_pose_6d[POSE_Z] = ENGINEER_ARM_Z_MAX_DISTANCE;
+float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index)
+{
+    return rflMotorGetTemperature(&scara_arm.joints_motors[motor_index]);
 }
 
 bool checkIfArmGrabbed(void)
@@ -121,11 +123,6 @@ bool checkIfLifterMotorOverheat(void)
         return true;
 
     return false;
-}
-
-float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index)
-{
-    return rflMotorGetTemperature(&scara_arm.joints_motors[motor_index]);
 }
 
 bool *getArmResetStatus(void)
@@ -156,6 +153,19 @@ bool *getStoragePushStatus(void)
 bool *getStoragePopStatus(void)
 {
     return &scara_arm.storage_pop_success;
+}
+
+void resetArmPose(void)
+{
+    for (uint8_t i = 0; i < 6; i++)
+        scara_arm.set_pose_6d[i] = scara_arm.pose_6d[i];
+}
+
+void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution)
+{
+    scara_arm.solution = solution;
+
+    scara_arm.set_pose_6d[POSE_Z] = ENGINEER_ARM_Z_MAX_DISTANCE;
 }
 
 static void arm_init(engineer_scara_arm_s *scara_arm)

@@ -195,12 +195,12 @@ typedef struct EngineerScaraArm
 extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
 
-extern void resetArmPose(void);
-extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
+extern float getArmTargetDirection(void);
+extern float getArmJointsValue(engineer_scara_arm_joints_e joint);
+extern float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index);
 
 extern bool checkIfArmGrabbed(void);
 extern bool checkIfLifterMotorOverheat(void);
-extern float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index);
 
 extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);
@@ -208,6 +208,9 @@ extern bool *getArmOperationHomingStatus(void);
 extern bool *getSilverMiningStatus(void);
 extern bool *getStoragePushStatus(void);
 extern bool *getStoragePopStatus(void);
+
+extern void resetArmPose(void);
+extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 
 /* 机械臂结构参数 */
 

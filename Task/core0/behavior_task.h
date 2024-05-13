@@ -61,6 +61,8 @@ typedef struct EngineerBehaviorManager
     bool *storage_push_success;
     bool *storage_pop_success;
     bool *gimbal_reset_success;
+    bool *gimbal_move_homing_success;
+    bool *gimbal_operation_homing_success;
 
     /* 模块状态输出 */
 

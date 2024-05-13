@@ -8,6 +8,7 @@
 #include "algo_data_limiting.h"
 
 #include "INS_task.h"
+#include "arm_task.h"
 #include "chassis_task.h"
 #include "detect_task.h"
 
@@ -16,10 +17,11 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal);
 static void gimbal_update_and_execute(engineer_gimbal_s *gimbal);
 static void gimbal_no_force_control(engineer_gimbal_s *gimbal);
 static void gimbal_reset_control(engineer_gimbal_s *gimbal);
+static void gimbal_move_homing_control(engineer_gimbal_s *gimbal);
 static void gimbal_move_control(engineer_gimbal_s *gimbal);
-static void gimbal_operation_control(engineer_gimbal_s *gimbal);
-static void gimbal_steer_pitch_normal_control(engineer_gimbal_s *gimbal);
-static void gimbal_steer_pitch_reset_control(engineer_gimbal_s *gimbal);
+static void gimbal_operation_homing_control(engineer_gimbal_s *gimbal);
+static void gimbal_manual_operation_control(engineer_gimbal_s *gimbal);
+static void gimbal_auto_operation_control(engineer_gimbal_s *gimbal);
 static void gimbal_motor_yaw_can_rx_callback(void);
 
 static engineer_gimbal_s gimbal;
@@ -54,6 +56,16 @@ bool *getGimbalResetStatus(void)
     return &gimbal.reset_success;
 }
 
+bool *getGimbalMoveHomingStatus(void)
+{
+    return &gimbal.move_homing_success;
+}
+
+bool *getGimbalOperationHomingStatus(void)
+{
+    return &gimbal.operation_homing_success;
+}
+
 float getGimbalYawAngle(rfl_angle_format_e angle_format)
 {
     return rflMotorGetAngle(&gimbal.yaw_motor, angle_format);
@@ -68,6 +80,8 @@ static void gimbal_init(engineer_gimbal_s *gimbal)
 
     gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_HOMING;
     gimbal->reset_success = false;
+    gimbal->move_homing_success = false;
+    gimbal->operation_homing_success = false;
 
     rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, GIMBAL_YAW_START_ANGLE);
 
@@ -95,44 +109,6 @@ static void gimbal_init(engineer_gimbal_s *gimbal)
     motor_config.master_can_id = 0x201;
     rflMotorInit(&gimbal->yaw_motor, &motor_config);
 
-    // 在IO控制器中配置对应引脚
-    HPM_IOC->PAD[IOC_PAD_PC01].FUNC_CTL = IOC_PC01_FUNC_CTL_PWM0_P_0;
-    // 设置PWM频率
-    gimbal->pitch_pwm_freq = 50;
-    // 获得时钟频率
-    gimbal->pitch_pwm_clk_freq = clock_get_frequency(clock_mot0); // 200000000
-    // 计算reload值
-    gimbal->pitch_pwm_reload = gimbal->pitch_pwm_clk_freq / gimbal->pitch_pwm_freq - 1;
-    // PWM配置（根据需求配置，此处仅示范用法）
-    pwm_config_t pwm_config = {0};
-    pwm_get_default_pwm_config(HPM_PWM0, &pwm_config);
-    pwm_config.invert_output = true; // 反向输出
-    // PWM比较器配置（根据需求配置，此处仅示范用法）
-    pwm_cmp_config_t cmp_config = {0};
-    pwm_get_default_cmp_config(HPM_PWM0, &cmp_config);
-    // 停止计数器
-    pwm_stop_counter(HPM_PWM0);
-    // 设置RLD寄存器（设置reload）
-    pwm_set_reload(HPM_PWM0, 0, gimbal->pitch_pwm_reload);
-    // 设置STA寄存器（设置初始计数值）
-    pwm_set_start_count(HPM_PWM0, 0, 0);
-    // 设置波形
-    if (status_success != pwm_setup_waveform(HPM_PWM0, 0, &pwm_config, 0, &cmp_config, 1))
-    {
-        printf("failed to setup waveform\n");
-        while (1)
-            ;
-    }
-    // 锁定影子寄存器
-    pwm_issue_shadow_register_lock_event(HPM_PWM0);
-    // 开始计数
-    pwm_start_counter(HPM_PWM0);
-
-    // 改变占空比
-    gimbal->pitch_pwm_compare = ENGINEER_GIMBAL_PITCH_PWM_CONPARE_VALUE_MID;
-    pwm_update_raw_cmp_edge_aligned(HPM_PWM0, 0, gimbal->pitch_pwm_compare);
-    pwm_enable_output(HPM_PWM0, 0); //
-
     gimbal->rc = getRemoteControlPointer();
 }
 
@@ -148,12 +124,10 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
         if (gimbal->behavior == ENGINEER_BEHAVIOR_DISABLE)
         {
             rflMotorSetMode(&gimbal->yaw_motor, RFL_MOTOR_CONTROL_MODE_NO_FORCE);
-            pwm_disable_output(HPM_PWM0, 0);
         }
         else if (gimbal->behavior != ENGINEER_BEHAVIOR_DISABLE)
         {
             rflMotorSetMode(&gimbal->yaw_motor, RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
-            pwm_enable_output(HPM_PWM0, 0);
         }
 
         if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
@@ -172,10 +146,10 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
 
     // 根据不同模式使用不同控制
 
-    if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
+    if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET || gimbal->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
         rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.0f);
     else
-        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.5f);
+        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.64f);
 
     switch (gimbal->behavior)
     {
@@ -186,14 +160,22 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
         gimbal_reset_control(gimbal);
         break;
     case ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING:
+        gimbal_move_homing_control(gimbal);
+        break;
     case ENGINEER_BEHAVIOR_MOVE:
         gimbal_move_control(gimbal);
         break;
     case ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING:
-    case ENGINEER_BEHAVIOR_AUTO_SILVER_MINING:
-    // case ENGINEER_BEHAVIOR_AUTO_GOLD_MINING:
+        gimbal_operation_homing_control(gimbal);
+        break;
     case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
-        gimbal_operation_control(gimbal);
+        gimbal_manual_operation_control(gimbal);
+        break;
+    case ENGINEER_BEHAVIOR_AUTO_SILVER_MINING:
+    case ENGINEER_BEHAVIOR_AUTO_GOLD_MINING:
+    case ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH:
+    case ENGINEER_BEHAVIOR_AUTO_STORAGE_POP:
+        gimbal_auto_operation_control(gimbal);
         break;
 
     default:
@@ -209,11 +191,6 @@ static void gimbal_update_and_execute(engineer_gimbal_s *gimbal)
     rflMotorUpdateControl(&gimbal->yaw_motor);
     rflRmMotorControl(GIMBAL_MOTORS_CAN_ORDINAL, GIMBAL_MOTORS_CAN_SLAVE_ID,
                       (int16_t)rflMotorGetOutput(&gimbal->yaw_motor), 0, 0, 0);
-
-    gimbal->pitch_pwm_compare =
-        rflUint32Constrain(gimbal->pitch_pwm_compare, ENGINEER_GIMBAL_PITCH_PWM_CONPARE_VALUE_MIN,
-                           ENGINEER_GIMBAL_PITCH_PWM_CONPARE_VALUE_MAX);
-    pwm_update_raw_cmp_edge_aligned(HPM_PWM0, 0, gimbal->pitch_pwm_compare);
 }
 
 static void gimbal_no_force_control(engineer_gimbal_s *gimbal)
@@ -250,40 +227,43 @@ static void gimbal_reset_control(engineer_gimbal_s *gimbal)
             }
         }
     }
+}
 
-    gimbal_steer_pitch_reset_control(gimbal);
+static void gimbal_move_homing_control(engineer_gimbal_s *gimbal)
+{
+    rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE);
+
+    if (fabsf(rflMotorGetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE) - ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE) <
+        2.0f)
+    {
+        gimbal->move_homing_success = true;
+    }
 }
 
 static void gimbal_move_control(engineer_gimbal_s *gimbal)
 {
     rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE);
-
-    gimbal_steer_pitch_normal_control(gimbal);
 }
 
-static void gimbal_operation_control(engineer_gimbal_s *gimbal)
+static void gimbal_operation_homing_control(engineer_gimbal_s *gimbal)
 {
     rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_OPERATION_BEHAVIOR_GIMBAL_SET_ANGLE);
+
+    if (fabsf(rflMotorGetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE) -
+              ENGINEER_OPERATION_BEHAVIOR_GIMBAL_SET_ANGLE) < 2.0f)
+    {
+        gimbal->operation_homing_success = true;
+    }
 }
 
-static void gimbal_steer_pitch_normal_control(engineer_gimbal_s *gimbal)
+static void gimbal_manual_operation_control(engineer_gimbal_s *gimbal)
 {
-    uint32_t temp_value = 0;
-
-    // DT7 & 键鼠
-
-    temp_value = rflDeadZoneZero(gimbal->rc->dt7_dr16_data.rc.ch[4], 3);
-    temp_value = temp_value ? temp_value : (gimbal->rc->mouse_z * 100);
-
-    if (temp_value > 0)
-        gimbal->pitch_pwm_compare += (uint32_t)(temp_value);
-    else if (temp_value < 0)
-        gimbal->pitch_pwm_compare -= (uint32_t)(-temp_value);
+    rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_RADIAN, getArmTargetDirection());
 }
 
-static void gimbal_steer_pitch_reset_control(engineer_gimbal_s *gimbal)
+static void gimbal_auto_operation_control(engineer_gimbal_s *gimbal)
 {
-    gimbal->pitch_pwm_compare = ENGINEER_GIMBAL_PITCH_PWM_CONPARE_VALUE_MID;
+    rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_OPERATION_BEHAVIOR_GIMBAL_SET_ANGLE);
 }
 
 static void gimbal_motor_yaw_can_rx_callback(void)

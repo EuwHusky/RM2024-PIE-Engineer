@@ -17,15 +17,12 @@ typedef struct EngineerGimbal
 
     uint8_t reset_step;
     bool reset_success;
+    bool move_homing_success;
+    bool operation_homing_success;
 
     rfl_angle_s set_gimbal_angle;
 
     rfl_motor_s yaw_motor;
-
-    uint32_t pitch_pwm_clk_freq;
-    uint32_t pitch_pwm_freq;
-    uint32_t pitch_pwm_reload;
-    uint32_t pitch_pwm_compare;
 
     const remote_control_s *rc;
 
@@ -35,6 +32,9 @@ extern void gimbal_task(void *pvParameters);
 extern const engineer_gimbal_s *getGimbalDataPointer(void);
 
 extern bool *getGimbalResetStatus(void);
+extern bool *getGimbalMoveHomingStatus(void);
+extern bool *getGimbalOperationHomingStatus(void);
+
 extern float getGimbalYawAngle(rfl_angle_format_e angle_format);
 
 #define ENGINEER_GIMBAL_RESET_STEP_HOMING (0u)

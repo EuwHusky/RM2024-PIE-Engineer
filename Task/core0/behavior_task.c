@@ -125,6 +125,8 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->storage_push_success = getStoragePushStatus();
     behavior_manager->storage_pop_success = getStoragePopStatus();
     behavior_manager->gimbal_reset_success = getGimbalResetStatus();
+    behavior_manager->gimbal_move_homing_success = getGimbalMoveHomingStatus();
+    behavior_manager->gimbal_operation_homing_success = getGimbalOperationHomingStatus();
 
     behavior_manager->arm_grab = false;
     behavior_manager->arm_switch_solution = false;
@@ -512,15 +514,17 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
      * @brief 机动/作业模式互相切换 自动归位
      */
     else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING &&
-             *behavior_manager->arm_move_homing_success)
+             *behavior_manager->arm_move_homing_success && *behavior_manager->gimbal_move_homing_success)
     {
         *behavior_manager->arm_move_homing_success = false;
+        *behavior_manager->gimbal_move_homing_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
     }
     else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
-             *behavior_manager->arm_operation_homing_success)
+             *behavior_manager->arm_operation_homing_success && *behavior_manager->gimbal_operation_homing_success)
     {
         *behavior_manager->arm_operation_homing_success = false;
+        *behavior_manager->gimbal_operation_homing_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
     }
 

@@ -189,9 +189,16 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
     // 更新底盘模型控制量
 
     if (*getGimbalResetStatus())
-        chassis->follow_offset = -getGimbalYawAngle(RFL_ANGLE_FORMAT_DEGREE);
+    {
+        if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+            chassis->follow_offset = 0.0f;
+        else
+            chassis->follow_offset = -getGimbalYawAngle(RFL_ANGLE_FORMAT_DEGREE);
+    }
     else
+    {
         chassis->follow_offset = -GIMBAL_YAW_START_ANGLE;
+    }
 
     if (chassis->model.mode_ != RFL_CHASSIS_BEHAVIOR_NO_FORCE)
     {
