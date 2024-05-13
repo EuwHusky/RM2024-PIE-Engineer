@@ -633,7 +633,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
         else
         {
             scara_arm->set_joints_value[JOINT_1] = 0.03f;
-            scara_arm->set_joints_value[JOINT_2] = 0.0f;
+            scara_arm->set_joints_value[JOINT_2] = 90.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_joints_value[JOINT_3] = 0.0f;
             scara_arm->set_joints_value[JOINT_4] = 0.0f;
             scara_arm->set_joints_value[JOINT_5] = 0.0f;

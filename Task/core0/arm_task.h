@@ -197,6 +197,7 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 
 extern float getArmTargetDirection(void);
 extern float getArmJointsValue(engineer_scara_arm_joints_e joint);
+extern float getArmSetJointsValue(engineer_scara_arm_joints_e joint);
 extern float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index);
 
 extern bool checkIfArmGrabbed(void);

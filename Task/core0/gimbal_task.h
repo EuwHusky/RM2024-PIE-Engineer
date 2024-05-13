@@ -20,7 +20,8 @@ typedef struct EngineerGimbal
     bool move_homing_success;
     bool operation_homing_success;
 
-    rfl_angle_s set_gimbal_angle;
+    rfl_angle_s set_gimbal_angle; // 设定的云台相对于机体的角度，以机械臂方向为0点，逆时针为正
+    rfl_angle_s gimbal_angle;     // 云台相对于机体的角度，以机械臂方向为0点，逆时针为正
 
     rfl_motor_s yaw_motor;
 
@@ -42,16 +43,19 @@ extern float getGimbalYawAngle(rfl_angle_format_e angle_format);
 
 #define GIMBAL_YAW_HOMING_STEP_ANGLE (1.0f)
 #define GIMBAL_YAW_HOMING_TORQUE_THRESHOLD (3.6f)
-#define GIMBAL_YAW_HOMING_ANGLE (72.0f)
-#define GIMBAL_YAW_START_ANGLE (-90.0f)
+#define GIMBAL_YAW_HOMING_ANGLE (0.0f)
+#define GIMBAL_YAW_START_ANGLE (90.0f)
 
 #define ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE (GIMBAL_YAW_START_ANGLE)
 #define ENGINEER_OPERATION_BEHAVIOR_GIMBAL_SET_ANGLE (0.0f)
 
-#define ENGINEER_GIMBAL_YAW_MAX_ANGLE (GIMBAL_YAW_HOMING_ANGLE)
-#define ENGINEER_GIMBAL_YAW_MIN_ANGLE (GIMBAL_YAW_START_ANGLE)
-#define ENGINEER_GIMBAL_YAW_INITIAL_MAX_ANGLE (360.0f)
-#define ENGINEER_GIMBAL_YAW_INITIAL_MIN_ANGLE (-360.0f)
+#define ENGINEER_GIMBAL_YAW_MAX_ANGLE (90.0f)
+#define ENGINEER_GIMBAL_YAW_MIN_ANGLE (-90.0f)
+
+#define ENGINEER_GIMBAL_YAW_MOTOR_MAX_ANGLE (180.0f)
+#define ENGINEER_GIMBAL_YAW_MOTOR_MIN_ANGLE (-180.0f)
+#define ENGINEER_GIMBAL_YAW_MOTOR_INITIAL_MAX_ANGLE (360.0f)
+#define ENGINEER_GIMBAL_YAW_MOTOR_INITIAL_MIN_ANGLE (-360.0f)
 
 #define GIMBAL_MOTORS_CAN_ORDINAL (4)
 #define GIMBAL_MOTORS_CAN_SLAVE_ID (0x200)

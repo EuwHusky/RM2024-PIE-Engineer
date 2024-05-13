@@ -280,9 +280,10 @@ void print_task(void *pvParameters)
             //         arm_print->pose_6d[4], arm_print->pose_6d[5], arm_print->printer[0], arm_print->printer[1],
             //         arm_print->printer[2]);
             /*银矿动作调试*/
-            sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
-                    arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1],
-                    arm_print->set_pose_6d[2], arm_print->pose_6d[2], arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
+            // sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
+            //         arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1],
+            //         arm_print->pose_6d[1], arm_print->set_pose_6d[2], arm_print->pose_6d[2],
+            //         arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
             /*金矿动作调试*/
             // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", behavior_print->behavior, arm_print->gold_mining_step,
             //         arm_print->set_joints_value[JOINT_1], arm_print->joints_value[JOINT_1]);
@@ -357,6 +358,12 @@ void print_task(void *pvParameters)
             // behavior_print->last_behavior,
             //         *behavior_print->arm_reset_success, *behavior_print->gimbal_reset_success,
             //         *behavior_print->arm_move_homing_success, *behavior_print->arm_operation_homing_success);
+            sprintf((char *)test_txt, "%d,%d,%d,%d,%f,%f,%f,%f,%f\r\n", behavior_print->behavior,
+                    behavior_print->last_behavior, *behavior_print->arm_operation_homing_success,
+                    *behavior_print->gimbal_operation_homing_success, gimbal_print->set_gimbal_angle.deg,
+                    gimbal_print->gimbal_angle.deg, rflMotorGetAngle(&gimbal_print->yaw_motor, RFL_ANGLE_FORMAT_DEGREE),
+                    getArmSetJointsValue(JOINT_2) * RADIAN_TO_DEGREE_FACTOR,
+                    getArmJointsValue(JOINT_2) * RADIAN_TO_DEGREE_FACTOR);
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
             //         can_is_primary_transmit_buffer_full(HPM_CAN0), can_is_secondary_transmit_buffer_full(HPM_CAN0),
             //         can_is_in_bus_off_mode(HPM_CAN0), can_is_primary_transmit_buffer_full(HPM_CAN1),

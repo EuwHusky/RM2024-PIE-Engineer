@@ -387,25 +387,30 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
          * @brief 立即停止自动取金/银矿、自动存/取矿 切换回手动作业
          * 键鼠 短按C键触发
          */
-        if (checkIfRcKeyFallingEdgeDetected(RC_C) &&
-            (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
-             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING ||
-             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
-             behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP))
+        if (checkIfRcKeyFallingEdgeDetected(RC_C))
         {
-            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
-                *behavior_manager->silver_mining_success = false;
-            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
+                behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
+                behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
             {
-                *behavior_manager->storage_push_success = false;
-                StorageCancelOperation(STORAGE_PUSH_IN);
+                if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+                    *behavior_manager->silver_mining_success = false;
+                else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+                {
+                    *behavior_manager->storage_push_success = false;
+                    StorageCancelOperation(STORAGE_PUSH_IN);
+                }
+                else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+                    *behavior_manager->storage_pop_success = false;
+
+                resetArmPose();
+
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
             }
-            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
-                *behavior_manager->storage_pop_success = false;
-
-            resetArmPose();
-
-            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+            {
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+            }
         }
 
         // 清除标志位 防止历史误操作

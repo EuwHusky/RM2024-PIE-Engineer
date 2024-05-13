@@ -106,6 +106,11 @@ float getArmJointsValue(engineer_scara_arm_joints_e joint)
     return scara_arm.joints_value[joint];
 }
 
+float getArmSetJointsValue(engineer_scara_arm_joints_e joint)
+{
+    return scara_arm.set_joints_value[joint];
+}
+
 float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index)
 {
     return rflMotorGetTemperature(&scara_arm.joints_motors[motor_index]);
