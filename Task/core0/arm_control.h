@@ -62,10 +62,15 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define ANGLE_DEVIATION_THRESHOLD (0.1f)
 
 /**
- * @brief 作业模式默认抬升高度
+ * @brief 作业模式默认位姿
  * @note 此值将影响自动取矿辅助UI的位置 修改此项后需要重新调整相关UI的参数
  */
+#define OPERATION_MODE_DEFAULT_X (0.45f)
+#define OPERATION_MODE_DEFAULT_Y (0.0f)
 #define OPERATION_MODE_DEFAULT_Z (0.0f)
+#define OPERATION_MODE_DEFAULT_YAW (0.0f)
+#define OPERATION_MODE_DEFAULT_PITCH (0.0f)
+#define OPERATION_MODE_DEFAULT_ROLL (0.0f)
 
 /* =============================================== 自动控制 复位参数 =============================================== */
 

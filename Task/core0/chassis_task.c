@@ -314,10 +314,13 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
         y_sign = 1.0f;
     else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
         y_sign = -1.0f;
-    if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
-        z_sign = 1.0f;
-    else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
-        z_sign = -1.0f;
+    if (!checkIsRcKeyPressed(RC_CTRL))
+    {
+        if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+            z_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+            z_sign = -1.0f;
+    }
 
     float shift_speed_multiplier = 0.42f;
     if (checkIsRcKeyPressed(RC_SHIFT))

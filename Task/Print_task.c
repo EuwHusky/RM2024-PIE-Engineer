@@ -358,12 +358,12 @@ void print_task(void *pvParameters)
             // behavior_print->last_behavior,
             //         *behavior_print->arm_reset_success, *behavior_print->gimbal_reset_success,
             //         *behavior_print->arm_move_homing_success, *behavior_print->arm_operation_homing_success);
-            sprintf((char *)test_txt, "%d,%d,%d,%d,%f,%f,%f,%f,%f\r\n", behavior_print->behavior,
-                    behavior_print->last_behavior, *behavior_print->arm_operation_homing_success,
-                    *behavior_print->gimbal_operation_homing_success, gimbal_print->set_gimbal_angle.deg,
-                    gimbal_print->gimbal_angle.deg, rflMotorGetAngle(&gimbal_print->yaw_motor, RFL_ANGLE_FORMAT_DEGREE),
-                    getArmSetJointsValue(JOINT_2) * RADIAN_TO_DEGREE_FACTOR,
-                    getArmJointsValue(JOINT_2) * RADIAN_TO_DEGREE_FACTOR);
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%f,%f,%f,%f,%f\r\n", behavior_print->behavior,
+            //         behavior_print->last_behavior, *behavior_print->arm_operation_homing_success,
+            //         *behavior_print->gimbal_operation_homing_success, gimbal_print->set_gimbal_angle.deg,
+            //         gimbal_print->gimbal_angle.deg, rflMotorGetAngle(&gimbal_print->yaw_motor,
+            //         RFL_ANGLE_FORMAT_DEGREE), getArmSetJointsValue(JOINT_2) * RADIAN_TO_DEGREE_FACTOR,
+            //         getArmJointsValue(JOINT_2) * RADIAN_TO_DEGREE_FACTOR);
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
             //         can_is_primary_transmit_buffer_full(HPM_CAN0), can_is_secondary_transmit_buffer_full(HPM_CAN0),
             //         can_is_in_bus_off_mode(HPM_CAN0), can_is_primary_transmit_buffer_full(HPM_CAN1),
@@ -379,6 +379,7 @@ void print_task(void *pvParameters)
             //         detect_error(ARM_JOINT_56_R_DH), detect_error(CHASSIS_MOTOR_0_DH),
             //         detect_error(CHASSIS_MOTOR_1_DH), detect_error(CHASSIS_MOTOR_2_DH),
             //         detect_error(CHASSIS_MOTOR_3_DH));
+            sprintf((char *)test_txt, "%d", behavior_print->visual_aid_ui);
 
             uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),

@@ -121,76 +121,27 @@ void uiSplitLine4Builder(interaction_figure_t *figure, figure_operation_type_e f
 
 /* ================================================================================================================== */
 
-#define GOLD_PRE_AIM_BOX_X_0 (800)
-#define GOLD_PRE_AIM_BOX_X_1 (900)
-#define GOLD_PRE_AIM_BOX_Y_0 (440)
-#define GOLD_PRE_AIM_BOX_Y_1 (640)
-
-#define SILVER_PRE_AIM_BOX_X_0 (800)
-#define SILVER_PRE_AIM_BOX_X_1 (900)
-#define SILVER_PRE_AIM_BOX_Y_0 (540)
-#define SILVER_PRE_AIM_BOX_Y_1 (640)
-
-#define AUTO_SILVER_MINING_AID_BOX_X_0 (900)
-#define AUTO_SILVER_MINING_AID_BOX_X_1 (1080)
-#define AUTO_SILVER_MINING_AID_BOX_Y_0 (630)
-#define AUTO_SILVER_MINING_AID_BOX_Y_1 (740)
+#define AUTO_SILVER_MINING_AID_BOX_X_0 (726)
+#define AUTO_SILVER_MINING_AID_BOX_X_1 (1021)
+#define AUTO_SILVER_MINING_AID_BOX_Y_0 (560)
+#define AUTO_SILVER_MINING_AID_BOX_Y_1 (717)
 
 void uiVauAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    if (getVisualAidUi() == VAU_GOLD_PRE)
-    {
-        uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 3, GOLD_PRE_AIM_BOX_X_1, GOLD_PRE_AIM_BOX_X_1,
-                   GOLD_PRE_AIM_BOX_Y_0, GOLD_PRE_AIM_BOX_Y_1);
-    }
-    else if (getVisualAidUi() == VAU_SILVER_PRE)
-    {
-        uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 3, SILVER_PRE_AIM_BOX_X_1,
-                   SILVER_PRE_AIM_BOX_X_1, SILVER_PRE_AIM_BOX_Y_0, SILVER_PRE_AIM_BOX_Y_1);
-    }
-    else
-    {
-        uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
-                   AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_1, AUTO_SILVER_MINING_AID_BOX_Y_1);
-    }
+    uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 2, AUTO_SILVER_MINING_AID_BOX_X_0,
+               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_1, AUTO_SILVER_MINING_AID_BOX_Y_1);
 }
 
 void uiVauAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    if (getVisualAidUi() == VAU_GOLD_PRE)
-    {
-        uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 3, GOLD_PRE_AIM_BOX_X_0, GOLD_PRE_AIM_BOX_X_1,
-                   GOLD_PRE_AIM_BOX_Y_0, GOLD_PRE_AIM_BOX_Y_0);
-    }
-    else if (getVisualAidUi() == VAU_SILVER_PRE)
-    {
-        uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 3, SILVER_PRE_AIM_BOX_X_0,
-                   SILVER_PRE_AIM_BOX_X_1, SILVER_PRE_AIM_BOX_Y_0, SILVER_PRE_AIM_BOX_Y_0);
-    }
-    else
-    {
-        uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_0,
-                   AUTO_SILVER_MINING_AID_BOX_X_0, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
-    }
+    uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 2, AUTO_SILVER_MINING_AID_BOX_X_0,
+               AUTO_SILVER_MINING_AID_BOX_X_0, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
 }
 
 void uiVauAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    if (getVisualAidUi() == VAU_GOLD_PRE)
-    {
-        uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 3, GOLD_PRE_AIM_BOX_X_0, GOLD_PRE_AIM_BOX_X_1,
-                   GOLD_PRE_AIM_BOX_Y_1, GOLD_PRE_AIM_BOX_Y_1);
-    }
-    else if (getVisualAidUi() == VAU_SILVER_PRE)
-    {
-        uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 3, SILVER_PRE_AIM_BOX_X_0,
-                   SILVER_PRE_AIM_BOX_X_1, SILVER_PRE_AIM_BOX_Y_1, SILVER_PRE_AIM_BOX_Y_1);
-    }
-    else
-    {
-        uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 3, AUTO_SILVER_MINING_AID_BOX_X_1,
-                   AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
-    }
+    uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 2, AUTO_SILVER_MINING_AID_BOX_X_1,
+               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
 }
 
 /* ================================================================================================================== */
@@ -225,17 +176,44 @@ void uiAimSight1Builder(interaction_figure_t *figure, figure_operation_type_e fi
 #define DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0 (232)
 #define DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1 (0)
 
+#define GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_X_0 (1208)
+#define GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_X_1 (1526)
+#define GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_Y_0 (282)
+#define GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_Y_1 (0)
+#define GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_X_0 (1189)
+#define GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_X_1 (1436)
+#define GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0 (267)
+#define GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1 (0)
+
 void uiSafeRightBarrierWarningLineBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sbw", figure_operation_type, 9, FIGURE_GREEN, 5, SAFE_RIGHT_BARRIER_WARNING_LINE_X_0,
-               SAFE_RIGHT_BARRIER_WARNING_LINE_X_1, SAFE_RIGHT_BARRIER_WARNING_LINE_Y_0,
-               SAFE_RIGHT_BARRIER_WARNING_LINE_Y_1);
+    if (checkIfArmGrabbed())
+    {
+        uiPlotLine(figure, "sbw", figure_operation_type, 9, FIGURE_GREEN, 5,
+                   GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_X_0, GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_X_1,
+                   GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_Y_0, GRABBED_SAFE_RIGHT_BARRIER_WARNING_LINE_Y_1);
+    }
+    else
+    {
+        uiPlotLine(figure, "sbw", figure_operation_type, 9, FIGURE_GREEN, 5, SAFE_RIGHT_BARRIER_WARNING_LINE_X_0,
+                   SAFE_RIGHT_BARRIER_WARNING_LINE_X_1, SAFE_RIGHT_BARRIER_WARNING_LINE_Y_0,
+                   SAFE_RIGHT_BARRIER_WARNING_LINE_Y_1);
+    }
 }
 void uiDangerRightBarrierWarningLineBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "dbw", figure_operation_type, 9, FIGURE_ORANGE, 5, DANGER_RIGHT_BARRIER_WARNING_LINE_X_0,
-               DANGER_RIGHT_BARRIER_WARNING_LINE_X_1, DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0,
-               DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1);
+    if (checkIfArmGrabbed())
+    {
+        uiPlotLine(figure, "dbw", figure_operation_type, 9, FIGURE_ORANGE, 5,
+                   GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_X_0, GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_X_1,
+                   GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0, GRABBED_DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1);
+    }
+    else
+    {
+        uiPlotLine(figure, "dbw", figure_operation_type, 9, FIGURE_ORANGE, 5, DANGER_RIGHT_BARRIER_WARNING_LINE_X_0,
+                   DANGER_RIGHT_BARRIER_WARNING_LINE_X_1, DANGER_RIGHT_BARRIER_WARNING_LINE_Y_0,
+                   DANGER_RIGHT_BARRIER_WARNING_LINE_Y_1);
+    }
 }
 
 /* ================================================================================================================== */

@@ -118,12 +118,12 @@ float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_inde
 
 bool checkIfArmInDefaultPose(void)
 {
-    return (fabsf(scara_arm.pose_6d[POSE_X] - 0.45f) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm.pose_6d[POSE_Y] - 0.0f) < TOLERABLE_DISTANCE_DEVIATION &&
+    return (fabsf(scara_arm.pose_6d[POSE_X] - OPERATION_MODE_DEFAULT_X) < 0.1f &&
+            fabsf(scara_arm.pose_6d[POSE_Y] - OPERATION_MODE_DEFAULT_Y) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm.pose_6d[POSE_Z] - OPERATION_MODE_DEFAULT_Z) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm.pose_6d[POSE_YAW] - 0.0f) < TOLERABLE_ANGLE_DEVIATION &&
-            fabsf(scara_arm.pose_6d[POSE_PITCH] - 0.0f) < TOLERABLE_ANGLE_DEVIATION &&
-            fabsf(scara_arm.pose_6d[POSE_ROLL] - 0.0f) < TOLERABLE_ANGLE_DEVIATION);
+            fabsf(scara_arm.pose_6d[POSE_YAW] - OPERATION_MODE_DEFAULT_YAW) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm.pose_6d[POSE_PITCH] - OPERATION_MODE_DEFAULT_PITCH) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm.pose_6d[POSE_ROLL] - OPERATION_MODE_DEFAULT_ROLL) < TOLERABLE_ANGLE_DEVIATION);
 }
 
 bool checkIfArmGrabbed(void)
@@ -180,7 +180,8 @@ void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution)
 {
     scara_arm.solution = solution;
 
-    scara_arm.set_pose_6d[POSE_Z] = ENGINEER_ARM_Z_MAX_DISTANCE;
+    scara_arm.set_pose_6d[POSE_X] = 0.65f;
+    scara_arm.set_pose_6d[POSE_Z] = ENGINEER_ARM_Z_MAX_DISTANCE / 2.0f;
 }
 
 static void arm_init(engineer_scara_arm_s *scara_arm)

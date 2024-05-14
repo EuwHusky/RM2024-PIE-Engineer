@@ -350,28 +350,13 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
          * @brief 切换视觉辅助UI类型
          * 键鼠 Ctrl+Q 触发切换
          */
-        if (checkIfRcKeyFallingEdgeDetected(RC_Q))
+        if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
         {
-            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
-            {
-                if (behavior_manager->visual_aid_ui == VAU_NONE)
-                    behavior_manager->visual_aid_ui = VAU_GOLD_PRE;
-                else if (behavior_manager->visual_aid_ui == VAU_GOLD_PRE)
-                    behavior_manager->visual_aid_ui = VAU_SILVER_PRE;
-                else
-                    behavior_manager->visual_aid_ui = VAU_NONE;
-            }
-            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-            {
-                if (behavior_manager->visual_aid_ui == VAU_NONE)
-                    behavior_manager->visual_aid_ui = VAU_SILVER;
-                else
-                    behavior_manager->visual_aid_ui = VAU_NONE;
-            }
+            if (behavior_manager->visual_aid_ui == VAU_NONE)
+                behavior_manager->visual_aid_ui = VAU_SILVER;
+            else
+                behavior_manager->visual_aid_ui = VAU_NONE;
         }
-        else if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MOVE &&
-                 behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-            behavior_manager->visual_aid_ui = VAU_NONE;
 
         /**
          * @brief 切换机械臂解算
@@ -557,6 +542,16 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     {
         *behavior_manager->storage_pop_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+    }
+
+    /**
+     * @brief 自动清除视觉辅助UI
+     */
+    if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
+        behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_SILVER_MINING &&
+        behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+    {
+        behavior_manager->visual_aid_ui = VAU_NONE;
     }
 
     /**
