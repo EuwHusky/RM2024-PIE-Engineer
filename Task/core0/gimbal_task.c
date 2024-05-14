@@ -154,7 +154,7 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
     // 根据不同模式使用不同控制
 
     if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
-        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.0f);
+        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.4f);
     else if (gimbal->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
              getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
         rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.4f);
@@ -223,17 +223,16 @@ static void gimbal_reset_control(engineer_gimbal_s *gimbal)
     {
         if (gimbal->reset_step == ENGINEER_GIMBAL_RESET_STEP_HOMING)
         {
-            // rflMotorSetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE,
-            //                  rflMotorGetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE) +
-            //                      GIMBAL_YAW_HOMING_STEP_ANGLE);
+            rflMotorSetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE,
+                             rflMotorGetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE) -
+                                 GIMBAL_YAW_HOMING_STEP_ANGLE);
 
-            // if (rflMotorGetTorque(&gimbal->yaw_motor) > GIMBAL_YAW_HOMING_TORQUE_THRESHOLD &&
-            //     fabsf(rflMotorGetSpeed(&gimbal->yaw_motor)) < 0.2f)
-            // {
-            //     rflMotorResetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, GIMBAL_YAW_HOMING_ANGLE, false);
-            //     gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_STARTING;
-            // }
-            gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_STARTING;
+            if (rflMotorGetTorque(&gimbal->yaw_motor) < -GIMBAL_YAW_HOMING_TORQUE_THRESHOLD &&
+                fabsf(rflMotorGetSpeed(&gimbal->yaw_motor)) < 0.2f)
+            {
+                rflMotorResetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, GIMBAL_YAW_HOMING_ANGLE, false);
+                gimbal->reset_step = ENGINEER_GIMBAL_RESET_STEP_STARTING;
+            }
         }
         else if (gimbal->reset_step == ENGINEER_GIMBAL_RESET_STEP_STARTING)
         {
