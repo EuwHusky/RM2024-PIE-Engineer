@@ -115,6 +115,7 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define STORAGE_PUSH_STEP_START (1u)
 #define STORAGE_PUSH_STEP_SLOT (2u)
 #define STORAGE_PUSH_STEP_PUSH_IN (3u)
+#define STORAGE_PUSH_STEP_END (4u)
 
 /* =============================================== 自动控制 取矿参数 =============================================== */
 

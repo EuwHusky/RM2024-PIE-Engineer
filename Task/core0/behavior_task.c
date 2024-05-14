@@ -440,7 +440,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     /* ================================================== 下级模块 ================================================== */
 
     /**
-     * @brief 机械臂吸取工作模式切换
+     * @brief 机械臂吸取工作模式切换/软重启
      * DT7 长拨拨轮触发切换
      */
     behavior_manager->dt7_arm_grab_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
@@ -449,7 +449,10 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         behavior_manager->dt7_arm_grab_trigger_timer++;
         if (behavior_manager->dt7_arm_grab_trigger_timer == 20)
         {
-            behavior_manager->arm_grab = !behavior_manager->arm_grab;
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+                behavior_manager->arm_grab = !behavior_manager->arm_grab;
+            else
+                ppor_sw_reset(HPM_PPOR, 10);
         }
     }
     else
