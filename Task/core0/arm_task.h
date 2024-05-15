@@ -115,7 +115,6 @@ typedef struct EngineerScaraArm
 
     uint16_t joint_6_homing_timer;
     uint8_t silver_mining_step;
-    uint16_t silver_mining_grab_detect_timer;
     uint16_t silver_mining_grab_end_timer;
     uint8_t gold_mining_step;
     uint8_t storage_push_step;

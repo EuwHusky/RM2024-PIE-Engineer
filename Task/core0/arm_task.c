@@ -201,7 +201,6 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
 
     scara_arm->joint_6_homing_timer = 0;
     scara_arm->silver_mining_step = 0;
-    scara_arm->silver_mining_grab_detect_timer = 0;
     scara_arm->silver_mining_grab_end_timer = 0;
     scara_arm->gold_mining_step = 0;
     scara_arm->storage_push_step = 0;
