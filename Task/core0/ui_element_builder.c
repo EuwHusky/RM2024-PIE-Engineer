@@ -121,10 +121,10 @@ void uiSplitLine4Builder(interaction_figure_t *figure, figure_operation_type_e f
 
 /* ================================================================================================================== */
 
-#define AUTO_SILVER_MINING_AID_BOX_X_0 (726)
-#define AUTO_SILVER_MINING_AID_BOX_X_1 (1021)
-#define AUTO_SILVER_MINING_AID_BOX_Y_0 (560)
-#define AUTO_SILVER_MINING_AID_BOX_Y_1 (717)
+#define AUTO_SILVER_MINING_AID_BOX_X_0 (722)
+#define AUTO_SILVER_MINING_AID_BOX_X_1 (1012)
+#define AUTO_SILVER_MINING_AID_BOX_Y_0 (565)
+#define AUTO_SILVER_MINING_AID_BOX_Y_1 (718)
 
 void uiVauAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
