@@ -379,11 +379,11 @@ void print_task(void *pvParameters)
             //         detect_error(ARM_JOINT_56_R_DH), detect_error(CHASSIS_MOTOR_0_DH),
             //         detect_error(CHASSIS_MOTOR_1_DH), detect_error(CHASSIS_MOTOR_2_DH),
             //         detect_error(CHASSIS_MOTOR_3_DH));
-            sprintf((char *)test_txt, "%d", behavior_print->visual_aid_ui);
+            // sprintf((char *)test_txt, "%d", behavior_print->visual_aid_ui);
 
-            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                strlen((char *)test_txt));
+            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+            //                     strlen((char *)test_txt));
         }
 
         /**

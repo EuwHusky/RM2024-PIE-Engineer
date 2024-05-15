@@ -549,9 +549,9 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
             scara_arm->silver_mining_grab_detect_timer = 0;
             scara_arm->silver_mining_grab_end_timer = 0;
 
-            scara_arm->set_pose_6d[POSE_X] = scara_arm->pose_6d[POSE_X] - 0.07f;
+            scara_arm->set_pose_6d[POSE_X] = scara_arm->pose_6d[POSE_X] - 0.06f;
             scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.2f;
-            scara_arm->set_pose_6d[POSE_PITCH] = scara_arm->pose_6d[POSE_PITCH] + 6.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_PITCH] = scara_arm->pose_6d[POSE_PITCH] + 8.0f * DEGREE_TO_RADIAN_FACTOR;
 
             scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
         }
