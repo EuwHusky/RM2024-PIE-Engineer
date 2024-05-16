@@ -430,7 +430,7 @@ static void move_homing_control(engineer_scara_arm_s *scara_arm)
         scara_arm->set_pose_6d[POSE_Z] = 0.0f;
         scara_arm->set_pose_6d[POSE_YAW] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
         scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
-        scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
+        scara_arm->set_pose_6d[POSE_ROLL] = 90.0f * DEGREE_TO_RADIAN_FACTOR;
     }
     else
     {
@@ -547,15 +547,24 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
             ;
 
-        scara_arm->set_pose_6d[POSE_Z] += 0.001f;
+        if (scara_arm->pose_6d[POSE_Z] < 0.32f)
+        {
+            scara_arm->set_pose_6d[POSE_Z] += 0.0006f;
+        }
+        else if (scara_arm->pose_6d[POSE_Z] < 0.43f)
+        {
+            scara_arm->set_pose_6d[POSE_Z] += 0.0004f;
+        }
 
-        if (scara_arm->pose_6d[POSE_Z] > 0.45f)
+        if (scara_arm->pose_6d[POSE_Z] > 0.42f)
         {
             scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
         }
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_WAIT)
     {
+        scara_arm->set_pose_6d[POSE_Z] += ((float)getRcMouseZ() * 0.00004);
+
         if (checkIfRcKeyFallingEdgeDetected(RC_LEFT) &&
             fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
         {
