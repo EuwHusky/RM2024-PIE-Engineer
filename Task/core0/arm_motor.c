@@ -301,6 +301,20 @@ void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm)
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
     }
+    else if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
+    {
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.6f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.6f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 2.4f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 2.4f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+    }
     else if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
     {
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT],

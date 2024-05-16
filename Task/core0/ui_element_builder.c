@@ -84,11 +84,7 @@ void uiStorageBackUsedBuilder(interaction_figure_t *figure, figure_operation_typ
 
 void uiSplitLine2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sp2", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 564, 564);
-}
-void uiSplitLine3Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
-{
-    uiPlotLine(figure, "sp3", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 554, 554);
+    uiPlotLine(figure, "sp2", figure_operation_type, 9, FIGURE_PINK, 7, 1830, 1880, 559, 559);
 }
 
 /* ================================================================================================================== */
@@ -109,7 +105,7 @@ void uiVtlinkIndicatorBuilder(interaction_figure_t *figure, figure_operation_typ
 
 void uiSplitLine4Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sp4", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1840, 1870, 444, 444);
+    uiPlotLine(figure, "sp4", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1830, 1880, 444, 444);
 }
 
 /* ================================================================================================================== */
@@ -120,11 +116,15 @@ void uiMotorStatusIndicatorBuilder(interaction_figure_t *figure, figure_operatio
                     checkIfMotorFailureDetected() ? FIGURE_ORANGE : FIGURE_GREEN, 9, 1840, 1870, 394, 424);
 }
 
-/* ================================================================================================================== */
-
-void uiSplitLine5Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+/**
+ * @brief 其实是用来让操作手看图传对没对准的竖线
+ *
+ * @param figure
+ * @param figure_operation_type
+ */
+void uiSplitLine3Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "sp5", figure_operation_type, 9, FIGURE_MAJOR_COLOR, 7, 1890, 1890, 384, 844);
+    uiPlotLine(figure, "sp3", figure_operation_type, 9, FIGURE_PINK, 3, 622, 622, 511, 597);
 }
 
 /* ================================================================================================================== */
@@ -236,4 +236,27 @@ void uiLifterRightMotorOverheatWarningBuilder(interaction_figure_t *figure,
         (uint32_t)rflFloatLoopConstrain(
             getArmMotorTemperature(MOTOR_JOINT1_RIGHT) / LIFTER_MOTORS_MAX_TEMPERATURE * 360.0f + 180.0f, 0.0f, 360.0f),
         24, 24);
+}
+
+/* ================================================================================================================== */
+
+void uiPushInOvertimeBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    if (fabsf(getArmJointsValue(JOINT_6)) * RADIAN_TO_DEGREE_FACTOR > 1.0f)
+    {
+        uiPlotArc(figure, "pot", figure_operation_type, 9, FIGURE_ORANGE, 7, 960, 540,
+                  (uint32_t)(getArmJointsValue(JOINT_6) >= 0.0f
+                                 ? 0.0f
+                                 : rflFloatLoopConstrain(getArmJointsValue(JOINT_6) * RADIAN_TO_DEGREE_FACTOR * 18.0f,
+                                                         0.0f, 360.0f)),
+                  (uint32_t)(getArmJointsValue(JOINT_6) >= 0.0f
+                                 ? rflFloatLoopConstrain(getArmJointsValue(JOINT_6) * RADIAN_TO_DEGREE_FACTOR * 18.0f,
+                                                         0.0f, 360.0f)
+                                 : 0.0f),
+                  48, 48);
+    }
+    else
+    {
+        uiPlotArc(figure, "pot", figure_operation_type, 9, FIGURE_ORANGE, 7, 960, 540, 359, 1, 48, 48);
+    }
 }

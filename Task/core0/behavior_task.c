@@ -151,13 +151,11 @@ static void update_behavior(engineer_behavior_manager_s *behavior_manager, engin
     behavior_manager->last_behavior = behavior_manager->behavior;
     behavior_manager->behavior = new_behavior;
 
-    if (new_behavior == ENGINEER_BEHAVIOR_DISABLE)
-    {
-        behavior_manager->pump_flag = 0;
+    if (new_behavior == ENGINEER_BEHAVIOR_DISABLE || new_behavior == ENGINEER_BEHAVIOR_MOVE)
+        behavior_manager->buzzer_beep = true;
 
-        if (new_behavior == ENGINEER_BEHAVIOR_MOVE)
-            behavior_manager->buzzer_beep = true;
-    }
+    if (new_behavior == ENGINEER_BEHAVIOR_DISABLE)
+        behavior_manager->pump_flag = 0;
 }
 
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager)

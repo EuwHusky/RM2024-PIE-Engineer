@@ -16,6 +16,7 @@
 #include "ui_element_builder.h"
 
 #include "INS_task.h"
+#include "arm_task.h"
 #include "behavior_task.h"
 #include "detect_task.h"
 
@@ -91,7 +92,7 @@ void referee_task(void *pvParameters)
     refereeSetRobotInteractionFigureBuilder(VAU_AID_0_UI_INDEX, uiVauAid0Builder);
     refereeSetRobotInteractionFigureBuilder(VAU_AID_1_UI_INDEX, uiVauAid1Builder);
     refereeSetRobotInteractionFigureBuilder(VAU_AID_2_UI_INDEX, uiVauAid2Builder);
-    refereeSetRobotInteractionFigureBuilder(10, uiSplitLine5Builder);
+    refereeSetRobotInteractionFigureBuilder(STORAGE_PUSH_IN_OVERTIME_UI_INDEX, uiPushInOvertimeBuilder);
     refereeSetRobotInteractionFigureBuilder(VT_LINK_INDICATOR_UI_INDEX, uiVtlinkIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
                                             uiSafeRightBarrierWarningLineBuilder);
@@ -179,6 +180,8 @@ static void client_ui(void)
         refereeClientUiOperate(UI_DISPLAY_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
         refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
         refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
+
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, 19);
     }
     else
     {
@@ -186,6 +189,8 @@ static void client_ui(void)
         refereeClientUiOperate(UI_HIDE_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
+
+        refereeClientUiOperate(UI_HIDE_FIGURE, 19);
     }
 
     if (getVisualAidUi() == VAU_NONE)
@@ -199,6 +204,15 @@ static void client_ui(void)
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_0_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_1_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_2_UI_INDEX);
+    }
+
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && checkIfStoragePushInOverTime())
+    {
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, STORAGE_PUSH_IN_OVERTIME_UI_INDEX);
+    }
+    else
+    {
+        refereeClientUiOperate(UI_HIDE_FIGURE, STORAGE_PUSH_IN_OVERTIME_UI_INDEX);
     }
 }
 

@@ -121,6 +121,7 @@ typedef struct EngineerScaraArm
     uint8_t gold_mining_step;
     uint8_t storage_push_step;
     uint16_t storage_push_end_timer;
+    uint16_t storage_push_overtime_timer;
     uint8_t storage_pop_step;
 
     float silver_mining_pose_memory[6]; // 机械臂位置记忆
@@ -206,6 +207,7 @@ extern float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e mot
 extern bool checkIfArmInDefaultPose(void);
 extern bool checkIfArmGrabbed(void);
 extern bool checkIfLifterMotorOverheat(void);
+extern bool checkIfStoragePushInOverTime(void);
 
 extern bool *getArmResetStatus(void);
 extern bool *getArmMoveHomingStatue(void);
@@ -329,13 +331,13 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_IOUT (8000.0f)
 #define ENGINEER_ARM_JOINT_1_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
 
-#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KP (1.2f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KP (1.35f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KI (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_KD (0.002f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_IOUT (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_ANGLE_PID_MAX_OUT (16.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KP (1200.0f)
-#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (1.2f)
+#define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KI (1.35f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_IOUT (6000.0f)
 #define ENGINEER_ARM_JOINT_4_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
