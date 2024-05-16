@@ -60,6 +60,7 @@ typedef struct RemoteControl
 {
     remote_control_status_e status;
     bool use_vt_link_control;
+    bool vt_link_status;
 
     rfl_dt7_dr16_data_s dt7_dr16_data;
     const vt_link_remote_control_t *vt_link_data;
@@ -77,6 +78,7 @@ extern void RemoteControlInit(void);
 extern void RemoteControlUpdate(bool is_dt7_connected, bool is_vt_connected);
 
 extern remote_control_status_e getRemoteControlStatus(void);
+extern bool getVtLinkStatus(void);
 
 extern int16_t getRcMouseX(void);
 extern int16_t getRcMouseY(void);

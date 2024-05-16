@@ -30,6 +30,8 @@ void RemoteControlUpdate(bool is_dt7_connected, bool is_vt_connected)
 
     remote_control.use_vt_link_control = is_dt7_connected ? false : true;
 
+    remote_control.vt_link_status = is_vt_connected;
+
     // 常规遥控控制器
 
     if (remote_control.use_vt_link_control)
@@ -127,6 +129,11 @@ void RemoteControlUpdate(bool is_dt7_connected, bool is_vt_connected)
 remote_control_status_e getRemoteControlStatus(void)
 {
     return remote_control.status;
+}
+
+bool getVtLinkStatus(void)
+{
+    return remote_control.vt_link_status;
 }
 
 int16_t getRcMouseX(void)

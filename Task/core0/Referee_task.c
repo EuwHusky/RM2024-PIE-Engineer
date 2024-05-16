@@ -91,8 +91,8 @@ void referee_task(void *pvParameters)
     refereeSetRobotInteractionFigureBuilder(VAU_AID_0_UI_INDEX, uiVauAid0Builder);
     refereeSetRobotInteractionFigureBuilder(VAU_AID_1_UI_INDEX, uiVauAid1Builder);
     refereeSetRobotInteractionFigureBuilder(VAU_AID_2_UI_INDEX, uiVauAid2Builder);
-    refereeSetRobotInteractionFigureBuilder(AIM_SIGHT_0_UI_INDEX, uiAimSight0Builder);
-    refereeSetRobotInteractionFigureBuilder(AIM_SIGHT_1_UI_INDEX, uiAimSight1Builder);
+    refereeSetRobotInteractionFigureBuilder(10, uiSplitLine5Builder);
+    refereeSetRobotInteractionFigureBuilder(VT_LINK_INDICATOR_UI_INDEX, uiVtlinkIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
                                             uiSafeRightBarrierWarningLineBuilder);
     refereeSetRobotInteractionFigureBuilder(DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
@@ -102,7 +102,7 @@ void referee_task(void *pvParameters)
     refereeSetRobotInteractionFigureBuilder(LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
                                             uiLifterRightMotorOverheatWarningBuilder);
     refereeSetRobotInteractionFigureBuilder(16, uiSplitLine2Builder);
-    refereeSetRobotInteractionFigureBuilder(VT_LINK_INDICATOR_UI_INDEX, uiVtlinkIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(DT7_DR16_LINK_INDICATOR_UI_INDEX, uiDt7Dr16linkIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(MOTOR_STATUS_INDICATOR_UI_INDEX, uiMotorStatusIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(19, uiSplitLine3Builder);
     refereeSetRobotInteractionFigureBuilder(20, uiSplitLine4Builder);
@@ -199,18 +199,6 @@ static void client_ui(void)
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_0_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_1_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_2_UI_INDEX);
-    }
-
-    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
-        getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
-    {
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, AIM_SIGHT_0_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, AIM_SIGHT_1_UI_INDEX);
-    }
-    else
-    {
-        refereeClientUiOperate(UI_HIDE_FIGURE, AIM_SIGHT_0_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, AIM_SIGHT_1_UI_INDEX);
     }
 }
 
