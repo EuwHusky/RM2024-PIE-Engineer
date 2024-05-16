@@ -259,10 +259,13 @@ static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm)
 
     // 执行
 
-    gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN,
-                   getArmGrabMode() ? 1 : 0); // 气泵
-    gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN,
-                   getArmGrabMode() ? 0 : 1); // 电磁阀
+    if (scara_arm->behavior != ENGINEER_BEHAVIOR_DISABLE)
+    {
+        gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN,
+                       getArmGrabMode() ? 1 : 0); // 气泵
+        gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN,
+                       getArmGrabMode() ? 0 : 1); // 电磁阀
+    }
 }
 
 static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)

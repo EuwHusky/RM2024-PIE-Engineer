@@ -90,6 +90,9 @@ typedef struct EngineerBehaviorManager
     uint32_t dt7_arm_switch_trigger_timer; // 使用DT7切换机械臂解算的触发计时器
     uint32_t km_reboot_trigger_timer;      // 使用键鼠重启的触发计时器
 
+    /* 给检录时用来快捷开气路的几把玩意 */
+    uint8_t pump_flag;
+
 } engineer_behavior_manager_s;
 
 extern void behavior_task(void *pvParameters);

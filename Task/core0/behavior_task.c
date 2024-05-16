@@ -151,8 +151,13 @@ static void update_behavior(engineer_behavior_manager_s *behavior_manager, engin
     behavior_manager->last_behavior = behavior_manager->behavior;
     behavior_manager->behavior = new_behavior;
 
-    if (new_behavior == ENGINEER_BEHAVIOR_DISABLE || new_behavior == ENGINEER_BEHAVIOR_MOVE)
-        behavior_manager->buzzer_beep = true;
+    if (new_behavior == ENGINEER_BEHAVIOR_DISABLE)
+    {
+        behavior_manager->pump_flag = 0;
+
+        if (new_behavior == ENGINEER_BEHAVIOR_MOVE)
+            behavior_manager->buzzer_beep = true;
+    }
 }
 
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager)
@@ -430,20 +435,21 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     /* ================================================== 下级模块 ================================================== */
 
     /**
-     * @brief 机械臂吸取工作模式切换/软重启
+     * @brief 快捷气路控制
      * DT7 长拨拨轮触发切换
      */
     behavior_manager->dt7_arm_grab_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
-    if (behavior_manager->dt7_arm_grab_trigger_value < -600 && behavior_manager->behavior != ENGINEER_BEHAVIOR_DISABLE)
+    if (behavior_manager->dt7_arm_grab_trigger_value < -600 && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
     {
         behavior_manager->dt7_arm_grab_trigger_timer++;
         if (behavior_manager->dt7_arm_grab_trigger_timer == 20)
         {
-            behavior_manager->arm_grab = !behavior_manager->arm_grab;
+            behavior_manager->pump_flag = ((behavior_manager->pump_flag >= 3) ? 0 : behavior_manager->pump_flag + 1);
         }
     }
     else
         behavior_manager->dt7_arm_grab_trigger_timer = 0;
+
     /**
      * @brief 机械臂吸取工作模式切换
      * 键鼠 短按R键触发切换
@@ -580,7 +586,7 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     }
 
     /**
-     * @brief 检测被下电 直接软复位防止疯车
+     * @brief 检测被裁判系统下电 直接软复位以防止疯车
      */
     if (behavior_manager->robot_survival_status && *behavior_manager->arm_started &&
         *behavior_manager->chassis_started && *behavior_manager->gimbal_started)
@@ -609,6 +615,30 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     else
     {
         behavior_manager->motor_failure_detect_timer = 0;
+    }
+
+    /**
+     * @brief 快捷气路控制
+     */
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    {
+        // 机械臂
+        gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN,
+                       behavior_manager->pump_flag == 1 ? 1 : 0); // 气泵
+        gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN,
+                       behavior_manager->pump_flag == 1 ? 0 : 1); // 电磁阀
+        // 前储矿
+        gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_FRONT_PUMP_GPIO_PORT, ENGINEER_STORAGE_FRONT_PUMP_GPIO_PIN,
+                       behavior_manager->pump_flag == 2 ? 1 : 0); // 气泵
+        gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PORT,
+                       ENGINEER_STORAGE_FRONT_RELIEF_VALVE_GPIO_PIN,
+                       behavior_manager->pump_flag == 2 ? 0 : 1); // 电磁阀
+        // 后储矿
+        gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_PUMP_GPIO_PORT, ENGINEER_STORAGE_BACK_PUMP_GPIO_PIN,
+                       behavior_manager->pump_flag == 3 ? 1 : 0); // 气泵
+        gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PORT,
+                       ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PIN,
+                       behavior_manager->pump_flag == 3 ? 0 : 1); // 电磁阀
     }
 }
 

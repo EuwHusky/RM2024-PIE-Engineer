@@ -3,7 +3,6 @@
 #include "drv_delay.h"
 
 #include "INS_task.h"
-#include "behavior_task.h"
 
 #define USED_DETECT_TIMER_THRESHOLD_VALUE (10)
 #define EMPTY_DETECT_TIMER_THRESHOLD_VALUE (10)
@@ -232,6 +231,9 @@ static void storage_init(engineer_storage_s *storage)
 
 static void storage_update(engineer_storage_s *storage)
 {
+    storage->last_behavior = storage->behavior;
+    storage->behavior = getEngineerCurrentBehavior();
+
     // 更新槽位矿石状态
     for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
     {
@@ -273,7 +275,8 @@ static void storage_update(engineer_storage_s *storage)
 
     // 失能时关闭并重置储矿功能
 
-    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_DISABLE)
+    if (storage->last_behavior != storage->behavior && storage->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    {
         for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
         {
             storage->storage_slot_status[i] = STORAGE_SLOT_EMPTY;
@@ -281,6 +284,7 @@ static void storage_update(engineer_storage_s *storage)
             storage->empty_detect_timer[i] = 0;
             storage->used_detect_timer[i] = 0;
         }
+    }
 
     // 计算已使用槽位数量
 
@@ -292,24 +296,17 @@ static void storage_update(engineer_storage_s *storage)
 
 static void storage_execute(engineer_storage_s *storage)
 {
-    for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+    if (storage->behavior != ENGINEER_BEHAVIOR_DISABLE)
     {
-        // // 气泵
-        // gpio_write_pin(HPM_GPIO0, storage->gpio_port[i][ENGINEER_STORAGE_POWER],
-        //                storage->gpio_pin[i][ENGINEER_STORAGE_POWER],
-        //                getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_DISABLE ? 0 : 1);
+        for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+        {
+            // 气泵
+            gpio_write_pin(HPM_GPIO0, storage->gpio_port[i][ENGINEER_STORAGE_POWER],
+                           storage->gpio_pin[i][ENGINEER_STORAGE_POWER], storage->storage_slot_needed[i] ? 1 : 0);
 
-        // // 卸力阀
-        // gpio_write_pin(ENGINEER_STORAGE_GPIO, storage->gpio_port[i][ENGINEER_STORAGE_RELIEF],
-        //                storage->gpio_pin[i][ENGINEER_STORAGE_RELIEF],
-        //                getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_DISABLE ? 1 : 0);
-
-        // 气泵
-        gpio_write_pin(HPM_GPIO0, storage->gpio_port[i][ENGINEER_STORAGE_POWER],
-                       storage->gpio_pin[i][ENGINEER_STORAGE_POWER], storage->storage_slot_needed[i] ? 1 : 0);
-
-        // 卸力阀
-        gpio_write_pin(ENGINEER_STORAGE_GPIO, storage->gpio_port[i][ENGINEER_STORAGE_RELIEF],
-                       storage->gpio_pin[i][ENGINEER_STORAGE_RELIEF], storage->storage_slot_needed[i] ? 0 : 1);
+            // 卸力阀
+            gpio_write_pin(ENGINEER_STORAGE_GPIO, storage->gpio_port[i][ENGINEER_STORAGE_RELIEF],
+                           storage->gpio_pin[i][ENGINEER_STORAGE_RELIEF], storage->storage_slot_needed[i] ? 0 : 1);
+        }
     }
 }

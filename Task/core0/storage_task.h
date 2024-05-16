@@ -4,6 +4,8 @@
 #include "stdbool.h"
 #include "stdint.h"
 
+#include "behavior_task.h"
+
 #define STORAGE_MAX_LIMIT 2
 
 typedef enum EngineerStorageStatus
@@ -40,6 +42,9 @@ typedef enum EngineerStorageOperation
 
 typedef struct EngineerStorage
 {
+    engineer_behavior_e behavior;
+    engineer_behavior_e last_behavior;
+
     engineer_storage_slot_index_e current_target_slot;
 
     uint8_t storage_used_num;
