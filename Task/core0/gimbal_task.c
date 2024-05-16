@@ -34,7 +34,11 @@ void gimbal_task(void *pvParameters)
         rflOsDelayMs(10);
     rflOsDelayMs(2000);
 
+    gimbal.started = false;
+
     gimbal_init(&gimbal);
+
+    gimbal.started = true;
 
     while (1)
     {
@@ -49,6 +53,11 @@ void gimbal_task(void *pvParameters)
 const engineer_gimbal_s *getGimbalDataPointer(void)
 {
     return &gimbal;
+}
+
+bool *getGimbalStartedFlag(void)
+{
+    return &gimbal.started;
 }
 
 bool *getGimbalResetStatus(void)

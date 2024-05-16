@@ -10,6 +10,7 @@
 
 #include "INS_task.h"
 #include "arm_task.h"
+#include "chassis_task.h"
 #include "detect_task.h"
 #include "gimbal_task.h"
 #include "storage_task.h"
@@ -110,6 +111,10 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
 
     behavior_manager->behavior = ENGINEER_BEHAVIOR_DISABLE;
     behavior_manager->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
+
+    behavior_manager->arm_started = getArmStartedFlag();
+    behavior_manager->chassis_started = getChassisStartedFlag();
+    behavior_manager->gimbal_started = getGimbalStartedFlag();
 
     behavior_manager->robot_survival_status = false;
     behavior_manager->last_robot_survival_status = false;
@@ -429,15 +434,12 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * DT7 长拨拨轮触发切换
      */
     behavior_manager->dt7_arm_grab_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
-    if (behavior_manager->dt7_arm_grab_trigger_value < -600)
+    if (behavior_manager->dt7_arm_grab_trigger_value < -600 && behavior_manager->behavior != ENGINEER_BEHAVIOR_DISABLE)
     {
         behavior_manager->dt7_arm_grab_trigger_timer++;
         if (behavior_manager->dt7_arm_grab_trigger_timer == 20)
         {
-            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-                behavior_manager->arm_grab = !behavior_manager->arm_grab;
-            else
-                ppor_sw_reset(HPM_PPOR, 10);
+            behavior_manager->arm_grab = !behavior_manager->arm_grab;
         }
     }
     else
@@ -446,7 +448,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 机械臂吸取工作模式切换
      * 键鼠 短按R键触发切换
      */
-    if (checkIfRcKeyFallingEdgeDetected(RC_R))
+    if (checkIfRcKeyFallingEdgeDetected(RC_R) && behavior_manager->behavior != ENGINEER_BEHAVIOR_DISABLE)
     {
         behavior_manager->arm_grab = !behavior_manager->arm_grab;
     }
@@ -575,6 +577,21 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
         can_reset(BOARD_CAN2, false);
         can_reset(BOARD_CAN3, false);
         can_reset(BOARD_CAN4, false);
+    }
+
+    /**
+     * @brief 检测被下电 直接软复位防止疯车
+     */
+    if (behavior_manager->robot_survival_status && *behavior_manager->arm_started &&
+        *behavior_manager->chassis_started && *behavior_manager->gimbal_started)
+    {
+        for (uint8_t i = ARM_JOINT_1_L_DH; i <= GIMBAL_MOTOR_YAW_DH; i++)
+        {
+            if (!detect_error(i))
+                break;
+            if (i == GIMBAL_MOTOR_YAW_DH)
+                ppor_sw_reset(HPM_PPOR, 10);
+        }
     }
 
     /**

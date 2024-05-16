@@ -39,6 +39,10 @@ typedef struct EngineerBehaviorManager
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
 
+    bool *arm_started;
+    bool *chassis_started;
+    bool *gimbal_started;
+
     /* 机器人状态 */
 
     bool robot_survival_status; // 存活为真

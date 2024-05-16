@@ -12,6 +12,8 @@
 
 typedef struct EngineerGimbal
 {
+    bool started;
+
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
 
@@ -31,6 +33,8 @@ typedef struct EngineerGimbal
 
 extern void gimbal_task(void *pvParameters);
 extern const engineer_gimbal_s *getGimbalDataPointer(void);
+
+extern bool *getGimbalStartedFlag(void);
 
 extern bool *getGimbalResetStatus(void);
 extern bool *getGimbalMoveHomingStatus(void);

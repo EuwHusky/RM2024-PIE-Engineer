@@ -53,7 +53,11 @@ void arm_task(void *pvParameters)
         rflOsDelayMs(2);
     rflOsDelayMs(30);
 
+    scara_arm.started = false;
+
     arm_init(&scara_arm);
+
+    scara_arm.started = true;
 
     vt_uart_init(); // 初始化图传链路串口
 
@@ -94,6 +98,11 @@ void arm_task(void *pvParameters)
 engineer_scara_arm_s *getArmDataPointer(void)
 {
     return &scara_arm;
+}
+
+bool *getArmStartedFlag(void)
+{
+    return &scara_arm.started;
 }
 
 float getArmTargetDirection(void)
@@ -227,7 +236,7 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[5], 0.03f, 0.97f);
 
     // 气泵
-    HPM_IOC->PAD[IOC_PAD_PB31].FUNC_CTL = IOC_PB31_FUNC_CTL_GPIO_B_31;
+    HPM_IOC->PAD[IOC_PAD_PA25].FUNC_CTL = IOC_PA25_FUNC_CTL_GPIO_A_25;
     gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN, 0);
 
     // 卸力阀
@@ -263,13 +272,7 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
     if (scara_arm->joint_6_encoder_value = MA600_read_with_check(&is_error), is_error == false)
     {
         scara_arm->joint_6_encoder_angle = (float)scara_arm->joint_6_encoder_value * 0.005493248f;
-        // rflSlidingWindowFilterCalc(&scara_arm->joint_6_encoder_angle_filter,
-        //                            rflFloatLoopConstrain(((float)scara_arm->joint_6_encoder_value * 0.005493248f) -
-        //                                                      180.0f - ENGINEER_ARM_JOINT_6_ENCODER_ANGLE_OFFSET,
-        //                                                  -DEG_PI, DEG_PI));
     }
-
-    // scara_arm->joint_6_encoder_angle = 0.0f; // 还没装磁编，暂时这样，记得删
 }
 
 /*图传链路串口初始化**/

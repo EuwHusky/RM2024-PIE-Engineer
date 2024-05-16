@@ -98,12 +98,14 @@ typedef enum EngineerScaraArmSolution
 
 typedef struct EngineerScaraArm
 {
-    /* 行为 */
+    bool started;
 
-    bool grabbed;
+    /* 行为 */
 
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
+
+    bool grabbed;
 
     uint16_t start_up_status;
     bool reset_success;
@@ -193,6 +195,8 @@ typedef struct EngineerScaraArm
 
 extern void arm_task(void *pvParameters);
 extern engineer_scara_arm_s *getArmDataPointer(void);
+
+extern bool *getArmStartedFlag(void);
 
 extern float getArmTargetDirection(void);
 extern float getArmJointsValue(engineer_scara_arm_joints_e joint);
@@ -354,8 +358,8 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 #define ENGINEER_ARM_JOINTS_456_RM_MOTORS_CAN_SLAVE_ID (0x200)
 
 // 气泵&电磁阀&气压传感器端口定义
-#define ENGINEER_ARM_PUMP_GPIO_PORT (GPIO_DO_GPIOB)
-#define ENGINEER_ARM_PUMP_GPIO_PIN (31)
+#define ENGINEER_ARM_PUMP_GPIO_PORT (GPIO_DO_GPIOA)
+#define ENGINEER_ARM_PUMP_GPIO_PIN (25)
 #define ENGINEER_ARM_VALVE_GPIO_PORT (GPIO_DO_GPIOA)
 #define ENGINEER_ARM_VALVE_GPIO_PIN (31)
 #define ENGINEER_ARM_SENSOR_GPIO_PORT (GPIO_DO_GPIOA)

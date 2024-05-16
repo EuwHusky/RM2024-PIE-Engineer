@@ -35,7 +35,11 @@ void chassis_task(void *pvParameters)
         rflOsDelayMs(2);
     rflOsDelayMs(60);
 
+    chassis.started = false;
+
     chassis_init(&chassis);
+
+    chassis.started = true;
 
     while (1)
     {
@@ -50,6 +54,11 @@ void chassis_task(void *pvParameters)
 engineer_chassis_s *getChassisDataPointer(void)
 {
     return &chassis;
+}
+
+bool *getChassisStartedFlag(void)
+{
+    return &chassis.started;
 }
 
 float getChassisFollowOffsetMemory(void)

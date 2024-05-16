@@ -16,6 +16,8 @@
 
 typedef struct EngineerChassis
 {
+    bool started;
+
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
 
@@ -38,6 +40,8 @@ typedef struct EngineerChassis
 
 extern void chassis_task(void *pvParameters);
 extern engineer_chassis_s *getChassisDataPointer(void);
+
+extern bool *getChassisStartedFlag(void);
 
 extern float getChassisFollowOffsetMemory(void);
 
