@@ -743,7 +743,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
             scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
-            scara_arm->set_pose_6d[POSE_PITCH] = ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_PITCH] = (ENGINEER_ARM_PITCH_MIN_ANGLE + 2.0f) * DEGREE_TO_RADIAN_FACTOR;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
@@ -770,7 +770,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
             scara_arm->set_pose_6d[POSE_X] = -0.02f;
-            scara_arm->set_pose_6d[POSE_Z] = getLatestNuggetTypeToGrab() == GOLD_NUGGET ? 0.0f : 0.04f;
+            scara_arm->set_pose_6d[POSE_Z] = getLatestNuggetTypeToGrab() == GOLD_NUGGET ? -0.005f : 0.04f;
         }
         scara_arm->set_pose_6d[POSE_Y] = -0.425f;
     }
@@ -863,7 +863,7 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
             scara_arm->set_pose_6d[POSE_YAW] = -180.0f * DEGREE_TO_RADIAN_FACTOR;
-            scara_arm->set_pose_6d[POSE_PITCH] = ENGINEER_ARM_PITCH_MIN_ANGLE * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_PITCH] = (ENGINEER_ARM_PITCH_MIN_ANGLE + 2.0f) * DEGREE_TO_RADIAN_FACTOR;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
@@ -893,7 +893,7 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
         {
             scara_arm->set_pose_6d[POSE_X] = 0.05f;
             scara_arm->set_pose_6d[POSE_Y] = -0.28f;
-            scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+            scara_arm->set_pose_6d[POSE_Z] = -0.005f;
         }
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_POP_OUT)
