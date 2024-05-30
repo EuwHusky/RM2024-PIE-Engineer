@@ -215,7 +215,7 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
         chassis->follow_offset = -GIMBAL_YAW_START_ANGLE;
     }
 
-    if (chassis->model.mode_ != RFL_CHASSIS_BEHAVIOR_NO_FORCE)
+    if (rflChassisGetBehavior(&chassis->model) != RFL_CHASSIS_BEHAVIOR_NO_FORCE)
     {
         rflChassisSetFollowOffset(&chassis->model, RFL_ANGLE_FORMAT_DEGREE, chassis->follow_offset);
 
