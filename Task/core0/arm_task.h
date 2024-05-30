@@ -223,8 +223,8 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 
 #define ENGINEER_ARM_1_LENGTH (0.276f)  /*第一节小臂臂长*/
 #define ENGINEER_ARM_2_LENGTH (0.3015f) /*第二节小臂臂长*/
-#define ENGINEER_ARM_3_LENGTH (0.07f)   /*第三节小臂臂长*/
-#define ENGINEER_ARM_4_LENGTH (0.145f)  /*第四节小臂臂长*/
+#define ENGINEER_ARM_3_LENGTH (0.08f)   /*第三节小臂臂长*/
+#define ENGINEER_ARM_4_LENGTH (0.1455f) /*第四节小臂臂长*/
 
 /**
  * @brief 抬升链轮半径 单位 mm
@@ -260,8 +260,8 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 #define ENGINEER_ARM_XY24_MAX_DISTANCE (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH) /*关节2到关节4的最大伸展距离*/
 #define ENGINEER_ARM_YAW_MAX_ANGLE (210.0f)                                            /* 末端YAW最大角度 */
 #define ENGINEER_ARM_YAW_MIN_ANGLE (-210.0f)                                           /* 末端YAW最小角度 */
-#define ENGINEER_ARM_PITCH_MAX_ANGLE (48.0f)                                           /* 末端PITCH最大角度 */
-#define ENGINEER_ARM_PITCH_MIN_ANGLE (-83.0f)                                          /* 末端PITCH最小角度 */
+#define ENGINEER_ARM_PITCH_MAX_ANGLE (50.0f)                                           /* 末端PITCH最大角度 */
+#define ENGINEER_ARM_PITCH_MIN_ANGLE (-90.0f)                                          /* 末端PITCH最小角度 */
 #define ENGINEER_ARM_ROLL_MAX_ANGLE (720.0f)                                           /* 末端ROLL最大角度 */
 #define ENGINEER_ARM_ROLL_MIN_ANGLE (-720.0f)                                          /* 末端ROLL最小角度 */
 
@@ -276,8 +276,8 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 #define ENGINEER_ARM_JOINT_2_MIN_ANGLE (-90.0f)
 #define ENGINEER_ARM_JOINT_3_MAX_ANGLE (160.0f)
 #define ENGINEER_ARM_JOINT_3_MIN_ANGLE (-160.0f)
-#define ENGINEER_ARM_JOINT_4_MAX_ANGLE (125.0f)
-#define ENGINEER_ARM_JOINT_4_MIN_ANGLE (-125.0f)
+#define ENGINEER_ARM_JOINT_4_MAX_ANGLE (110.0f)
+#define ENGINEER_ARM_JOINT_4_MIN_ANGLE (-110.0f)
 #define ENGINEER_ARM_JOINT_5_MAX_ANGLE (ENGINEER_ARM_PITCH_MAX_ANGLE)
 #define ENGINEER_ARM_JOINT_5_MIN_ANGLE (ENGINEER_ARM_PITCH_MIN_ANGLE)
 #define ENGINEER_ARM_JOINT_6_MAX_ANGLE (ENGINEER_ARM_ROLL_MAX_ANGLE)
@@ -286,8 +286,8 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 // 关节初始化扩展可达范围 用于启动操作 有一定的危险性
 #define ENGINEER_ARM_JOINT_1_INITIAL_MAX_DISTANCE (ENGINEER_ARM_JOINT_1_MAX_DISTANCE)
 #define ENGINEER_ARM_JOINT_1_INITIAL_MIN_DISTANCE (-ENGINEER_ARM_JOINT_1_MAX_DISTANCE)
-#define ENGINEER_ARM_JOINT_4_INITIAL_MAX_ANGLE (ENGINEER_ARM_JOINT_4_MAX_ANGLE * 2.0f)
-#define ENGINEER_ARM_JOINT_4_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_4_MIN_ANGLE * 2.0f)
+#define ENGINEER_ARM_JOINT_4_INITIAL_MAX_ANGLE (360.0f)
+#define ENGINEER_ARM_JOINT_4_INITIAL_MIN_ANGLE (-360.0f)
 #define ENGINEER_ARM_JOINT_5_INITIAL_MAX_ANGLE (ENGINEER_ARM_JOINT_5_MAX_ANGLE - ENGINEER_ARM_JOINT_5_MIN_ANGLE)
 #define ENGINEER_ARM_JOINT_5_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_5_MIN_ANGLE - ENGINEER_ARM_JOINT_5_MAX_ANGLE)
 
@@ -314,8 +314,8 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
     (ENGINEER_ARM_JOINT_1_INITIAL_MIN_DISTANCE * LIFTER_DISTANCE_TO_DEGREE_FACTOR)
 #define ENGINEER_ARM_JOINT_23_FRONT_MOTOR_INITIAL_MAX_ANGLE (540.0f)
 #define ENGINEER_ARM_JOINT_23_FRONT_MOTOR_INITIAL_MIN_ANGLE (-540.0f)
-#define ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MAX_ANGLE (360.0f)
-#define ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MIN_ANGLE (-360.0f)
+#define ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MAX_ANGLE (ENGINEER_ARM_JOINT_4_INITIAL_MAX_ANGLE)
+#define ENGINEER_ARM_JOINT_4_MOTOR_INITIAL_MIN_ANGLE (ENGINEER_ARM_JOINT_4_INITIAL_MIN_ANGLE)
 #define ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MAX_ANGLE (ENGINEER_ARM_MOTOR_JOINT_56_MAX_ANGLE * 2.0f)
 #define ENGINEER_ARM_JOINT_56_MOTOR_INITIAL_MIN_ANGLE (ENGINEER_ARM_MOTOR_JOINT_56_MIN_ANGLE * 2.0f)
 

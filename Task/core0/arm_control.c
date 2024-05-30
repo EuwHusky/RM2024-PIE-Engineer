@@ -191,9 +191,13 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
              scara_arm->joint_23_front_motor_angle_offset) *
                 RADIAN_TO_DEGREE_FACTOR <
             -160.0f)
+        {
             scara_arm->set_joints_value[JOINT_2] = scara_arm->joints_value[JOINT_2];
+        }
         else if (checkIfJointNotStartUp(JOINT_4, scara_arm->start_up_status))
+        {
             scara_arm->set_joints_value[JOINT_2] = JOINT_2_START_WAIT_ANGLE * DEGREE_TO_RADIAN_FACTOR;
+        }
         else
         {
             scara_arm->set_joints_value[JOINT_2] = JOINT_2_START_ANGLE * DEGREE_TO_RADIAN_FACTOR;
@@ -255,16 +259,18 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     {
         if ((rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN) +
              scara_arm->joint_23_front_motor_angle_offset) *
-                RADIAN_TO_DEGREE_FACTOR <
-            -160.0f)
+                RADIAN_TO_DEGREE_FACTOR >
+            160.0f)
+        {
             scara_arm->set_joints_value[JOINT_4] = scara_arm->joints_value[JOINT_4];
+        }
         else
         {
             if (checkIfJointNotStartUp(JOINT_4 + JOINTS_START_UP_STEP1_BIT_OFFSET, scara_arm->start_up_status))
             {
-                scara_arm->set_joints_value[JOINT_4] -= JOINT_4_HOMING_STEP_ANGLE;
+                scara_arm->set_joints_value[JOINT_4] += JOINT_4_HOMING_STEP_ANGLE;
 
-                if (rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT4]) < -JOINT_4_HOMING_TORQUE_THRESHOLD &&
+                if (rflMotorGetTorque(&scara_arm->joints_motors[MOTOR_JOINT4]) > JOINT_4_HOMING_TORQUE_THRESHOLD &&
                     fabsf(rflMotorGetSpeed(&scara_arm->joints_motors[MOTOR_JOINT4])) < 0.2f)
                 {
                     rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_ANGLE_FORMAT_DEGREE,

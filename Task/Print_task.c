@@ -274,6 +274,12 @@ void print_task(void *pvParameters)
             //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
             //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
+            sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_print->joints_value[0],
+                    arm_print->joints_value[1] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_print->joints_value[2] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_print->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_print->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_print->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
             /*测量位姿及关节4平面坐标*/
             // sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
@@ -381,9 +387,9 @@ void print_task(void *pvParameters)
             //         detect_error(CHASSIS_MOTOR_3_DH));
             // sprintf((char *)test_txt, "%d", behavior_print->visual_aid_ui);
 
-            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-            //                     strlen((char *)test_txt));
+            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                strlen((char *)test_txt));
         }
 
         /**
