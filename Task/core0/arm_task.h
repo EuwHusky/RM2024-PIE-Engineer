@@ -252,8 +252,10 @@ extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);
 /* 机械臂模型参数 */
 
 // 位姿可达范围相关参数
-#define ENGINEER_ARM_XY_MAX_DISTANCE (0.7925f) /*机械臂平面最大伸展距离*/
-#define ENGINEER_ARM_XY_MIN_DISTANCE (0.33f)   /*机械臂平面最小伸展距离*/
+#define ENGINEER_ARM_FORWARD_MAX_DISTANCE                                                                              \
+    (ENGINEER_ARM_1_LENGTH + ENGINEER_ARM_2_LENGTH + ENGINEER_ARM_3_LENGTH + ENGINEER_ARM_4_LENGTH -                   \
+     0.01f)                                      /*机械臂最大前伸距离*/
+#define ENGINEER_ARM_FORWARD_MIN_DISTANCE (0.4f) /*机械臂最小前伸距离*/
 
 #define ENGINEER_ARM_Z_MAX_DISTANCE (0.625f)                                           /*关节1的最大伸展距离*/
 #define ENGINEER_ARM_Z_MIN_DISTANCE (0.0f)                                             /*关节1最小伸展距离*/

@@ -84,6 +84,8 @@ typedef struct EngineerBehaviorManager
     uint32_t dt7_reset_trigger_timer;  // 使用DT7复位的触发计时器
     uint32_t km_disable_trigger_timer; // 使用键鼠失能的触发计时器
     uint32_t km_reset_trigger_timer;   // 使用键鼠复位的触发计时器
+    int16_t dt7_pump_trigger_value;
+    uint32_t dt7_pump_trigger_timer;
     int16_t dt7_arm_grab_trigger_value;
     uint32_t dt7_arm_grab_trigger_timer;
     int16_t dt7_arm_switch_trigger_value;  // 使用DT7切换机械臂解算的触发器值

@@ -167,7 +167,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
     /**
      * @brief 失能 -> 复位
-     * DT7 长拨拨轮触发
+     * DT7 逆时针长拨拨轮触发
      */
     behavior_manager->dt7_reset_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE && behavior_manager->dt7_reset_trigger_value > 600)
@@ -233,7 +233,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
     /**
      * @brief 机械臂回到默认位姿
-     * DT7 长拨拨轮触发切换
+     * DT7 逆时针长拨拨轮触发切换
      */
     behavior_manager->dt7_arm_switch_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
@@ -434,19 +434,19 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
 
     /**
      * @brief 快捷气路控制
-     * DT7 长拨拨轮触发切换
+     * DT7 顺时针长拨拨轮触发切换
      */
-    behavior_manager->dt7_arm_grab_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
-    if (behavior_manager->dt7_arm_grab_trigger_value < -600 && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    behavior_manager->dt7_pump_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    if (behavior_manager->dt7_pump_trigger_value < -600 && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
     {
-        behavior_manager->dt7_arm_grab_trigger_timer++;
-        if (behavior_manager->dt7_arm_grab_trigger_timer == 20)
+        behavior_manager->dt7_pump_trigger_timer++;
+        if (behavior_manager->dt7_pump_trigger_timer == 20)
         {
             behavior_manager->pump_flag = ((behavior_manager->pump_flag >= 3) ? 0 : behavior_manager->pump_flag + 1);
         }
     }
     else
-        behavior_manager->dt7_arm_grab_trigger_timer = 0;
+        behavior_manager->dt7_pump_trigger_timer = 0;
 
     /**
      * @brief 机械臂吸取工作模式切换
@@ -456,6 +456,22 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     {
         behavior_manager->arm_grab = !behavior_manager->arm_grab;
     }
+    /**
+     * @brief 机械臂吸取工作模式切换
+     * DT7 顺时针长拨拨轮触发切换
+     */
+    behavior_manager->dt7_arm_grab_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    if (behavior_manager->dt7_arm_grab_trigger_value < -600 &&
+        behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+    {
+        behavior_manager->dt7_arm_grab_trigger_timer++;
+        if (behavior_manager->dt7_arm_grab_trigger_timer == 20)
+        {
+            behavior_manager->arm_grab = !behavior_manager->arm_grab;
+        }
+    }
+    else
+        behavior_manager->dt7_arm_grab_trigger_timer = 0;
 
     /**
      * @brief 手动作业 准备兑矿
