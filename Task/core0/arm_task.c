@@ -205,6 +205,9 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->behavior = ENGINEER_BEHAVIOR_DISABLE;
     scara_arm->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
 
+    scara_arm->grabbed = false;
+    scara_arm->grab_top = false;
+
     resetArmStartUpStatus(scara_arm->start_up_status);
     scara_arm->reset_success = false;
     scara_arm->move_homing_success = false;
@@ -262,6 +265,9 @@ static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm)
     // 更新
 
     scara_arm->grabbed = (gpio_read_pin(HPM_GPIO0, ENGINEER_ARM_SENSOR_GPIO_PORT, ENGINEER_ARM_SENSOR_GPIO_PIN) == 0);
+
+    if (!scara_arm->grabbed && scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+        scara_arm->grab_top = false;
 
     // 执行
 

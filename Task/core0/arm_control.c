@@ -591,7 +591,10 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         {
             scara_arm->set_pose_6d[POSE_Z] = OPERATION_MODE_DEFAULT_Z;
             if (fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
+            {
+                scara_arm->grab_top = true;
                 scara_arm->silver_mining_success = true;
+            }
         }
     }
 }
@@ -610,7 +613,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
         if (scara_arm->grabbed)
         {
             scara_arm->set_joints_value[JOINT_1] += 0.065f;
-            scara_arm->set_joints_value[JOINT_5] = 6.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_joints_value[JOINT_5] = NUGGET_PITCH_LEVELLING_OFFSET * DEGREE_TO_RADIAN_FACTOR;
 
             scara_arm->gold_mining_step = GOLD_MINING_STEP_PULL_OUT;
         }
@@ -653,7 +656,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
         if (scara_arm->grabbed)
         {
             scara_arm->set_joints_value[JOINT_1] += 0.065f;
-            scara_arm->set_joints_value[JOINT_5] = 6.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_joints_value[JOINT_5] = NUGGET_PITCH_LEVELLING_OFFSET * DEGREE_TO_RADIAN_FACTOR;
 
             scara_arm->gold_mining_step = GOLD_MINING_STEP_PULL_OUT;
         }
@@ -698,8 +701,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
         scara_arm->set_pose_6d[POSE_X] = -0.02f;
         scara_arm->set_pose_6d[POSE_Y] = -0.425f;
         scara_arm->set_pose_6d[POSE_Z] = 0.0f;
-        scara_arm->set_pose_6d[POSE_YAW] = -150.0f * DEGREE_TO_RADIAN_FACTOR;
-        scara_arm->set_pose_6d[POSE_PITCH] = 0.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_YAW] = -145.0f * DEGREE_TO_RADIAN_FACTOR;
+        scara_arm->set_pose_6d[POSE_PITCH] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
 
         if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
@@ -710,16 +713,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SLOT)
     {
-        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
-        {
-            scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
-            scara_arm->set_pose_6d[POSE_PITCH] = (ENGINEER_ARM_PITCH_MIN_ANGLE + 2.0f) * DEGREE_TO_RADIAN_FACTOR;
-        }
-        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-        {
-            scara_arm->set_pose_6d[POSE_YAW] = -190.0f * DEGREE_TO_RADIAN_FACTOR;
-            scara_arm->set_pose_6d[POSE_PITCH] = 2.5f * DEGREE_TO_RADIAN_FACTOR;
-        }
+        scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
 
         if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
@@ -734,13 +728,11 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
-            scara_arm->set_pose_6d[POSE_X] = getLatestNuggetTypeToGrab() == GOLD_NUGGET ? -0.39f : -0.41f;
-            scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+            scara_arm->set_pose_6d[POSE_X] = -0.39f;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
             scara_arm->set_pose_6d[POSE_X] = -0.02f;
-            scara_arm->set_pose_6d[POSE_Z] = getLatestNuggetTypeToGrab() == GOLD_NUGGET ? -0.005f : 0.04f;
         }
         scara_arm->set_pose_6d[POSE_Y] = -0.425f;
     }
@@ -750,7 +742,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
-            scara_arm->set_pose_6d[POSE_X] = getLatestNuggetTypeToGrab() == GOLD_NUGGET ? -0.39f : -0.41f;
+            scara_arm->set_pose_6d[POSE_X] = -0.39f;
 
             scara_arm->set_pose_6d[POSE_Y] += 0.0002f;
         }
@@ -771,9 +763,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
 
             scara_arm->set_pose_6d[POSE_X] = scara_arm->pose_6d[POSE_X] + 0.1f;
             scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.1f;
-
-            if (getStorageCurrentTargetSlot() == STORAGE_BACK)
-                scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.1f;
+            scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.1f;
 
             scara_arm->storage_push_step = STORAGE_PUSH_STEP_END;
         }
@@ -785,6 +775,15 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
             fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
         {
             scara_arm->storage_push_overtime_timer = 0;
+
+            if (scara_arm->grab_top)
+            {
+                setPushInNuggetToward(getStorageCurrentTargetSlot(), NUGGET_FACING_FORWARD);
+            }
+            else
+            {
+                setPushInNuggetToward(getStorageCurrentTargetSlot(), NUGGET_FACING_UPWARD);
+            }
 
             scara_arm->storage_push_success = true;
         }
@@ -805,15 +804,17 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
 
         scara_arm->solution = JOINT_3_ON_THE_LEFT;
 
-        if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-            scara_arm->set_pose_6d[POSE_ROLL] = scara_arm->pose_6d[POSE_ROLL] - 0.01f;
-
         scara_arm->storage_pop_step = STORAGE_POP_STEP_START;
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_START)
     {
         scara_arm->set_pose_6d[POSE_X] = 0.05f;
         scara_arm->set_pose_6d[POSE_Y] = -0.31f;
+
+        if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
+        {
+        }
+
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
             scara_arm->set_pose_6d[POSE_Z] = 0.125f;
@@ -822,6 +823,7 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
         {
             scara_arm->set_pose_6d[POSE_Z] = 0.0f;
         }
+
         scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
         scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
 

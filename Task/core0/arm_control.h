@@ -72,6 +72,12 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define OPERATION_MODE_DEFAULT_PITCH (0.0f)
 #define OPERATION_MODE_DEFAULT_ROLL (0.0f)
 
+/**
+ * @brief 矿石PITCH轴调平补偿
+ * @单位 角度 degree
+ */
+#define NUGGET_PITCH_LEVELLING_OFFSET (0.0f)
+
 /* =============================================== 自动控制 复位参数 =============================================== */
 
 #define JOINT_1_HOMING_STEP_DISTANCE (0.001f)

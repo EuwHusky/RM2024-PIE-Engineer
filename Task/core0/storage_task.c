@@ -73,6 +73,16 @@ void setGrabNuggetType(engineer_storage_nugget_type_e nugget_type)
     storage.latest_nugget_type_to_grab = nugget_type;
 }
 
+void setPushInNuggetToward(engineer_storage_slot_index_e slot_index, engineer_storage_nugget_toward_e toward)
+{
+    storage.slot_nugget_toward[slot_index] = toward;
+}
+
+engineer_storage_nugget_toward_e getNuggetPopOutToward(engineer_storage_slot_index_e slot_index)
+{
+    return storage.slot_nugget_toward[slot_index];
+}
+
 /**
  * @brief 获取可存矿石槽位 若无可存槽位则返回空槽位
  * @note 若成功获取到可存槽位 则会自动打开此槽位的吸取功能

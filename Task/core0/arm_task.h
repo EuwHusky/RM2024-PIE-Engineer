@@ -105,7 +105,8 @@ typedef struct EngineerScaraArm
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
 
-    bool grabbed;
+    bool grabbed;  // 抓取到矿石
+    bool grab_top; // 抓取矿石顶端
 
     uint16_t start_up_status;
     bool reset_success;
