@@ -536,20 +536,13 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 
             scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.01f;
 
+            scara_arm->grab_top = true;
+
             scara_arm->silver_mining_step = SILVER_MINING_STEP_LIFT;
         }
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_LIFT)
     {
-        // if (scara_arm->pose_6d[POSE_Z] < 0.32f)
-        // {
-        //     scara_arm->set_pose_6d[POSE_Z] += 0.0006f;
-        // }
-        // else if (scara_arm->pose_6d[POSE_Z] < 0.43f)
-        // {
-        //     scara_arm->set_pose_6d[POSE_Z] += 0.0004f;
-        // }
-
         scara_arm->set_pose_6d[POSE_Z] += 0.0005f;
 
         if (scara_arm->pose_6d[POSE_Z] > 0.475f)
@@ -585,7 +578,10 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_OK)
     {
-        scara_arm->set_pose_6d[POSE_X] = 0.32f;
+        if (scara_arm->grab_top)
+            scara_arm->set_pose_6d[POSE_X] = 0.32f;
+        else
+            scara_arm->set_pose_6d[POSE_X] = 0.42f;
 
         if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION)
         {
@@ -593,6 +589,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
             if (fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
             {
                 scara_arm->grab_top = true;
+
                 scara_arm->silver_mining_success = true;
             }
         }
@@ -728,7 +725,7 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
-            scara_arm->set_pose_6d[POSE_X] = -0.39f;
+            scara_arm->set_pose_6d[POSE_X] = -0.37f;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
@@ -742,20 +739,18 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
         {
-            scara_arm->set_pose_6d[POSE_X] = -0.39f;
-
-            scara_arm->set_pose_6d[POSE_Y] += 0.0002f;
+            scara_arm->set_pose_6d[POSE_X] = -0.37f;
         }
         else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
         {
             scara_arm->set_pose_6d[POSE_X] = -0.02f;
-
-            scara_arm->set_pose_6d[POSE_Y] += 0.0002f;
         }
-        scara_arm->set_pose_6d[POSE_ROLL] += ((float)getRcMouseZ() * 0.0005f);
 
+        scara_arm->set_pose_6d[POSE_Y] += 0.00015f;
         if (scara_arm->set_pose_6d[POSE_Y] > -0.26f)
             scara_arm->set_pose_6d[POSE_Y] = -0.26f;
+
+        scara_arm->set_pose_6d[POSE_ROLL] += ((float)getRcMouseZ() * 0.0005f);
 
         if (getStorageSlotStatus(getStorageCurrentTargetSlot()) == STORAGE_SLOT_USED)
         {
@@ -808,109 +803,109 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_START)
     {
-        scara_arm->set_pose_6d[POSE_X] = 0.05f;
         scara_arm->set_pose_6d[POSE_Y] = -0.31f;
 
         if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
         {
+            scara_arm->set_pose_6d[POSE_X] = 0.0f;
+            scara_arm->set_pose_6d[POSE_Z] = 0.05f;
+            scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_PITCH] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
         }
-
-        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+        else if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_FORWARD)
         {
-            scara_arm->set_pose_6d[POSE_Z] = 0.125f;
-        }
-        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-        {
+            scara_arm->set_pose_6d[POSE_X] = 0.05f;
             scara_arm->set_pose_6d[POSE_Z] = 0.0f;
-        }
-
-        scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
-        scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
-
-        if (fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION)
-            scara_arm->storage_pop_step = STORAGE_POP_STEP_SLOT;
-    }
-    else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_SLOT)
-    {
-        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
-        {
-            scara_arm->set_pose_6d[POSE_YAW] = -180.0f * DEGREE_TO_RADIAN_FACTOR;
-            scara_arm->set_pose_6d[POSE_PITCH] = (ENGINEER_ARM_PITCH_MIN_ANGLE + 2.0f) * DEGREE_TO_RADIAN_FACTOR;
-        }
-        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-        {
-            scara_arm->set_pose_6d[POSE_YAW] = -188.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_YAW] = -195.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
         }
 
         if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION &&
-            fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) < TOLERABLE_ANGLE_DEVIATION * 3.0f &&
-            fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) <
-                TOLERABLE_ANGLE_DEVIATION * 2.0f)
+            fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) < TOLERABLE_ANGLE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) < TOLERABLE_ANGLE_DEVIATION)
+            scara_arm->storage_pop_step = STORAGE_POP_STEP_SLOT;
+    }
+    else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_SLOT)
+    {
+        if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
         {
-            setArmGrabMode(true);
-            scara_arm->storage_pop_step = STORAGE_POP_STEP_POP_OUT;
+            scara_arm->set_pose_6d[POSE_Y] = -0.313f;
+
+            if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+            {
+                scara_arm->set_pose_6d[POSE_X] = -0.365f;
+            }
+            else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+            {
+                scara_arm->set_pose_6d[POSE_X] = 0.0f;
+            }
+        }
+        else if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_FORWARD)
+        {
+            if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+            {
+                scara_arm->set_pose_6d[POSE_X] = -0.327f;
+                scara_arm->set_pose_6d[POSE_Y] = -0.3f;
+            }
+            else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+            {
+                scara_arm->set_pose_6d[POSE_X] = 0.05f;
+                scara_arm->set_pose_6d[POSE_Y] = -0.28f;
+            }
         }
 
-        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+        if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION)
         {
-            scara_arm->set_pose_6d[POSE_X] =
-                getStorageSlotNuggetType(getStorageCurrentTargetSlot()) == GOLD_NUGGET ? -0.365f : -0.35f;
-            scara_arm->set_pose_6d[POSE_Y] = -0.313f;
-            scara_arm->set_pose_6d[POSE_Z] = 0.03f;
-        }
-        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-        {
-            scara_arm->set_pose_6d[POSE_X] = 0.05f;
-            scara_arm->set_pose_6d[POSE_Y] = -0.28f;
-            scara_arm->set_pose_6d[POSE_Z] = -0.005f;
+            setArmGrabMode(true);
+
+            scara_arm->storage_pop_step = STORAGE_POP_STEP_POP_OUT;
         }
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_POP_OUT)
     {
-        if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+        if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
         {
-            scara_arm->set_pose_6d[POSE_Y] = -0.313f;
-
-            scara_arm->set_pose_6d[POSE_Z] -= 0.00015;
-            if (scara_arm->set_pose_6d[POSE_Z] < -0.04f)
-                scara_arm->set_pose_6d[POSE_Z] = -0.04f;
+            scara_arm->set_pose_6d[POSE_Z] -= 0.0002;
+            if (scara_arm->set_pose_6d[POSE_Z] < -0.05f)
+                scara_arm->set_pose_6d[POSE_Z] = -0.05f;
         }
-        else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+        else if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_FORWARD)
         {
-            scara_arm->set_pose_6d[POSE_Y] = -0.28f;
+            scara_arm->set_pose_6d[POSE_X] -= 0.0002f;
 
-            scara_arm->set_pose_6d[POSE_X] -= 0.00025f;
-            if (scara_arm->set_pose_6d[POSE_X] < -0.08f)
-                scara_arm->set_pose_6d[POSE_X] = -0.08f;
+            if (getStorageCurrentTargetSlot() == STORAGE_BACK)
+            {
+                if (scara_arm->set_pose_6d[POSE_X] < -0.4f)
+                    scara_arm->set_pose_6d[POSE_X] = -0.4f;
+
+                scara_arm->set_pose_6d[POSE_Y] = -0.3f;
+            }
+            else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+            {
+                if (scara_arm->set_pose_6d[POSE_X] < -0.09f)
+                    scara_arm->set_pose_6d[POSE_X] = -0.09f;
+
+                scara_arm->set_pose_6d[POSE_Y] = -0.28f;
+            }
         }
 
         if (checkIfArmGrabbed())
         {
             StorageConfirmOperation(STORAGE_POP_OUT);
 
-            if (getStorageCurrentTargetSlot() == STORAGE_BACK)
-            {
-                scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.1f;
-                scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.05f;
+            scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.05f;
+            scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.05f;
 
-                scara_arm->storage_pop_step = STORAGE_POP_STEP_END;
-            }
-            else if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
-            {
-                scara_arm->set_pose_6d[POSE_X] = scara_arm->pose_6d[POSE_X] + 0.05f;
-                scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.05f;
-
-                scara_arm->storage_pop_success = true;
-            }
+            scara_arm->storage_pop_step = STORAGE_POP_STEP_END;
         }
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_END)
     {
-        if (fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION * 4.0f &&
-            fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION * 4.0f)
+        if (fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
+            fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
             scara_arm->storage_pop_success = true;
     }
 }

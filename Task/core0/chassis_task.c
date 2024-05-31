@@ -199,9 +199,13 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
 
     if (*getGimbalResetStatus())
     {
-        if ((chassis->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION) ||
-            (chassis->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
-             getEngineerLastBehavior() == ENGINEER_BEHAVIOR_MANUAL_OPERATION))
+        if ((chassis->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION ||
+             chassis->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
+             chassis->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP) ||
+            ((chassis->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING) &&
+             (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_MANUAL_OPERATION ||
+              getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
+              getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)))
         {
             chassis->follow_offset = 0.0f;
         }
