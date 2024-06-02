@@ -4,7 +4,6 @@
 #include "board.h"
 
 #define PM_UART_RX_BUF_LENGHT 512 // 电管链路裁判系统数据接收数组大小
-#define VT_UART_RX_BUF_LENGHT 120 // 图传链路裁判系统数据接收数组大小
 
 #define VAU_AID_0_UI_INDEX (7)
 #define VAU_AID_1_UI_INDEX (8)

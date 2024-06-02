@@ -130,15 +130,15 @@ static void control_value_process(engineer_scara_arm_s *scara_arm)
     for (uint8_t i = 0; i < 6; i++)
     {
         if (i < 3)
-            rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->customer_controller->pose[i]);
+            rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->rc->cc_data->pose[i]);
         else
             rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i],
-                                    rflFloatLoopConstrain(scara_arm->customer_controller->pose[i], -RAD_PI, RAD_PI));
+                                    rflFloatLoopConstrain(scara_arm->rc->cc_data->pose[i], -RAD_PI, RAD_PI));
 
         scara_arm->cc_pose_6d[i] = scara_arm->cc_pose_filter[i].out;
     }
 
-    if (!checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, CC_TRIGGER))
+    if (!checkIfCustomerControllerKeyPressed(scara_arm->rc->cc_data->key, CC_TRIGGER))
     {
         for (uint8_t i = 0; i < 3; i++)
         {
@@ -407,7 +407,7 @@ static void pose_control(engineer_scara_arm_s *scara_arm)
     scara_arm->set_pose_6d[POSE_Z] += ((float)getRcMouseZ() * 0.0002);
 
     // 自定义控制器控制
-    if (checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, CC_TRIGGER))
+    if (checkIfCustomerControllerKeyPressed(scara_arm->rc->cc_data->key, CC_TRIGGER))
     {
         for (uint8_t i = 0; i < 6; i++)
         {

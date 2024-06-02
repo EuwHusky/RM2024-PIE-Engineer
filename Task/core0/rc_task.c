@@ -7,6 +7,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "drv_can.h"
 #include "drv_dma.h"
 
 #include "bsp_dt7_dr16.h"
@@ -18,11 +19,22 @@
 
 static void dbus_uart_init(void);
 
+static void vt_link_relay_pack_0_can_rx_callback(void);
+static void vt_link_relay_pack_1_can_rx_callback(void);
+static void vt_link_relay_pack_2_can_rx_callback(void);
+static void vt_link_relay_pack_3_can_rx_callback(void);
+static void vt_link_relay_pack_4_can_rx_callback(void);
+
 remote_control_s *rc_pointer;
 
 ATTR_PLACE_AT_NONCACHEABLE uint8_t dbus_rx_buf[DBUS_RX_BUF_NUM]; // 遥控器数据接收缓冲区
 volatile bool dbus_uart_rx_dma_done = true;                      // dma传输完成标志位
 rfl_dt7_dr16_data_s dt7_dr16_prior_data;
+
+const uint8_t *vt_link_relay_data[5] = {0, 0, 0, 0, 0};
+
+ATTR_PLACE_AT_NONCACHEABLE custom_robot_data_t cc_data;
+ATTR_PLACE_AT_NONCACHEABLE vt_link_remote_control_t vt_rc_data;
 
 void dbus_dma_isr(void)
 {
@@ -37,7 +49,7 @@ void dbus_dma_isr(void)
         if (rflDt7Dr16CheckIsDataCorrect(&dt7_dr16_prior_data))
         {
             memcpy(&rc_pointer->dt7_dr16_data, &dt7_dr16_prior_data, sizeof(rfl_dt7_dr16_data_s));
-            detect_hook(DBUS_DH); // 记录更新时间
+            detect_hook_in_isr(DBUS_DH); // 记录更新时间
             break;
         }
     }
@@ -56,6 +68,18 @@ void rc_task(void *pvParameters)
 
     rc_pointer = getRemoteControlPointer();
 
+    for (uint8_t i = 0; i < 5; i++)
+    {
+        rflCanRxMessageBoxAddId(4, 0x300 + i);
+        vt_link_relay_data[i] = rflCanGetRxMessageBoxData(4, 0x300 + i);
+    }
+
+    rflCanRxMessageBoxAddRxCallbackFunc(4, 0x300, vt_link_relay_pack_0_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(4, 0x301, vt_link_relay_pack_1_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(4, 0x302, vt_link_relay_pack_2_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(4, 0x303, vt_link_relay_pack_3_can_rx_callback);
+    rflCanRxMessageBoxAddRxCallbackFunc(4, 0x304, vt_link_relay_pack_4_can_rx_callback);
+
     while (true)
     {
         // dma传输完成
@@ -71,6 +95,16 @@ void rc_task(void *pvParameters)
 
         vTaskDelay(5);
     }
+}
+
+const custom_robot_data_t *getCcData(void)
+{
+    return &cc_data;
+}
+
+const vt_link_remote_control_t *getVtRcData(void)
+{
+    return &vt_rc_data;
 }
 
 static void dbus_uart_init(void)
@@ -92,4 +126,60 @@ static void dbus_uart_init(void)
     }
     intc_m_enable_irq_with_priority(BOARD_XDMA_IRQ, 1);
     dmamux_config(BOARD_DMAMUX, DBUS_UART_RX_DMAMUX_CHN, DBUS_UART_RX_DMA_REQ, true);
+}
+
+static void vt_link_relay_pack_0_can_rx_callback(void)
+{
+    uint32_t temp;
+    float temp_out;
+    for (uint8_t i = 0; i < 2; i++)
+    {
+        temp = ((vt_link_relay_data[0][4u * i + 3u] << 24) | (vt_link_relay_data[0][4u * i + 2u] << 16) |
+                (vt_link_relay_data[0][4u * i + 1u] << 8) | vt_link_relay_data[0][4u * i + 0u]);
+        temp_out = *(float *)&temp;
+        cc_data.pose[0 + i] = temp_out;
+    }
+
+    detect_hook_in_isr(VT_REFEREE_DH);
+}
+static void vt_link_relay_pack_1_can_rx_callback(void)
+{
+    uint32_t temp;
+    float temp_out;
+    for (uint8_t i = 0; i < 2; i++)
+    {
+        temp = ((vt_link_relay_data[1][4u * i + 3u] << 24) | (vt_link_relay_data[1][4u * i + 2u] << 16) |
+                (vt_link_relay_data[1][4u * i + 1u] << 8) | vt_link_relay_data[1][4u * i + 0u]);
+        temp_out = *(float *)&temp;
+        cc_data.pose[2 + i] = temp_out;
+    }
+
+    detect_hook_in_isr(VT_REFEREE_DH);
+}
+static void vt_link_relay_pack_2_can_rx_callback(void)
+{
+    uint32_t temp;
+    float temp_out;
+    for (uint8_t i = 0; i < 2; i++)
+    {
+        temp = ((vt_link_relay_data[2][4u * i + 3u] << 24) | (vt_link_relay_data[2][4u * i + 2u] << 16) |
+                (vt_link_relay_data[2][4u * i + 1u] << 8) | vt_link_relay_data[2][4u * i + 0u]);
+        temp_out = *(float *)&temp;
+        cc_data.pose[4 + i] = temp_out;
+    }
+
+    detect_hook_in_isr(VT_REFEREE_DH);
+}
+static void vt_link_relay_pack_3_can_rx_callback(void)
+{
+    memcpy(&vt_rc_data, vt_link_relay_data[3], 8u);
+
+    detect_hook_in_isr(VT_REFEREE_DH);
+}
+static void vt_link_relay_pack_4_can_rx_callback(void)
+{
+    vt_rc_data.keyboard_value = ((vt_link_relay_data[4][1] << 8) | vt_link_relay_data[4][0]);
+    cc_data.key = vt_link_relay_data[4][7];
+
+    detect_hook_in_isr(VT_REFEREE_DH);
 }

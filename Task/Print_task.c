@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 10    // 输出数据的周期
+#define PRINT_TIME_MS 12    // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -54,12 +54,6 @@ rm_motor_s *motor_1_driver_test;
 
 rfl_motor_pid_controller_s *motor_0_controller_test;
 rfl_motor_pid_controller_s *motor_1_controller_test;
-
-extern uint32_t test_all;
-extern uint32_t test_pm;
-extern uint32_t test_vt;
-extern uint32_t test_ui;
-extern uint32_t test_reset;
 
 void print_dma_isr(void)
 {
@@ -160,6 +154,20 @@ void print_task(void *pvParameters)
                     break;
                 case ARM_JOINT_1_R_DH: // 机械臂电机
                     sprintf((char *)test_txt, "关节1右电机异常\n");
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case ARM_JOINT_2_DH: // 机械臂电机
+                    sprintf((char *)test_txt, "关节2电机异常\n");
+                    uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                        core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                        strlen((char *)test_txt));
+                    vTaskDelay(5);
+                    break;
+                case ARM_JOINT_3_DH: // 机械臂电机
+                    sprintf((char *)test_txt, "关节3电机异常\n");
                     uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                         core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
                                         strlen((char *)test_txt));
@@ -269,11 +277,11 @@ void print_task(void *pvParameters)
              * @brief Scara Arm
              */
             /*设定/测量位姿*/
-            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-                    arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
-                    arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
-                    arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
-                    arm_print->pose_6d[4], arm_print->pose_6d[5]);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_print->set_pose_6d[0], arm_print->set_pose_6d[1], arm_print->set_pose_6d[2],
+            //         arm_print->set_pose_6d[3], arm_print->set_pose_6d[4], arm_print->set_pose_6d[5],
+            //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],
+            //         arm_print->pose_6d[4], arm_print->pose_6d[5]);
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f\r\n", arm_print->joints_value[0],
             //         arm_print->joints_value[1] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[2] * RADIAN_TO_DEGREE_FACTOR,
@@ -345,8 +353,6 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%f,%f,%f,%f,%f,%f,%d\r\n", customer_controller->pose[0],
             //         customer_controller->pose[1], customer_controller->pose[2], customer_controller->pose[3],
             //         customer_controller->pose[4], customer_controller->pose[5], customer_controller->key);
-            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", test_all, test_pm, test_vt, test_ui, test_reset);
-            // sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", test_all, test_pm, test_vt, vt_link_rc_p->keyboard_value);
 
             /**
              * @brief Remote Control
@@ -356,6 +362,13 @@ void print_task(void *pvParameters)
             //         checkIfRcKeyRisingEdgeDetected(RC_F));
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", test_pm, test_vt, rc_print->use_vt_link_control,
             //         detect_error(DBUS_DH), detect_error(VT_REFEREE_DH));
+            // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%d\r\n",
+            //         rc_print->vt_link_data->mouse_x, rc_print->vt_link_data->mouse_y,
+            //         rc_print->vt_link_data->mouse_z, rc_print->vt_link_data->left_button_down,
+            //         rc_print->vt_link_data->right_button_down, rc_print->vt_link_data->keyboard_value,
+            //         rc_print->cc_data->pose[0], rc_print->cc_data->pose[1], rc_print->cc_data->pose[2],
+            //         rc_print->cc_data->pose[3], rc_print->cc_data->pose[4], rc_print->cc_data->pose[5],
+            //         rc_print->cc_data->key);
 
             /**
              * @brief Behavior Manager
@@ -387,9 +400,9 @@ void print_task(void *pvParameters)
             //         detect_error(CHASSIS_MOTOR_3_DH));
             // sprintf((char *)test_txt, "%d", behavior_print->visual_aid_ui);
 
-            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-                                strlen((char *)test_txt));
+            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+            //                     strlen((char *)test_txt));
         }
 
         /**

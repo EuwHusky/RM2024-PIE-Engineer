@@ -418,29 +418,29 @@ void arm_motor_set_angle_limit(engineer_scara_arm_s *scara_arm, bool is_to_reset
 
 static void arm_joint_1_l_can_rx_callback(void)
 {
-    detect_hook(ARM_JOINT_1_L_DH);
+    detect_hook_in_isr(ARM_JOINT_1_L_DH);
 }
 static void arm_joint_1_r_can_rx_callback(void)
 {
-    detect_hook(ARM_JOINT_1_R_DH);
+    detect_hook_in_isr(ARM_JOINT_1_R_DH);
 }
 static void arm_joint_2_can_rx_callback(void)
 {
-    detect_hook(ARM_JOINT_2_DH);
+    detect_hook_in_isr(ARM_JOINT_2_DH);
 }
 static void arm_joint_3_can_rx_callback(void)
 {
-    detect_hook(ARM_JOINT_3_DH);
+    detect_hook_in_isr(ARM_JOINT_3_DH);
 }
 static void arm_joint_4_can_rx_callback(void)
 {
-    detect_hook(ARM_JOINT_4_DH);
+    detect_hook_in_isr(ARM_JOINT_4_DH);
 }
 static void arm_joint_56_l_can_rx_callback(void)
 {
-    detect_hook(ARM_JOINT_56_L_DH);
+    detect_hook_in_isr(ARM_JOINT_56_L_DH);
 }
 static void arm_joint_56_r_can_rx_callback(void)
 {
-    detect_hook(ARM_JOINT_56_R_DH);
+    detect_hook_in_isr(ARM_JOINT_56_R_DH);
 }

@@ -2,7 +2,9 @@
 
 #include "referee.h"
 
-#define USE_VT_LINK (false)
+#include "rc_task.h"
+
+#define USE_VT_LINK (true)
 
 #define PRESS_SEN 6
 
@@ -14,9 +16,9 @@ void RemoteControlInit(void)
 
     remote_control.use_vt_link_control = USE_VT_LINK;
 
-    remote_control.vt_link_data = getVtLinkRemoteControlData();
+    remote_control.vt_link_data = getVtRcData();
 
-    remote_control.cc_data = getCustomerControllerData();
+    remote_control.cc_data = getCcData();
 }
 
 void RemoteControlUpdate(bool is_dt7_connected, bool is_vt_connected)

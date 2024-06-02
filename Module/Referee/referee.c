@@ -69,12 +69,12 @@ const robot_status_t *getRobotStatus(void)
     return &robot_status;
 }
 
-const uint8_t getRobotStatusId(void)
+uint8_t getRobotStatusId(void)
 {
     return robot_status.robot_id;
 }
 
-const uint16_t getRobotCurrentHp(void)
+uint16_t getRobotCurrentHp(void)
 {
     return robot_status.current_HP;
 }

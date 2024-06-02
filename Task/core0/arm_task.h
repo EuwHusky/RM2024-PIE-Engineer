@@ -178,7 +178,6 @@ typedef struct EngineerScaraArm
 
     const remote_control_s *rc; // 遥控器数据
 
-    const custom_robot_data_t *customer_controller; // 自定义控制器数据
     float cc_pose_6d[6];
     first_order_filter_type_t cc_pose_filter[6];
     float local_pos_memory[3]; // 机械臂位置记忆

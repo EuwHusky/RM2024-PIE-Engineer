@@ -357,17 +357,17 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
 
 static void chassis_motor_0_can_rx_callback(void)
 {
-    detect_hook(CHASSIS_MOTOR_0_DH);
+    detect_hook_in_isr(CHASSIS_MOTOR_0_DH);
 }
 static void chassis_motor_1_can_rx_callback(void)
 {
-    detect_hook(CHASSIS_MOTOR_1_DH);
+    detect_hook_in_isr(CHASSIS_MOTOR_1_DH);
 }
 static void chassis_motor_2_can_rx_callback(void)
 {
-    detect_hook(CHASSIS_MOTOR_2_DH);
+    detect_hook_in_isr(CHASSIS_MOTOR_2_DH);
 }
 static void chassis_motor_3_can_rx_callback(void)
 {
-    detect_hook(CHASSIS_MOTOR_3_DH);
+    detect_hook_in_isr(CHASSIS_MOTOR_3_DH);
 }

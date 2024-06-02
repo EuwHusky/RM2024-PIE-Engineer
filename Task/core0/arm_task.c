@@ -13,10 +13,6 @@
 
 #include "algo_data_limiting.h"
 
-#include "drv_dma.h"
-#include "hpm_uart_drv.h"
-#include "referee_frame_process.h"
-
 #include "INS_task.h"
 #include "detect_task.h"
 
@@ -25,25 +21,6 @@ static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm);
 static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm);
 
 static engineer_scara_arm_s scara_arm;
-
-// 图传链路串口初始化
-static void vt_uart_init(void);
-
-#define VT_UART_RX_BUF_LENGHT 99 // 图传链路裁判系统数据接收数组大小
-
-// 图传链路裁判系统数据相关变量和结构
-ATTR_PLACE_AT_NONCACHEABLE uint8_t vt_rx_buf[VT_UART_RX_BUF_LENGHT]; // 接收原始数据
-volatile bool vt_uart_rx_dma_done = true;                            // dma传输完成标志位
-fifo_s_t *vt_uart_fifo = NULL;
-
-uint32_t test_vt = 0;
-
-void vt_referee_dma_isr(void)
-{
-    fifo_s_puts(vt_uart_fifo, (char *)vt_rx_buf, VT_UART_RX_BUF_LENGHT);
-    vt_uart_rx_dma_done = true; // 更新标志位
-    detect_hook(VT_REFEREE_DH);
-}
 
 void arm_task(void *pvParameters)
 {
@@ -58,10 +35,6 @@ void arm_task(void *pvParameters)
     arm_init(&scara_arm);
 
     scara_arm.started = true;
-
-    vt_uart_init(); // 初始化图传链路串口
-
-    vt_uart_fifo = get_vt_fifo();
 
     while (1)
     {
@@ -80,16 +53,6 @@ void arm_task(void *pvParameters)
 
         // 机械臂电机更新与执行
         arm_motor_update_and_execute(&scara_arm);
-
-        if (vt_uart_rx_dma_done)
-        {
-            test_vt++;
-            vt_uart_rx_dma_done = false;
-            refereeUnpackFifoData(VT_REFEREE_LINK);
-            uart_rx_trigger_dma(BOARD_HDMA, VT_UART_RX_DMA_CHN, VT_UART,
-                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)vt_rx_buf),
-                                VT_UART_RX_BUF_LENGHT);
-        }
 
         rflOsDelayMs(1);
     }
@@ -236,7 +199,6 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
 
     scara_arm->rc = getRemoteControlPointer();
 
-    scara_arm->customer_controller = getCustomerControllerData();
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[0], 0.02f, 0.98f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[1], 0.02f, 0.98f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[2], 0.01f, 0.99f);
@@ -288,28 +250,4 @@ static void update_mag_encoder_ma600_feedback(engineer_scara_arm_s *scara_arm)
     {
         scara_arm->joint_6_encoder_angle = (float)scara_arm->joint_6_encoder_value * 0.005493248f;
     }
-}
-
-/*图传链路串口初始化**/
-static void vt_uart_init(void)
-{
-    uart_config_t config = {0}; // 串口配置
-    board_init_uart(VT_UART);
-    uart_default_config(VT_UART, &config);                    // 填充默认配置
-    config.fifo_enable = true;                                // 使能FIFO
-    config.dma_enable = true;                                 // 使能DMA
-    config.baudrate = VT_BAUDRATE;                            // 设置波特率
-    config.src_freq_in_hz = clock_get_frequency(VT_UART_CLK); // 获得时钟频率
-    config.rx_fifo_level = uart_rx_fifo_trg_not_empty;
-    if (uart_init(VT_UART, &config) != status_success)
-    {
-        printf("failed to initialize uart\n");
-        while (1)
-        {
-        }
-    }
-    intc_m_enable_irq_with_priority(BOARD_HDMA_IRQ, 1);
-    dmamux_config(BOARD_DMAMUX, VT_UART_RX_DMAMUX_CHN, VT_UART_RX_DMA_REQ, true);
-
-    rflDmaAddCallbackFunction(BOARD_HDMA, VT_UART_RX_DMA_CHN, vt_referee_dma_isr);
 }
