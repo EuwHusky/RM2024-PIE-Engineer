@@ -403,6 +403,9 @@ static void pose_control(engineer_scara_arm_s *scara_arm)
             ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[0], RC_DT7_ROCKER_DEADLINE)) / 660.0f *
              POSE_AR_CONTROL_SEN);
 
+    // 键鼠控制
+    scara_arm->set_pose_6d[POSE_Z] += ((float)getRcMouseZ() * 0.0002);
+
     // 自定义控制器控制
     if (checkIfCustomerControllerKeyPressed(scara_arm->customer_controller->key, CC_TRIGGER))
     {
@@ -476,7 +479,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     if (scara_arm->silver_mining_success == true)
         return;
 
-    if (scara_arm->silver_mining_step == SILVER_MINING_STEP_INIT) // 对位
+    if (scara_arm->silver_mining_step == SILVER_MINING_STEP_INIT)
     {
         setGrabNuggetType(SILVER_NUGGET);
 
@@ -496,7 +499,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_START)
     {
         scara_arm->set_pose_6d[POSE_Y] = 0.0f;
-        scara_arm->set_pose_6d[POSE_Z] = 0.48f;
+        scara_arm->set_pose_6d[POSE_Z] = 0.28f;
         scara_arm->set_pose_6d[POSE_YAW] = 0.0f;
         scara_arm->set_pose_6d[POSE_PITCH] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
         scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
@@ -511,17 +514,29 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 
             if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION)
             {
+                // 清除历史误操作
+                if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
+                    ;
+                if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
+                    ;
+
                 scara_arm->silver_mining_step = SILVER_MINING_STEP_READY;
             }
         }
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_READY)
     {
+        scara_arm->set_pose_6d[POSE_Z] += ((float)getRcMouseZ() * 0.00004);
+
         if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
         {
             setArmGrabMode(true);
 
             scara_arm->silver_mining_step = SILVER_MINING_STEP_GRAB;
+        }
+        if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
+        {
+            scara_arm->silver_mining_step = SILVER_MINING_STEP_OK;
         }
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_GRAB)
@@ -545,7 +560,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     {
         scara_arm->set_pose_6d[POSE_Z] += 0.0005f;
 
-        if (scara_arm->pose_6d[POSE_Z] > 0.475f)
+        if (scara_arm->pose_6d[POSE_Z] > 0.42f)
         {
             // 清除历史误操作
             if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
@@ -568,7 +583,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 
             scara_arm->set_pose_6d[POSE_X] = 0.655f;
             scara_arm->set_pose_6d[POSE_Y] = 0.0f;
-            scara_arm->set_pose_6d[POSE_Z] = 0.48f;
+            scara_arm->set_pose_6d[POSE_Z] = 0.28f;
             scara_arm->set_pose_6d[POSE_YAW] = 0.0f;
             scara_arm->set_pose_6d[POSE_PITCH] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
@@ -669,6 +684,8 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
     if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
     {
         rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+        setArmGrabMode(false);
+
         scara_arm->gold_mining_step = GOLD_MINING_STEP_INIT;
     }
 }

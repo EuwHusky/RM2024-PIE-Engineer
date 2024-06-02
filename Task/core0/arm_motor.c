@@ -297,7 +297,7 @@ void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm)
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 2.4f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 2.4f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.4f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
     }
@@ -311,7 +311,7 @@ void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm)
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 2.4f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 2.4f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.6f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
     }
@@ -358,11 +358,9 @@ void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm)
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.0f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 3.0f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 1.6f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT],
-                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 2.0f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT],
-                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 2.0f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
     }
 }
 
