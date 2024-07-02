@@ -331,8 +331,38 @@ void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm)
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 6.0f);
     }
-    else if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
-             scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
+    else if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+    {
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.2f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.2f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.6f);
+        if (scara_arm->storage_push_step < 5u) /*STORAGE_PUSH_STEP_SAFE_FOLD*/
+        {
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 1.8f);
+        }
+        else
+        {
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 6.0f);
+        }
+        if (scara_arm->storage_push_step == 3u) /*STORAGE_PUSH_STEP_PUSH_IN*/
+        {
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.8f);
+        }
+        else
+        {
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.35f);
+        }
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.8f);
+    }
+    else if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)
     {
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.2f);

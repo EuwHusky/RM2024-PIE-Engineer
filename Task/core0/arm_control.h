@@ -65,7 +65,7 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
  * @brief 作业模式默认位姿
  * @note 此值将影响自动取矿辅助UI的位置 修改此项后需要重新调整相关UI的参数
  */
-#define OPERATION_MODE_DEFAULT_X (0.45f)
+#define OPERATION_MODE_DEFAULT_X (0.36f)
 #define OPERATION_MODE_DEFAULT_Y (0.0f)
 #define OPERATION_MODE_DEFAULT_Z (0.0f)
 #define OPERATION_MODE_DEFAULT_YAW (0.0f)
@@ -91,7 +91,8 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define JOINT_3_START_ANGLE (-154.0f)
 
 #define JOINT_4_HOMING_STEP_ANGLE (0.005f)
-#define JOINT_4_HOMING_TORQUE_THRESHOLD (1.6f)
+#define JOINT_4_HOMING_TORQUE_THRESHOLD (2.5f)
+#define JOINT_4_HOMING_ANGLE_THRESHOLD (0.1745f)
 #define JOINT_4_HOMING_ANGLE (125.34378f)
 #define JOINT_4_START_ANGLE (0.0f)
 
@@ -128,6 +129,7 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define STORAGE_PUSH_STEP_SLOT (2u)
 #define STORAGE_PUSH_STEP_PUSH_IN (3u)
 #define STORAGE_PUSH_STEP_END (4u)
+#define STORAGE_PUSH_STEP_SAFE_FOLD (5u)
 
 /* =============================================== 自动控制 取矿参数 =============================================== */
 

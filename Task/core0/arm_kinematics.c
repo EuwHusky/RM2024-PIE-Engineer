@@ -113,7 +113,8 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
  */
 void arm_model_update_control(engineer_scara_arm_s *scara_arm)
 {
-    if (scara_arm->behavior != ENGINEER_BEHAVIOR_RESET && scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+    if (scara_arm->behavior != ENGINEER_BEHAVIOR_DISABLE && scara_arm->behavior != ENGINEER_BEHAVIOR_RESET &&
+        scara_arm->behavior != ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
     {
 #if !USE_JOINTS_CONTROL
         solve_inverse_kinematics(scara_arm);
