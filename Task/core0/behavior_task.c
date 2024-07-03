@@ -592,6 +592,9 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
      */
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING && *behavior_manager->silver_mining_success)
     {
+        behavior_manager->silver_target =
+            ((behavior_manager->silver_target == SILVER_LEFT) ? SILVER_RIGHT : (behavior_manager->silver_target - 1));
+
         *behavior_manager->silver_mining_success = false;
         update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MANUAL_OPERATION);
     }
@@ -615,7 +618,8 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
      */
     if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
         behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_SILVER_MINING &&
-        behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
+        behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH &&
+        behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING)
     {
         behavior_manager->show_silver_vau = false;
         behavior_manager->silver_target = SILVER_MID;
