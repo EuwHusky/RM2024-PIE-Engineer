@@ -25,6 +25,8 @@ typedef struct EngineerGimbal
     rfl_angle_s set_gimbal_angle; // 设定的云台相对于机体的角度，以机械臂方向为0点，逆时针为正
     rfl_angle_s gimbal_angle;     // 云台相对于机体的角度，以机械臂方向为0点，逆时针为正
 
+    float yaw_motor_homing_set_angle; // 用于复位校准时云台电机的设定控制角度 单位为角度
+
     rfl_motor_s yaw_motor;
 
     const remote_control_s *rc;
@@ -45,8 +47,9 @@ extern float getGimbalYawAngle(rfl_angle_format_e angle_format);
 #define ENGINEER_GIMBAL_RESET_STEP_HOMING (0u)
 #define ENGINEER_GIMBAL_RESET_STEP_STARTING (1u)
 
-#define GIMBAL_YAW_HOMING_STEP_ANGLE (2.0f)
-#define GIMBAL_YAW_HOMING_TORQUE_THRESHOLD (2.2f)
+#define GIMBAL_YAW_HOMING_STEP_ANGLE (0.4f)
+#define GIMBAL_YAW_HOMING_TORQUE_THRESHOLD (6.0f)
+#define GIMBAL_YAW_HOMING_ANGLE_THRESHOLD (10.0f)
 #define GIMBAL_YAW_HOMING_ANGLE (-125.0f)
 #define GIMBAL_YAW_START_ANGLE (90.0f)
 

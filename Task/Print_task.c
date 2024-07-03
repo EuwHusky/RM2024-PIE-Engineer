@@ -145,12 +145,9 @@ void print_task(void *pvParameters)
             /**
              * @brief Gimbal
              */
-            // sprintf((char *)test_txt, "%d,%d,%d,%d\r\n", gimbal_print->pitch_pwm_clk_freq,
-            // gimbal_print->pitch_pwm_freq,
-            //         gimbal_print->pitch_pwm_reload, gimbal_print->pitch_pwm_compare);
-            // sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
-            //         gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
-            //         gimbal_print->yaw_motor.angle_.deg);
+            sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
+                    gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
+                    gimbal_print->yaw_motor.angle_.deg);
 
             /**
              * @brief Scara Arm
@@ -181,15 +178,10 @@ void print_task(void *pvParameters)
             //         arm_print->pose_6d[4], arm_print->pose_6d[5], arm_print->printer[0], arm_print->printer[1],
             //         arm_print->printer[2]);
             /*银矿动作调试*/
-            // sprintf((char *)test_txt, "%d,%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            // sprintf((char *)test_txt, "%d,%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
             //         arm_print->silver_mining_step, behavior_print->silver_target, arm_print->set_pose_6d[0],
             //         arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1],
-            //         arm_print->set_pose_6d[2], arm_print->pose_6d[2], arm_print->set_pose_6d[3],
-            //         arm_print->pose_6d[3]);
-            sprintf((char *)test_txt, "%d,%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-                    arm_print->silver_mining_step, behavior_print->silver_target, arm_print->set_pose_6d[0],
-                    arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1], arm_print->set_pose_6d[2],
-                    arm_print->pose_6d[2]);
+            //         arm_print->set_pose_6d[2], arm_print->pose_6d[2]);
             /*金矿动作调试*/
             // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", behavior_print->behavior, arm_print->gold_mining_step,
             //         arm_print->set_joints_value[JOINT_1], arm_print->joints_value[JOINT_1]);

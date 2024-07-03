@@ -613,7 +613,13 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         if (scara_arm->grab_top)
             scara_arm->set_pose_6d[POSE_X] = 0.24f;
         else
-            scara_arm->set_pose_6d[POSE_X] = 0.42f;
+        {
+            scara_arm->set_pose_6d[POSE_X] = 0.36f;
+            scara_arm->set_pose_6d[POSE_Z] = 0.4255f;
+            scara_arm->set_pose_6d[POSE_YAW] = 0.0f;
+            scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
+            scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
+        }
 
         scara_arm->set_pose_6d[POSE_Y] = 0.0f;
 
