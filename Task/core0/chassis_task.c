@@ -200,10 +200,12 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis)
     if (*getGimbalResetStatus())
     {
         if ((chassis->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION ||
+             chassis->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
              chassis->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
              chassis->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP) ||
             ((chassis->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING) &&
              (getEngineerLastBehavior() == ENGINEER_BEHAVIOR_MANUAL_OPERATION ||
+              getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING ||
               getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH ||
               getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_STORAGE_POP)))
         {
@@ -285,6 +287,7 @@ static void chassis_normal_control(engineer_chassis_s *chassis)
     {
         float x_sign = 0.0f;
         float y_sign = 0.0f;
+        float z_sign = 0.0f;
         if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
             x_sign = 1.0f;
         else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
@@ -293,6 +296,13 @@ static void chassis_normal_control(engineer_chassis_s *chassis)
             y_sign = 1.0f;
         else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
             y_sign = -1.0f;
+        if (!checkIsRcKeyPressed(RC_CTRL))
+        {
+            if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+                z_sign = 1.0f;
+            else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+                z_sign = -1.0f;
+        }
 
         float shift_speed_multiplier = 0.5f;
         float shift_accel_multiplier = 0.5f;
@@ -308,9 +318,17 @@ static void chassis_normal_control(engineer_chassis_s *chassis)
         chassis->set_speed_vector[1] =
             rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 3.0f * shift_accel_multiplier,
                         y_sign * CHASSIS_VY_MAX * shift_speed_multiplier);
-        chassis->set_speed_vector[2] =
-            rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
-                        -((float)(getRcMouseX()) / 18.0f) * CHASSIS_WZ_MAX * shift_speed_multiplier);
+        if (!checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+        {
+            chassis->set_speed_vector[2] =
+                rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
+                            -((float)(getRcMouseX()) / 18.0f) * CHASSIS_WZ_MAX * shift_speed_multiplier);
+        }
+        else
+        {
+            chassis->set_speed_vector[2] = rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
+                                                       z_sign * CHASSIS_WZ_MAX * shift_speed_multiplier);
+        }
     }
 }
 
@@ -350,8 +368,8 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
     }
     else
     {
-        chassis->set_speed_vector[2] =
-            rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f, z_sign * CHASSIS_WZ_MAX / 8.0f);
+        chassis->set_speed_vector[2] = rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
+                                                   z_sign * CHASSIS_WZ_MAX / 6.0f * shift_speed_multiplier);
     }
 }
 

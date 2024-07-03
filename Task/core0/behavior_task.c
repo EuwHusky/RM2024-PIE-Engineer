@@ -93,9 +93,14 @@ bool checkIfNeedRebootCore(void)
     return behavior_manager.need_reboot;
 }
 
-engineer_visual_aid_ui_type_e getVisualAidUi(void)
+bool checkIfNeedShowSilverVau(void)
 {
-    return behavior_manager.visual_aid_ui;
+    return behavior_manager.show_silver_vau;
+}
+
+engineer_silver_mining_target_e getSilverTarget(void)
+{
+    return behavior_manager.silver_target;
 }
 
 bool checkIfMotorFailureDetected(void)
@@ -136,7 +141,8 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->arm_grab = false;
     behavior_manager->arm_switch_solution = false;
     behavior_manager->reset_ui = false;
-    behavior_manager->visual_aid_ui = VAU_NONE;
+    behavior_manager->show_silver_vau = false;
+    behavior_manager->silver_target = SILVER_MID;
     behavior_manager->motor_failure_detected = false;
 }
 
@@ -320,7 +326,10 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
          * 键鼠 CTRL+Z 触发切换
          */
         if (checkIfRcKeyFallingEdgeDetected(RC_Z) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
+        {
+            behavior_manager->show_silver_vau = true;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_SILVER_MINING);
+        }
 
         /**
          * @brief 手动作业 -> 自动取金矿
@@ -355,15 +364,12 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         }
 
         /**
-         * @brief 切换视觉辅助UI类型
+         * @brief 切换视觉辅助UI显示
          * 键鼠 Ctrl+Q 触发切换
          */
         if (checkIfRcKeyFallingEdgeDetected(RC_Q) && behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
         {
-            if (behavior_manager->visual_aid_ui == VAU_NONE)
-                behavior_manager->visual_aid_ui = VAU_SILVER;
-            else
-                behavior_manager->visual_aid_ui = VAU_NONE;
+            behavior_manager->show_silver_vau = !behavior_manager->show_silver_vau;
         }
 
         /**
@@ -377,21 +383,53 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     }
     else if (!checkIsRcKeyPressed(RC_CTRL))
     {
-        /**
-         * @brief 手动作业 -> 自动存矿
-         * 键鼠 短按Z键触发切换
-         */
-        if (checkIfRcKeyFallingEdgeDetected(RC_Z) && getStorageStatus() != STORAGE_FULL && checkIfArmGrabbed() &&
-            behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH);
+        if (checkIfRcKeyFallingEdgeDetected(RC_Z))
+        {
+            /**
+             * @brief 手动作业 -> 自动存矿
+             * 键鼠 短按Z键触发切换
+             */
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
+                getStorageStatus() != STORAGE_FULL && checkIfArmGrabbed())
+            {
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH);
+            }
 
-        /**
-         * @brief 手动作业 -> 自动取矿
-         * 键鼠 短按X键触发切换
-         */
-        if (checkIfRcKeyFallingEdgeDetected(RC_X) && getStorageStatus() != STORAGE_EMPTY && !checkIfArmGrabbed() &&
-            behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
-            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_POP);
+            /**
+             * @brief 取银矿时向左切换目标
+             * 键鼠 短按Z键触发切换
+             */
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+            {
+                behavior_manager->silver_target =
+                    ((behavior_manager->silver_target == SILVER_LEFT) ? SILVER_RIGHT
+                                                                      : (behavior_manager->silver_target - 1));
+            }
+        }
+
+        if (checkIfRcKeyFallingEdgeDetected(RC_X))
+        {
+            /**
+             * @brief 手动作业 -> 自动取矿
+             * 键鼠 短按X键触发切换
+             */
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
+                getStorageStatus() != STORAGE_EMPTY && !checkIfArmGrabbed())
+            {
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_STORAGE_POP);
+            }
+
+            /**
+             * @brief 取银矿时向右切换目标
+             * 键鼠 短按X键触发切换
+             */
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+            {
+                behavior_manager->silver_target =
+                    ((behavior_manager->silver_target == SILVER_RIGHT) ? SILVER_LEFT
+                                                                       : (behavior_manager->silver_target + 1));
+            }
+        }
 
         /**
          * @brief 立即停止自动取金/银矿、自动存/取矿 切换回手动作业
@@ -423,9 +461,15 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             }
         }
 
-        // 清除标志位 防止历史误操作
+        /**
+         * @brief 清除标志位 防止历史误操作
+         */
         if (checkIfRcKeyFallingEdgeDetected(RC_Q))
             ;
+
+        /**
+         * @brief 清除标志位 防止历史误操作
+         */
         if (checkIfRcKeyFallingEdgeDetected(RC_E))
             ;
     }
@@ -567,13 +611,14 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     }
 
     /**
-     * @brief 自动清除视觉辅助UI
+     * @brief 清除VAU & 重置取银矿目标
      */
     if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
         behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_SILVER_MINING &&
         behavior_manager->behavior != ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
     {
-        behavior_manager->visual_aid_ui = VAU_NONE;
+        behavior_manager->show_silver_vau = false;
+        behavior_manager->silver_target = SILVER_MID;
     }
 
     /**

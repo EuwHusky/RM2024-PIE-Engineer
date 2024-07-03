@@ -60,13 +60,13 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
 
     refereeInitRobotInteractionManager(&step_clock, 17, 21, 0);
-    refereeSetRobotInteractionFigureBuilder(0, uiModeIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(1, uiSplitLine0Builder);
-    refereeSetRobotInteractionFigureBuilder(2, uiGrabberPoweredBuilder);
-    refereeSetRobotInteractionFigureBuilder(3, uiGrabbedBuilder);
-    refereeSetRobotInteractionFigureBuilder(4, uiSplitLine1Builder);
-    refereeSetRobotInteractionFigureBuilder(5, uiStorageFrontUsedBuilder);
-    refereeSetRobotInteractionFigureBuilder(6, uiStorageBackUsedBuilder);
+    refereeSetRobotInteractionFigureBuilder(MODE_INDICATOR_UI_INDEX, uiModeIndicatorBuilder);
+    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_0_UI_INDEX, uiSplitLine0Builder);
+    refereeSetRobotInteractionFigureBuilder(GRABBER_POWERED_UI_INDEX, uiGrabberPoweredBuilder);
+    refereeSetRobotInteractionFigureBuilder(GRABBED_UI_INDEX, uiGrabbedBuilder);
+    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_1_UI_INDEX_UI_INDEX, uiSplitLine1Builder);
+    refereeSetRobotInteractionFigureBuilder(STORAGE_FRONT_USED_UI_INDEX, uiStorageFrontUsedBuilder);
+    refereeSetRobotInteractionFigureBuilder(STORAGE_BACK_USED_UI_INDEX, uiStorageBackUsedBuilder);
     refereeSetRobotInteractionFigureBuilder(VAU_AID_0_UI_INDEX, uiVauAid0Builder);
     refereeSetRobotInteractionFigureBuilder(VAU_AID_1_UI_INDEX, uiVauAid1Builder);
     refereeSetRobotInteractionFigureBuilder(VAU_AID_2_UI_INDEX, uiVauAid2Builder);
@@ -80,11 +80,11 @@ void referee_task(void *pvParameters)
                                             uiLifterLeftMotorOverheatWarningBuilder);
     refereeSetRobotInteractionFigureBuilder(LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
                                             uiLifterRightMotorOverheatWarningBuilder);
-    refereeSetRobotInteractionFigureBuilder(16, uiSplitLine2Builder);
+    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_2_UI_INDEX_UI_INDEX, uiSplitLine2Builder);
     refereeSetRobotInteractionFigureBuilder(DT7_DR16_LINK_INDICATOR_UI_INDEX, uiDt7Dr16linkIndicatorBuilder);
     refereeSetRobotInteractionFigureBuilder(MOTOR_STATUS_INDICATOR_UI_INDEX, uiMotorStatusIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(19, uiSplitLine3Builder);
-    refereeSetRobotInteractionFigureBuilder(20, uiSplitLine4Builder);
+    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_3_UI_INDEX_UI_INDEX, uiSplitLine3Builder);
+    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_4_UI_INDEX_UI_INDEX, uiSplitLine4Builder);
 
     while (1)
     {
@@ -131,11 +131,13 @@ void referee_task(void *pvParameters)
 
 static void client_ui(void)
 {
+    // 重新刷新UI
     if (checkIfNeedResetUi())
     {
         refereeClientUiOperate(UI_RESET_ALL, 0);
     }
 
+    // 运动警示线&图传云台校准线
     if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE ||
         getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
     {
@@ -144,7 +146,7 @@ static void client_ui(void)
         refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
         refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
 
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, 19);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, SPLIT_LINE_3_UI_INDEX_UI_INDEX);
     }
     else
     {
@@ -153,22 +155,24 @@ static void client_ui(void)
         refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
 
-        refereeClientUiOperate(UI_HIDE_FIGURE, 19);
+        refereeClientUiOperate(UI_HIDE_FIGURE, SPLIT_LINE_3_UI_INDEX_UI_INDEX);
     }
 
-    if (getVisualAidUi() == VAU_NONE)
-    {
-        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_0_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_1_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_2_UI_INDEX);
-    }
-    else
+    // 视觉辅助UI
+    if (checkIfNeedShowSilverVau())
     {
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_0_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_1_UI_INDEX);
         refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_2_UI_INDEX);
     }
+    else
+    {
+        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_0_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_1_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_2_UI_INDEX);
+    }
 
+    // 存矿辅助UI 基本没用 但是懒 没删
     if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && checkIfStoragePushInOverTime())
     {
         refereeClientUiOperate(UI_DISPLAY_FIGURE, STORAGE_PUSH_IN_OVERTIME_UI_INDEX);

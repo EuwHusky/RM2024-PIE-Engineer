@@ -26,11 +26,12 @@ typedef enum EngineerBehavior
     ENGINEER_BEHAVIOR_AUTO_STORAGE_POP,  // 自动取矿
 } engineer_behavior_e;
 
-typedef enum EngineerVisualAidUiType
+typedef enum EngineerSilverMiningTarget
 {
-    VAU_NONE = 0,
-    VAU_SILVER,
-} engineer_visual_aid_ui_type_e;
+    SILVER_LEFT = 0,
+    SILVER_MID,
+    SILVER_RIGHT,
+} engineer_silver_mining_target_e;
 
 typedef struct EngineerBehaviorManager
 {
@@ -71,7 +72,8 @@ typedef struct EngineerBehaviorManager
     bool arm_switch_solution;
     bool arm_grab;
     bool reset_ui;
-    engineer_visual_aid_ui_type_e visual_aid_ui;
+    bool show_silver_vau;
+    engineer_silver_mining_target_e silver_target;
     bool motor_failure_detected;
     uint32_t motor_failure_detect_timer;
 
@@ -109,7 +111,8 @@ extern bool checkIfArmNeedSwitchSolution(void);
 extern bool getArmGrabMode(void);
 extern bool checkIfNeedResetUi(void);
 extern bool checkIfNeedRebootCore(void);
-extern engineer_visual_aid_ui_type_e getVisualAidUi(void);
+extern bool checkIfNeedShowSilverVau(void);
+extern engineer_silver_mining_target_e getSilverTarget(void);
 extern bool checkIfMotorFailureDetected(void);
 
 #endif /* _BEHAVIOR_TASK_H__ */

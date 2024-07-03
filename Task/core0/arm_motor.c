@@ -325,11 +325,10 @@ void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm)
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 1.8f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 1.8f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.35f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT],
-                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 6.0f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT],
-                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 6.0f);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.3f);
+        // 末端锥齿电机速度不能太快，不然结构会错位，具体原因没有排查出来，可能是结构问题
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED);
     }
     else if (scara_arm->behavior == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH)
     {
@@ -337,28 +336,45 @@ void arm_motor_set_max_speed(engineer_scara_arm_s *scara_arm)
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.2f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.2f);
-        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK],
-                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.6f);
-        if (scara_arm->storage_push_step < 5u) /*STORAGE_PUSH_STEP_SAFE_FOLD*/
+
+        if (scara_arm->storage_push_step == 5u) /*STORAGE_PUSH_STEP_SAFE_FOLD*/
         {
-            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
-                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 1.8f);
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.0f);
         }
         else
+        {
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_BACK],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 3.6f);
+        }
+
+        if (scara_arm->storage_push_step == 1u) /*STORAGE_PUSH_STEP_START*/
+        {
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 2.0f);
+        }
+        else if (scara_arm->storage_push_step == 5u) /*STORAGE_PUSH_STEP_SAFE_FOLD*/
         {
             rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
                                 ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 6.0f);
         }
+        else
+        {
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT],
+                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED / JOINT2_REDUCTION * 1.8f);
+        }
+
         if (scara_arm->storage_push_step == 3u) /*STORAGE_PUSH_STEP_PUSH_IN*/
         {
-            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT],
-                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.8f);
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.8f);
         }
         else
         {
-            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4],
-                                ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.35f);
+            rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT4], ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.2f);
         }
+
+        rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT],
+                            ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.8f);
         rflMotorSetMaxSpeed(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT],
                             ENGINEER_ARM_AUTO_OPERATION_BASE_SPEED * 0.8f);
     }

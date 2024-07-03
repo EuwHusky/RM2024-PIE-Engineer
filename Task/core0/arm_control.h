@@ -109,11 +109,12 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 
 #define SILVER_MINING_STEP_INIT (0u)
 #define SILVER_MINING_STEP_START (1u)
-#define SILVER_MINING_STEP_READY (2u)
-#define SILVER_MINING_STEP_GRAB (3u)
-#define SILVER_MINING_STEP_LIFT (4u)
-#define SILVER_MINING_STEP_WAIT (5u)
-#define SILVER_MINING_STEP_OK (6u)
+#define SILVER_MINING_STEP_MOVE (2u)
+#define SILVER_MINING_STEP_READY (3u)
+#define SILVER_MINING_STEP_GRAB (4u)
+#define SILVER_MINING_STEP_LIFT (5u)
+#define SILVER_MINING_STEP_WAIT (6u)
+#define SILVER_MINING_STEP_OK (7u)
 
 /* =============================================== 自动控制 金矿参数 =============================================== */
 

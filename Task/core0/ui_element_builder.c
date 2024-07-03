@@ -1,3 +1,12 @@
+/**
+ * @file ui_element_builder.c
+ *
+ * X,Y
+ * 屏幕左下角坐标为 0,0
+ * 屏幕右上角坐标为 1920,1080
+ * 屏幕中心点坐标为 960,540
+ */
+
 #include "ui_element_builder.h"
 
 #include "algo_data_limiting.h"
@@ -9,13 +18,6 @@
 #include "arm_task.h"
 #include "behavior_task.h"
 #include "storage_task.h"
-
-/**
- * X,Y
- * 屏幕左下角坐标为 0,0
- * 屏幕右上角坐标为 1920,1080
- * 屏幕中心点坐标为 960,540
- */
 
 void uiModeIndicatorBuilder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
@@ -117,10 +119,7 @@ void uiMotorStatusIndicatorBuilder(interaction_figure_t *figure, figure_operatio
 }
 
 /**
- * @brief 其实是用来让操作手看图传对没对准的竖线
- *
- * @param figure
- * @param figure_operation_type
+ * @brief 其实是图传云台校准线，用来让操作手看图传归位是否准确
  */
 void uiSplitLine3Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {

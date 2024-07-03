@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 6     // 输出数据的周期
+#define PRINT_TIME_MS 10    // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -168,11 +168,6 @@ void print_task(void *pvParameters)
             //         arm_print->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
-            sprintf((char *)test_txt, "%d,%d,%7.4f,%7.4f,%7.4f,%7.4f,%6.3f,%6.3f,%6.3f\r\n", behavior_print->behavior,
-                    arm_print->start_up_status, arm_print->set_joints_value[JOINT_4] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_print->joints_value[JOINT_4] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_print->joints_motors[MOTOR_JOINT4].speed_, arm_print->joints_motors[MOTOR_JOINT4].torque_,
-                    arm_print->pose_6d[POSE_X], arm_print->pose_6d[POSE_Y], arm_print->pose_6d[POSE_YAW]);
             // sprintf((char *)test_txt, "%d,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n", behavior_print->behavior,
             //         arm_print->set_joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->set_joints_value[JOINT_3] * RADIAN_TO_DEGREE_FACTOR,
@@ -186,10 +181,15 @@ void print_task(void *pvParameters)
             //         arm_print->pose_6d[4], arm_print->pose_6d[5], arm_print->printer[0], arm_print->printer[1],
             //         arm_print->printer[2]);
             /*银矿动作调试*/
-            // sprintf((char *)test_txt, "%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n", arm_print->silver_mining_step,
-            //         arm_print->set_pose_6d[0], arm_print->pose_6d[0], arm_print->set_pose_6d[1],
-            //         arm_print->pose_6d[1], arm_print->set_pose_6d[2], arm_print->pose_6d[2],
-            //         arm_print->set_pose_6d[3], arm_print->pose_6d[3]);
+            // sprintf((char *)test_txt, "%d,%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_print->silver_mining_step, behavior_print->silver_target, arm_print->set_pose_6d[0],
+            //         arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1],
+            //         arm_print->set_pose_6d[2], arm_print->pose_6d[2], arm_print->set_pose_6d[3],
+            //         arm_print->pose_6d[3]);
+            sprintf((char *)test_txt, "%d,%d,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+                    arm_print->silver_mining_step, behavior_print->silver_target, arm_print->set_pose_6d[0],
+                    arm_print->pose_6d[0], arm_print->set_pose_6d[1], arm_print->pose_6d[1], arm_print->set_pose_6d[2],
+                    arm_print->pose_6d[2]);
             /*金矿动作调试*/
             // sprintf((char *)test_txt, "%d,%d,%f,%f\r\n", behavior_print->behavior, arm_print->gold_mining_step,
             //         arm_print->set_joints_value[JOINT_1], arm_print->joints_value[JOINT_1]);
@@ -290,7 +290,6 @@ void print_task(void *pvParameters)
             //         detect_error(ARM_JOINT_56_R_DH), detect_error(CHASSIS_MOTOR_0_DH),
             //         detect_error(CHASSIS_MOTOR_1_DH), detect_error(CHASSIS_MOTOR_2_DH),
             //         detect_error(CHASSIS_MOTOR_3_DH));
-            // sprintf((char *)test_txt, "%d", behavior_print->visual_aid_ui);
 
             uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
                                 core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
