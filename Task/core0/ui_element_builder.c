@@ -128,27 +128,84 @@ void uiSplitLine3Builder(interaction_figure_t *figure, figure_operation_type_e f
 
 /* ================================================================================================================== */
 
-#define AUTO_SILVER_MINING_AID_BOX_X_0 (722)
-#define AUTO_SILVER_MINING_AID_BOX_X_1 (1012)
-#define AUTO_SILVER_MINING_AID_BOX_Y_0 (565)
-#define AUTO_SILVER_MINING_AID_BOX_Y_1 (718)
+// 作业模式预对准线
+#define VAU_PRE_AIM_LEFT_X_0 (313)
+#define VAU_PRE_AIM_LEFT_X_1 (595)
+#define VAU_PRE_AIM_LEFT_Y_0 (582)
+#define VAU_PRE_AIM_LEFT_Y_1 (592)
+#define VAU_PRE_AIM_MID_X_0 (729)
+#define VAU_PRE_AIM_MID_X_1 (1110)
+#define VAU_PRE_AIM_MID_Y_0 (597)
+#define VAU_PRE_AIM_MID_Y_1 (600)
+#define VAU_PRE_AIM_RIGHT_X_0 (1248)
+#define VAU_PRE_AIM_RIGHT_X_1 (1550)
+#define VAU_PRE_AIM_RIGHT_Y_0 (600)
+#define VAU_PRE_AIM_RIGHT_Y_1 (596)
 
+// 取矿模式目标示意框
+
+#define VAU_AIM_LEFT_X_0 (625)
+#define VAU_AIM_LEFT_X_1 (710)
+#define VAU_AIM_LEFT_Y_0 (105)
+#define VAU_AIM_LEFT_Y_1 (207)
+#define VAU_AIM_MID_X_0 (799)
+#define VAU_AIM_MID_X_1 (1095)
+#define VAU_AIM_MID_Y_0 (102)
+#define VAU_AIM_MID_Y_1 (90)
+#define VAU_AIM_RIGHT_X_0 (1278)
+#define VAU_AIM_RIGHT_X_1 (1206)
+#define VAU_AIM_RIGHT_Y_0 (114)
+#define VAU_AIM_RIGHT_Y_1 (204)
+
+// LEFT
 void uiVauAid0Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "va0", figure_operation_type, 9, FIGURE_CYAN, 2, AUTO_SILVER_MINING_AID_BOX_X_0,
-               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_1, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+    {
+        uiPlotLine(figure, "va0", figure_operation_type, 9,
+                   (getSilverTarget() == SILVER_LEFT) ? FIGURE_GREEN : FIGURE_PINK, 5, VAU_AIM_LEFT_X_0,
+                   VAU_AIM_LEFT_X_1, VAU_AIM_LEFT_Y_0, VAU_AIM_LEFT_Y_1);
+    }
+    else
+    {
+        uiPlotLine(figure, "va0", figure_operation_type, 9,
+                   (getSilverTarget() == SILVER_LEFT) ? FIGURE_GREEN : FIGURE_PINK, 5, VAU_PRE_AIM_LEFT_X_0,
+                   VAU_PRE_AIM_LEFT_X_1, VAU_PRE_AIM_LEFT_Y_0, VAU_PRE_AIM_LEFT_Y_1);
+    }
 }
 
+// MID
 void uiVauAid1Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "va1", figure_operation_type, 9, FIGURE_CYAN, 2, AUTO_SILVER_MINING_AID_BOX_X_0,
-               AUTO_SILVER_MINING_AID_BOX_X_0, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+    {
+        uiPlotLine(figure, "va1", figure_operation_type, 9,
+                   (getSilverTarget() == SILVER_MID) ? FIGURE_GREEN : FIGURE_PINK, 5, VAU_AIM_MID_X_0, VAU_AIM_MID_X_1,
+                   VAU_AIM_MID_Y_0, VAU_AIM_MID_Y_1);
+    }
+    else
+    {
+        uiPlotLine(figure, "va1", figure_operation_type, 9,
+                   (getSilverTarget() == SILVER_MID) ? FIGURE_GREEN : FIGURE_PINK, 5, VAU_PRE_AIM_MID_X_0,
+                   VAU_PRE_AIM_MID_X_1, VAU_PRE_AIM_MID_Y_0, VAU_PRE_AIM_MID_Y_1);
+    }
 }
 
+// RIGHT
 void uiVauAid2Builder(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
 {
-    uiPlotLine(figure, "va2", figure_operation_type, 9, FIGURE_CYAN, 2, AUTO_SILVER_MINING_AID_BOX_X_1,
-               AUTO_SILVER_MINING_AID_BOX_X_1, AUTO_SILVER_MINING_AID_BOX_Y_0, AUTO_SILVER_MINING_AID_BOX_Y_1);
+    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
+    {
+        uiPlotLine(figure, "va2", figure_operation_type, 9,
+                   (getSilverTarget() == SILVER_RIGHT) ? FIGURE_GREEN : FIGURE_PINK, 5, VAU_AIM_RIGHT_X_0,
+                   VAU_AIM_RIGHT_X_1, VAU_AIM_RIGHT_Y_0, VAU_AIM_RIGHT_Y_1);
+    }
+    else
+    {
+        uiPlotLine(figure, "va2", figure_operation_type, 9,
+                   (getSilverTarget() == SILVER_RIGHT) ? FIGURE_GREEN : FIGURE_PINK, 5, VAU_PRE_AIM_RIGHT_X_0,
+                   VAU_PRE_AIM_RIGHT_X_1, VAU_PRE_AIM_RIGHT_Y_0, VAU_PRE_AIM_RIGHT_Y_1);
+    }
 }
 
 /* ================================================================================================================== */
