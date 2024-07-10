@@ -287,21 +287,21 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     // setJointStartUpStateOk(JOINT_6, scara_arm->start_up_status); // 只是测试时用来关掉这个关节的归中
     if (checkIfJointNotStartUp(JOINT_6, scara_arm->start_up_status))
     {
-        // scara_arm->set_joints_value[JOINT_6] += JOINT_6_HOMING_STEP_ANGLE;
+        scara_arm->set_joints_value[JOINT_6] += JOINT_6_HOMING_STEP_ANGLE;
 
-        // scara_arm->joint_6_homing_timer++;
+        scara_arm->joint_6_homing_timer++;
 
-        // if ((fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_0) < 2.4f) ||
-        //     (fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_1) < 2.4f) ||
-        //     scara_arm->joint_6_homing_timer > 1000)
-        // {
-        rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, true);
-        rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, true);
+        if ((fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_0) < 2.4f) ||
+            (fabsf(scara_arm->joint_6_encoder_angle - JOINT_6_START_DETECT_ANGLE_1) < 2.4f) ||
+            scara_arm->joint_6_homing_timer > 1000)
+        {
+            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_LEFT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, true);
+            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT56_RIGHT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, true);
 
-        scara_arm->set_joints_value[JOINT_6] = 0.0f;
+            scara_arm->set_joints_value[JOINT_6] = 0.0f;
 
-        setJointStartUpStateOk(JOINT_6, scara_arm->start_up_status);
-        // }
+            setJointStartUpStateOk(JOINT_6, scara_arm->start_up_status);
+        }
     }
 
     /* 关节5 当关节6启动完毕后 向固定方向运动通过机械限位触发角度获取后运动到起始位置 */
@@ -954,7 +954,11 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
         {
             StorageConfirmOperation(STORAGE_POP_OUT);
 
-            scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.05f;
+            if (getStorageCurrentTargetSlot() == STORAGE_FRONT)
+            {
+                scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_X] + 0.05f;
+            }
+            scara_arm->set_pose_6d[POSE_Y] = scara_arm->pose_6d[POSE_Y] - 0.1f;
             scara_arm->set_pose_6d[POSE_Z] = scara_arm->pose_6d[POSE_Z] + 0.05f;
 
             scara_arm->storage_pop_step = STORAGE_POP_STEP_END;
@@ -964,6 +968,44 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     {
         if (fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION)
-            scara_arm->storage_pop_success = true;
+        {
+            scara_arm->storage_pop_time_node = xTaskGetTickCount();
+            scara_arm->storage_pop_step = STORAGE_POP_STEP_SAFE_FOLD;
+        }
+    }
+    else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_SAFE_FOLD)
+    {
+        if (xTaskGetTickCount() - scara_arm->storage_pop_time_node < 600u)
+        {
+            scara_arm->set_pose_6d[POSE_X] = -0.02f;
+            scara_arm->set_pose_6d[POSE_Y] = -0.425f;
+            scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+            scara_arm->set_pose_6d[POSE_YAW] = -145.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
+            if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
+            {
+                scara_arm->set_pose_6d[POSE_PITCH] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
+            }
+            else if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_FORWARD)
+            {
+                scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
+            }
+        }
+        else
+        {
+            scara_arm->set_pose_6d[POSE_X] = 0.232f;
+            scara_arm->set_pose_6d[POSE_Y] = -0.281f;
+            scara_arm->set_pose_6d[POSE_Z] = 0.0f;
+            scara_arm->set_pose_6d[POSE_YAW] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_pose_6d[POSE_PITCH] = 0.0f;
+            scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
+
+            if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < 0.02f &&
+                fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < 0.02f &&
+                fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < 0.02f &&
+                fabsf(scara_arm->pose_6d[POSE_YAW] - scara_arm->set_pose_6d[POSE_YAW]) < 0.07f &&
+                fabsf(scara_arm->pose_6d[POSE_PITCH] - scara_arm->set_pose_6d[POSE_PITCH]) < 0.07f)
+                scara_arm->storage_pop_success = true;
+        }
     }
 }

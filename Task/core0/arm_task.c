@@ -188,6 +188,7 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->storage_push_end_timer = 0;
     scara_arm->storage_push_overtime_timer = 0;
     scara_arm->storage_pop_step = 0;
+    scara_arm->storage_pop_time_node = 0;
 
     arm_model_init(scara_arm);
 

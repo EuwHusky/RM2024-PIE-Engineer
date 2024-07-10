@@ -46,7 +46,7 @@ const robot_status_t *referee_robot_status;
 const custom_robot_data_t *customer_controller;
 const vt_link_remote_control_t *vt_link_rc_p;
 
-ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[256];
+ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[256] = {0};
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
 
 rm_motor_s *motor_0_driver_test;
@@ -145,9 +145,9 @@ void print_task(void *pvParameters)
             /**
              * @brief Gimbal
              */
-            sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
-                    gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
-                    gimbal_print->yaw_motor.angle_.deg);
+            // sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
+            //         gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
+            //         gimbal_print->yaw_motor.angle_.deg);
 
             /**
              * @brief Scara Arm
@@ -165,13 +165,20 @@ void print_task(void *pvParameters)
             //         arm_print->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
-            // sprintf((char *)test_txt, "%d,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n", behavior_print->behavior,
-            //         arm_print->set_joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
+            // sprintf((char *)test_txt,
+            // "%d,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         behavior_print->behavior, arm_print->set_joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->set_joints_value[JOINT_3] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_print->set_joints_value[JOINT_4] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[JOINT_3] * RADIAN_TO_DEGREE_FACTOR,
-            //         arm_print->joints_value[JOINT_4] * RADIAN_TO_DEGREE_FACTOR);
+            //         arm_print->joints_motors[MOTOR_JOINT23_BACK].set_angle_.deg,
+            //         arm_print->joints_motors[MOTOR_JOINT23_FRONT].set_angle_.deg,
+            //         arm_print->joints_motors[MOTOR_JOINT23_BACK].angle_.deg,
+            //         arm_print->joints_motors[MOTOR_JOINT23_FRONT].angle_.deg,
+            //         arm_print->joints_motors[MOTOR_JOINT23_BACK].max_speed_,
+            //         arm_print->joints_motors[MOTOR_JOINT23_FRONT].max_speed_,
+            //         arm_print->joints_motors[MOTOR_JOINT23_BACK].speed_,
+            //         arm_print->joints_motors[MOTOR_JOINT23_FRONT].speed_);
             /*测量位姿及关节4平面坐标*/
             // sprintf((char *)test_txt, "%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f\r\n",
             //         arm_print->pose_6d[0], arm_print->pose_6d[1], arm_print->pose_6d[2], arm_print->pose_6d[3],

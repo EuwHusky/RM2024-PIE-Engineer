@@ -6,6 +6,9 @@
 
 #include "board.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include "dev_motor.h"
 
 #include "algo_filter.h"
@@ -125,6 +128,7 @@ typedef struct EngineerScaraArm
     uint16_t storage_push_end_timer;
     uint16_t storage_push_overtime_timer;
     uint8_t storage_pop_step;
+    TickType_t storage_pop_time_node;
 
     float silver_mining_pose_memory[6]; // 机械臂位置记忆
 
