@@ -183,7 +183,10 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
         break;
     case ENGINEER_BEHAVIOR_MOVE:
     case ENGINEER_BEHAVIOR_AUTO_GOLD_MINING: // 取大资源岛特殊处理
-        gimbal_move_control(gimbal);
+        if (gimbal->reset_success)
+            gimbal_move_control(gimbal);
+        else
+            gimbal_no_force_control(gimbal);
         break;
     case ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING:
         gimbal_operation_homing_control(gimbal);

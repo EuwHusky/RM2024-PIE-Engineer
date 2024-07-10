@@ -304,23 +304,18 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     else
         behavior_manager->km_disable_trigger_timer = 0;
 
-    /**
-     * @brief 机动 -> 作业 / 作业 -> 机动
-     * 键鼠 短按F键触发切换
-     */
-    if (checkIfRcKeyFallingEdgeDetected(RC_F) && *behavior_manager->arm_reset_success &&
-        *behavior_manager->gimbal_reset_success)
-    {
-        if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-            (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION && checkIfArmInDefaultPose()))
-            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
-        else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
-                 behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
-            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
-    }
-
     if (checkIsRcKeyPressed(RC_CTRL))
     {
+        /**
+         * @brief 无力模式强制机动 用于死后无法复位的情况下机动脱困
+         * 键鼠 Ctrl+F 触发切换
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_F) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE &&
+            !*behavior_manager->arm_reset_success && !*behavior_manager->gimbal_reset_success)
+        {
+            update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
+        }
+
         /**
          * @brief 手动作业 -> 自动取银矿
          * 键鼠 CTRL+Z 触发切换
@@ -383,6 +378,20 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     }
     else if (!checkIsRcKeyPressed(RC_CTRL))
     {
+        /**
+         * @brief 机动 -> 作业 / 作业 -> 机动
+         * 键鼠 短按F键触发切换
+         */
+        if (checkIfRcKeyFallingEdgeDetected(RC_F) && *behavior_manager->arm_reset_success &&
+            *behavior_manager->gimbal_reset_success)
+        {
+            if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE ||
+                (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION && checkIfArmInDefaultPose()))
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
+            else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MOVE)
+                update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING);
+        }
+
         if (checkIfRcKeyFallingEdgeDetected(RC_Z))
         {
             /**
