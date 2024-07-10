@@ -38,16 +38,20 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 /* =============================================== 自动控制 通用参数 =============================================== */
 
 /**
- * @brief 距离最小允许偏差 控制距离时预期值与测量值相差小于此值时可认为控制已达到预期
+ * @brief 静止时距离最小允许偏差 控制距离时预期值与测量值相差小于此值时可认为控制已达到预期
+ *        运动时距离最小允许偏差 此值相比静止时更大 是为了在运动过程中减少机械臂精准运动到插值点浪费的时间
  * @单位 米 m
  */
 #define TOLERABLE_DISTANCE_DEVIATION (0.004f)
+#define TOLERABLE_DISTANCE_DEVIATION_IN_MOVE (0.02f)
 
 /**
- * @brief 角度最小允许偏差 控制角度时预期值与测量值相差小于此值时可认为控制已达到预期
+ * @brief 静止时角度最小允许偏差 控制角度时预期值与测量值相差小于此值时可认为控制已达到预期
+ *        运动时角度最小允许偏差 此值相比静止时更大 是为了在运动过程中减少机械臂精准运动到插值点浪费的时间
  * @单位 弧度 radian
  */
 #define TOLERABLE_ANGLE_DEVIATION (0.04f)
+#define TOLERABLE_ANGLE_DEVIATION_IN_MOVE (0.07f)
 
 /**
  * @brief 距离偏离检测阈值 控制距离时预期值与测量值相差大于此值时可认为控制已偏离预期
