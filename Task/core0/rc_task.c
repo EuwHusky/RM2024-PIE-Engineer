@@ -19,11 +19,11 @@
 
 static void dbus_uart_init(void);
 
-static void vt_link_relay_pack_0_can_rx_callback(void);
-static void vt_link_relay_pack_1_can_rx_callback(void);
-static void vt_link_relay_pack_2_can_rx_callback(void);
-static void vt_link_relay_pack_3_can_rx_callback(void);
-static void vt_link_relay_pack_4_can_rx_callback(void);
+static void vt_link_relay_pack_0_can_rx_callback(uint8_t *rx_data);
+static void vt_link_relay_pack_1_can_rx_callback(uint8_t *rx_data);
+static void vt_link_relay_pack_2_can_rx_callback(uint8_t *rx_data);
+static void vt_link_relay_pack_3_can_rx_callback(uint8_t *rx_data);
+static void vt_link_relay_pack_4_can_rx_callback(uint8_t *rx_data);
 
 remote_control_s *rc_pointer;
 
@@ -128,7 +128,7 @@ static void dbus_uart_init(void)
     dmamux_config(BOARD_DMAMUX, DBUS_UART_RX_DMAMUX_CHN, DBUS_UART_RX_DMA_REQ, true);
 }
 
-static void vt_link_relay_pack_0_can_rx_callback(void)
+static void vt_link_relay_pack_0_can_rx_callback(uint8_t *rx_data)
 {
     uint32_t temp;
     float temp_out;
@@ -142,7 +142,7 @@ static void vt_link_relay_pack_0_can_rx_callback(void)
 
     detect_hook_in_isr(VT_REFEREE_DH);
 }
-static void vt_link_relay_pack_1_can_rx_callback(void)
+static void vt_link_relay_pack_1_can_rx_callback(uint8_t *rx_data)
 {
     uint32_t temp;
     float temp_out;
@@ -156,7 +156,7 @@ static void vt_link_relay_pack_1_can_rx_callback(void)
 
     detect_hook_in_isr(VT_REFEREE_DH);
 }
-static void vt_link_relay_pack_2_can_rx_callback(void)
+static void vt_link_relay_pack_2_can_rx_callback(uint8_t *rx_data)
 {
     uint32_t temp;
     float temp_out;
@@ -170,13 +170,13 @@ static void vt_link_relay_pack_2_can_rx_callback(void)
 
     detect_hook_in_isr(VT_REFEREE_DH);
 }
-static void vt_link_relay_pack_3_can_rx_callback(void)
+static void vt_link_relay_pack_3_can_rx_callback(uint8_t *rx_data)
 {
     memcpy(&vt_rc_data, vt_link_relay_data[3], 8u);
 
     detect_hook_in_isr(VT_REFEREE_DH);
 }
-static void vt_link_relay_pack_4_can_rx_callback(void)
+static void vt_link_relay_pack_4_can_rx_callback(uint8_t *rx_data)
 {
     vt_rc_data.keyboard_value = ((vt_link_relay_data[4][1] << 8) | vt_link_relay_data[4][0]);
     cc_data.key = vt_link_relay_data[4][7];

@@ -141,6 +141,8 @@ void print_task(void *pvParameters)
             //         chassis_print->model.set_forward_vector.deg, chassis_print->model.forward_vector_->deg,
             //         chassis_print->model.speed_vector_[0], chassis_print->model.speed_vector_[1],
             //         chassis_print->model.speed_vector_[2]);
+            sprintf((char *)test_txt, "%7.4f,%7.4f\r\n", chassis_print->lidar_obstacle_distance,
+                    chassis_print->lidar_obstacle_surface_angle);
 
             /**
              * @brief Gimbal

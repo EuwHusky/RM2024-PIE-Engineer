@@ -22,7 +22,7 @@ static void gimbal_move_control(engineer_gimbal_s *gimbal);
 static void gimbal_operation_homing_control(engineer_gimbal_s *gimbal);
 static void gimbal_manual_operation_control(engineer_gimbal_s *gimbal);
 static void gimbal_auto_operation_control(engineer_gimbal_s *gimbal);
-static void gimbal_motor_yaw_can_rx_callback(void);
+static void gimbal_motor_yaw_can_rx_callback(uint8_t *rx_data);
 
 static engineer_gimbal_s gimbal;
 
@@ -302,7 +302,7 @@ static void gimbal_auto_operation_control(engineer_gimbal_s *gimbal)
     rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_OPERATION_BEHAVIOR_GIMBAL_SET_ANGLE);
 }
 
-static void gimbal_motor_yaw_can_rx_callback(void)
+static void gimbal_motor_yaw_can_rx_callback(uint8_t *rx_data)
 {
     detect_hook(GIMBAL_MOTOR_YAW_DH);
 }

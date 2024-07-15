@@ -20,10 +20,11 @@ static void chassis_update_and_execute(engineer_chassis_s *chassis);
 static void chassis_stop_control(engineer_chassis_s *chassis);
 static void chassis_normal_control(engineer_chassis_s *chassis);
 static void chassis_slowly_control(engineer_chassis_s *chassis);
-static void chassis_motor_0_can_rx_callback(void);
-static void chassis_motor_1_can_rx_callback(void);
-static void chassis_motor_2_can_rx_callback(void);
-static void chassis_motor_3_can_rx_callback(void);
+static void chassis_motor_0_can_rx_callback(uint8_t *rx_data);
+static void chassis_motor_1_can_rx_callback(uint8_t *rx_data);
+static void chassis_motor_2_can_rx_callback(uint8_t *rx_data);
+static void chassis_motor_3_can_rx_callback(uint8_t *rx_data);
+static void lidar_can_rx_callback(uint8_t *rx_data);
 
 static engineer_chassis_s chassis;
 
@@ -109,6 +110,9 @@ static void chassis_init(engineer_chassis_s *chassis)
     rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x202, chassis_motor_1_can_rx_callback);
     rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x203, chassis_motor_2_can_rx_callback);
     rflCanRxMessageBoxAddRxCallbackFunc(CHASSIS_MOTORS_CAN_ORDINAL, 0x204, chassis_motor_3_can_rx_callback);
+
+    rflCanRxMessageBoxAddId(4, 0x500); // 激光雷达数据
+    rflCanRxMessageBoxAddRxCallbackFunc(4, 0x500, lidar_can_rx_callback);
 
     // 底盘电机
     while (detect_error(CHASSIS_MOTOR_0_DH) || detect_error(CHASSIS_MOTOR_1_DH) || detect_error(CHASSIS_MOTOR_2_DH) ||
@@ -373,19 +377,27 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
     }
 }
 
-static void chassis_motor_0_can_rx_callback(void)
+static void chassis_motor_0_can_rx_callback(uint8_t *rx_data)
 {
     detect_hook_in_isr(CHASSIS_MOTOR_0_DH);
 }
-static void chassis_motor_1_can_rx_callback(void)
+static void chassis_motor_1_can_rx_callback(uint8_t *rx_data)
 {
     detect_hook_in_isr(CHASSIS_MOTOR_1_DH);
 }
-static void chassis_motor_2_can_rx_callback(void)
+static void chassis_motor_2_can_rx_callback(uint8_t *rx_data)
 {
     detect_hook_in_isr(CHASSIS_MOTOR_2_DH);
 }
-static void chassis_motor_3_can_rx_callback(void)
+static void chassis_motor_3_can_rx_callback(uint8_t *rx_data)
 {
     detect_hook_in_isr(CHASSIS_MOTOR_3_DH);
+}
+
+static void lidar_can_rx_callback(uint8_t *rx_data)
+{
+    memcpy(&chassis.lidar_obstacle_distance, rx_data + 0u, sizeof(float));
+    memcpy(&chassis.lidar_obstacle_surface_angle, rx_data + 4u, sizeof(float));
+
+    detect_hook_in_isr(LIDAR_DH);
 }

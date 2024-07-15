@@ -35,6 +35,8 @@ enum Detect_List
 
     GIMBAL_MOTOR_YAW_DH, /* 云台YAW轴电机 */
 
+    LIDAR_DH, /* 激光雷达 */
+
 #else
     DUAL_COMM_DH = 0, /* 双核通信 */
 
