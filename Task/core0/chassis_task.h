@@ -34,6 +34,7 @@ typedef struct EngineerChassis
     ramp_function_source_t speed_ramper[3]; // 速度斜坡化滤波器
     float set_speed_vector[3];              // 底盘预期速度vx vy wz
     rfl_angle_s set_control_angle;
+    rfl_angle_s set_control_angle_memory;
     float *wheel_set_speed;
     float follow_offset;
 
@@ -64,5 +65,8 @@ extern float getChassisFollowOffsetMemory(void);
 #define ENGINEER_CHASSIS_RM_M3508_SPEED_PID_KD (0.0f)
 #define ENGINEER_CHASSIS_RM_M3508_SPEED_PID_MAX_IOUT (10000.0f)
 #define ENGINEER_CHASSIS_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
+
+#define SILVER_MINING_X_ALIGN_KP (2.0f)
+#define SILVER_MINING_YAW_ALIGN_KP (0.004f)
 
 #endif /* _CHASSIS_TASK_H__ */
