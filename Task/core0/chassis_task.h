@@ -66,7 +66,16 @@ extern float getChassisFollowOffsetMemory(void);
 #define ENGINEER_CHASSIS_RM_M3508_SPEED_PID_MAX_IOUT (10000.0f)
 #define ENGINEER_CHASSIS_RM_M3508_SPEED_PID_MAX_OUT (16000.0f)
 
-#define SILVER_MINING_X_ALIGN_KP (2.0f)
-#define SILVER_MINING_YAW_ALIGN_KP (0.004f)
+/**
+ * @brief 激光雷达发射面到底盘边沿距离+底盘边沿到小资源岛距离
+ */
+#define SILVER_MINING_X_DISTANCE_OFFSET (0.39f)
+/**
+ * @brief 激光雷达测得小资源岛角度平行补偿
+ */
+#define SILVER_MINING_YAW_ANGLE_OFFSET (1.2f)
+
+#define SILVER_MINING_X_ALIGN_KP (3.0f)
+#define SILVER_MINING_YAW_ALIGN_KP (0.006f)
 
 #endif /* _CHASSIS_TASK_H__ */

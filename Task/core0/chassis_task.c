@@ -389,6 +389,7 @@ static void chassis_silver_control(engineer_chassis_s *chassis)
 {
     float x_sign = 0.0f;
     float y_sign = 0.0f;
+    float z_sign = 0.0f;
     if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
         x_sign = 1.0f;
     else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
@@ -397,23 +398,39 @@ static void chassis_silver_control(engineer_chassis_s *chassis)
         y_sign = 1.0f;
     else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
         y_sign = -1.0f;
+    if (!checkIsRcKeyPressed(RC_CTRL))
+    {
+        if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+            z_sign = 1.0f;
+        else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+            z_sign = -1.0f;
+    }
 
     float shift_speed_multiplier = 0.42f;
     if (checkIsRcKeyPressed(RC_SHIFT))
         shift_speed_multiplier = 1.0f;
 
-    chassis->set_speed_vector[0] = rflRampCalc(
-        chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f,
-        x_sign * CHASSIS_VX_MAX / 15.0f * shift_speed_multiplier +
-            ((chassis->lidar_obstacle_distance - 0.3f) * SILVER_MINING_X_ALIGN_KP) * shift_speed_multiplier);
+    float x_align_distance = (chassis->lidar_obstacle_distance - SILVER_MINING_X_DISTANCE_OFFSET);
+    float yaw_align_angle = (chassis->lidar_obstacle_surface_angle - SILVER_MINING_YAW_ANGLE_OFFSET);
+
+    float x_align_speed =
+        fabsf(x_align_distance) < 0.2f ? (x_align_distance * SILVER_MINING_X_ALIGN_KP * shift_speed_multiplier) : 0.0f;
+    float yaw_align_speed =
+        fabsf(yaw_align_angle) < 10.0f ? (yaw_align_angle * SILVER_MINING_YAW_ALIGN_KP * shift_speed_multiplier) : 0.0f;
+
+    chassis->set_speed_vector[0] =
+        rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f,
+                    x_sign * CHASSIS_VX_MAX / 15.0f * shift_speed_multiplier + x_align_speed);
     chassis->set_speed_vector[1] = rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 2.0f,
                                                y_sign * CHASSIS_VY_MAX / 10.0f * shift_speed_multiplier);
     chassis->set_speed_vector[2] = 0.0f;
 
     rflAngleUpdate(&chassis->set_control_angle, RFL_ANGLE_FORMAT_DEGREE,
-                   rflFloatLoopConstrain(chassis->set_control_angle.deg - chassis->lidar_obstacle_surface_angle *
-                                                                              SILVER_MINING_YAW_ALIGN_KP *
-                                                                              shift_speed_multiplier,
+                   rflFloatLoopConstrain(chassis->set_control_angle.deg +
+                                             rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
+                                                         z_sign * CHASSIS_WZ_MAX / 6.0f * shift_speed_multiplier) *
+                                                 RADIAN_TO_DEGREE_FACTOR * CHASSIS_CONTROL_TIME -
+                                             yaw_align_speed,
                                          -DEG_PI, DEG_PI));
 }
 
