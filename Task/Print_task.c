@@ -141,8 +141,8 @@ void print_task(void *pvParameters)
             //         chassis_print->model.set_forward_vector.deg, chassis_print->model.forward_vector_->deg,
             //         chassis_print->model.speed_vector_[0], chassis_print->model.speed_vector_[1],
             //         chassis_print->model.speed_vector_[2]);
-            sprintf((char *)test_txt, "%7.4f,%7.4f\r\n", chassis_print->lidar_obstacle_distance,
-                    chassis_print->lidar_obstacle_surface_angle);
+            // sprintf((char *)test_txt, "%7.4f,%7.4f\r\n", chassis_print->lidar_obstacle_distance,
+            //         chassis_print->lidar_obstacle_surface_angle);
 
             /**
              * @brief Gimbal
@@ -167,6 +167,7 @@ void print_task(void *pvParameters)
             //         arm_print->joints_value[3] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[4] * RADIAN_TO_DEGREE_FACTOR,
             //         arm_print->joints_value[5] * RADIAN_TO_DEGREE_FACTOR);
+            sprintf((char *)test_txt, "%6.3f,%6.3f\r\n", arm_print->joints_value[0], arm_print->set_pose_6d[POSE_Z]);
             // sprintf((char *)test_txt,
             // "%d,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
             //         behavior_print->behavior, arm_print->set_joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,

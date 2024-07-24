@@ -413,10 +413,14 @@ static void chassis_silver_control(engineer_chassis_s *chassis)
     float x_align_distance = (chassis->lidar_obstacle_distance - SILVER_MINING_X_DISTANCE_OFFSET);
     float yaw_align_angle = (chassis->lidar_obstacle_surface_angle - SILVER_MINING_YAW_ANGLE_OFFSET);
 
-    float x_align_speed =
-        fabsf(x_align_distance) < 0.2f ? (x_align_distance * SILVER_MINING_X_ALIGN_KP * shift_speed_multiplier) : 0.0f;
-    float yaw_align_speed =
-        fabsf(yaw_align_angle) < 10.0f ? (yaw_align_angle * SILVER_MINING_YAW_ALIGN_KP * shift_speed_multiplier) : 0.0f;
+    // 安全启用条件
+    // 强制手动控制
+    float x_align_speed = (fabsf(x_align_distance) < 0.3f && !checkIsRcKeyPressed(RC_CTRL))
+                              ? (x_align_distance * SILVER_MINING_X_ALIGN_KP * shift_speed_multiplier)
+                              : 0.0f;
+    float yaw_align_speed = (fabsf(yaw_align_angle) < 12.0f && !checkIsRcKeyPressed(RC_CTRL))
+                                ? (yaw_align_angle * SILVER_MINING_YAW_ALIGN_KP * shift_speed_multiplier)
+                                : 0.0f;
 
     chassis->set_speed_vector[0] =
         rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f,

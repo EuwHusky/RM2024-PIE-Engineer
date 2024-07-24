@@ -502,7 +502,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     {
         scara_arm->set_pose_6d[POSE_X] = 0.25f;
         scara_arm->set_pose_6d[POSE_Y] = 0.0f;
-        scara_arm->set_pose_6d[POSE_Z] = 0.28f;
+        scara_arm->set_pose_6d[POSE_Z] = SILVER_MINING_POSE_Z;
         scara_arm->set_pose_6d[POSE_YAW] = 0.0f;
         scara_arm->set_pose_6d[POSE_PITCH] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
         scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
@@ -521,9 +521,9 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         if (getSilverTarget() == SILVER_MID)
             scara_arm->set_pose_6d[POSE_Y] = 0.0f;
         else if (getSilverTarget() == SILVER_LEFT)
-            scara_arm->set_pose_6d[POSE_Y] = 0.27f;
+            scara_arm->set_pose_6d[POSE_Y] = SILVER_MINING_POSE_Y_OFFSET;
         else if (getSilverTarget() == SILVER_RIGHT)
-            scara_arm->set_pose_6d[POSE_Y] = -0.27f;
+            scara_arm->set_pose_6d[POSE_Y] = -SILVER_MINING_POSE_Y_OFFSET;
 
         if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION)
@@ -579,7 +579,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     {
         scara_arm->set_pose_6d[POSE_Z] += 0.0005f;
 
-        if (scara_arm->pose_6d[POSE_Z] > 0.42f)
+        if (scara_arm->pose_6d[POSE_Z] > 0.4f)
         {
             // 清除历史误操作
             if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
@@ -600,7 +600,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         {
             setArmGrabMode(false);
 
-            scara_arm->set_pose_6d[POSE_Z] = 0.28f;
+            scara_arm->set_pose_6d[POSE_Z] = SILVER_MINING_POSE_Z;
             scara_arm->set_pose_6d[POSE_YAW] = 0.0f;
             scara_arm->set_pose_6d[POSE_PITCH] = -90.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_pose_6d[POSE_ROLL] = 0.0f;
@@ -658,7 +658,7 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
         // 普通完整流程
         else
         {
-            scara_arm->set_joints_value[JOINT_1] = 0.0f;
+            scara_arm->set_joints_value[JOINT_1] = 0.07f;
             scara_arm->set_joints_value[JOINT_2] = 85.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_joints_value[JOINT_3] = 5.0f * DEGREE_TO_RADIAN_FACTOR;
             scara_arm->set_joints_value[JOINT_4] = 0.0f;

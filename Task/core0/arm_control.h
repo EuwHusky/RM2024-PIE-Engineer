@@ -71,7 +71,7 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
  */
 #define OPERATION_MODE_DEFAULT_X (0.36f)
 #define OPERATION_MODE_DEFAULT_Y (0.0f)
-#define OPERATION_MODE_DEFAULT_Z (0.0f)
+#define OPERATION_MODE_DEFAULT_Z (0.02f)
 #define OPERATION_MODE_DEFAULT_YAW (0.0f)
 #define OPERATION_MODE_DEFAULT_PITCH (0.0f)
 #define OPERATION_MODE_DEFAULT_ROLL (0.0f)
@@ -119,6 +119,8 @@ extern void arm_mode_control(engineer_scara_arm_s *scara_arm);
 #define SILVER_MINING_STEP_LIFT (5u)
 #define SILVER_MINING_STEP_WAIT (6u)
 #define SILVER_MINING_STEP_OK (7u)
+#define SILVER_MINING_POSE_Z (0.25f)          // 高度
+#define SILVER_MINING_POSE_Y_OFFSET (0.2675f) // 左右矿偏移量
 
 /* =============================================== 自动控制 金矿参数 =============================================== */
 

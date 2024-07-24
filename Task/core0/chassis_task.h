@@ -69,11 +69,11 @@ extern float getChassisFollowOffsetMemory(void);
 /**
  * @brief 激光雷达发射面到底盘边沿距离+底盘边沿到小资源岛距离
  */
-#define SILVER_MINING_X_DISTANCE_OFFSET (0.39f)
+#define SILVER_MINING_X_DISTANCE_OFFSET (0.394f)
 /**
  * @brief 激光雷达测得小资源岛角度平行补偿
  */
-#define SILVER_MINING_YAW_ANGLE_OFFSET (1.2f)
+#define SILVER_MINING_YAW_ANGLE_OFFSET (1.15f)
 
 #define SILVER_MINING_X_ALIGN_KP (3.0f)
 #define SILVER_MINING_YAW_ALIGN_KP (0.006f)
