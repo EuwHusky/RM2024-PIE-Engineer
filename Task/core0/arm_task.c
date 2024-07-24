@@ -155,9 +155,12 @@ void resetArmPose(void)
 
 void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution)
 {
-    scara_arm.solution = solution;
 
-    scara_arm.set_pose_6d[POSE_X] = 0.65f;
+    if (scara_arm.pose_6d[POSE_Z] > 0.2f)
+    {
+        scara_arm.solution = solution;
+        scara_arm.set_pose_6d[POSE_X] = 0.65f;
+    }
     scara_arm.set_pose_6d[POSE_Z] = ENGINEER_ARM_Z_MAX_DISTANCE / 2.0f;
 }
 
