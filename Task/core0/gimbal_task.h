@@ -22,6 +22,8 @@ typedef struct EngineerGimbal
     bool move_homing_success;
     bool operation_homing_success;
 
+    bool enable_scout_mode;
+
     rfl_angle_s set_gimbal_angle; // 设定的云台相对于机体的角度，以机械臂方向为0点，逆时针为正
     rfl_angle_s gimbal_angle;     // 云台相对于机体的角度，以机械臂方向为0点，逆时针为正
 
@@ -53,7 +55,7 @@ extern float getGimbalYawAngle(rfl_angle_format_e angle_format);
 #define GIMBAL_YAW_HOMING_ANGLE (-125.0f)
 #define GIMBAL_YAW_START_ANGLE (90.0f)
 
-#define ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE (GIMBAL_YAW_START_ANGLE)
+#define ENGINEER_MOVE_BEHAVIOR_GIMBAL_DEFAULT_SET_ANGLE (GIMBAL_YAW_START_ANGLE)
 #define ENGINEER_OPERATION_BEHAVIOR_GIMBAL_SET_ANGLE (0.0f)
 
 #define ENGINEER_GIMBAL_YAW_MAX_ANGLE (90.0f)

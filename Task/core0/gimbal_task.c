@@ -158,15 +158,22 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
             rflMotorSetDegAngleLimit(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_GIMBAL_YAW_MOTOR_MAX_ANGLE,
                                      ENGINEER_GIMBAL_YAW_MOTOR_MIN_ANGLE);
         }
+
+        if (gimbal->behavior == ENGINEER_BEHAVIOR_MOVE)
+        {
+            checkIfRcKeyFallingEdgeDetected(RC_LEFT);
+            checkIfRcKeyFallingEdgeDetected(RC_RIGHT);
+        }
+        gimbal->enable_scout_mode = false;
     }
 
     // 根据不同模式使用不同控制
 
     if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET || gimbal->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
         rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.6f);
-    else if (gimbal->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
-             getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
-        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.4f);
+    // else if (gimbal->behavior == ENGINEER_BEHAVIOR_AUTO_OPERATION_HOMING &&
+    //          getEngineerLastBehavior() == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING)
+    //     rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.4f);
     else
         rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.8f);
 
@@ -269,7 +276,7 @@ static void gimbal_reset_control(engineer_gimbal_s *gimbal)
 
 static void gimbal_move_homing_control(engineer_gimbal_s *gimbal)
 {
-    rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE);
+    rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_MOVE_BEHAVIOR_GIMBAL_DEFAULT_SET_ANGLE);
 
     if (fabsf(gimbal->gimbal_angle.deg - gimbal->set_gimbal_angle.deg) < 0.8f)
     {
@@ -279,7 +286,16 @@ static void gimbal_move_homing_control(engineer_gimbal_s *gimbal)
 
 static void gimbal_move_control(engineer_gimbal_s *gimbal)
 {
-    rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE, ENGINEER_MOVE_BEHAVIOR_GIMBAL_SET_ANGLE);
+    if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
+        gimbal->enable_scout_mode = true;
+    if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
+        gimbal->enable_scout_mode = false;
+
+    if (gimbal->behavior != ENGINEER_BEHAVIOR_MOVE)
+        gimbal->enable_scout_mode = false;
+
+    rflAngleUpdate(&gimbal->set_gimbal_angle, RFL_ANGLE_FORMAT_DEGREE,
+                   gimbal->enable_scout_mode ? 0.0f : ENGINEER_MOVE_BEHAVIOR_GIMBAL_DEFAULT_SET_ANGLE);
 }
 
 static void gimbal_operation_homing_control(engineer_gimbal_s *gimbal)

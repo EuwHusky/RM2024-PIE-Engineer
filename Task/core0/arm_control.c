@@ -529,10 +529,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
             fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION)
         {
             // 清除历史误操作
-            if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
-                ;
-            if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
-                ;
+            checkIfRcKeyFallingEdgeDetected(RC_LEFT);
+            checkIfRcKeyFallingEdgeDetected(RC_RIGHT);
 
             scara_arm->last_silver_target = getSilverTarget();
             scara_arm->silver_mining_step = SILVER_MINING_STEP_READY;
@@ -582,10 +580,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
         if (scara_arm->pose_6d[POSE_Z] > 0.4f)
         {
             // 清除历史误操作
-            if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
-                ;
-            if (checkIfRcKeyFallingEdgeDetected(RC_RIGHT))
-                ;
+            checkIfRcKeyFallingEdgeDetected(RC_LEFT);
+            checkIfRcKeyFallingEdgeDetected(RC_RIGHT);
 
             scara_arm->silver_mining_step = SILVER_MINING_STEP_WAIT;
         }
