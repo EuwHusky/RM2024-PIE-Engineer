@@ -411,7 +411,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
             {
                 behavior_manager->silver_target =
-                    ((behavior_manager->silver_target == SILVER_LEFT) ? SILVER_RIGHT
+                    ((behavior_manager->silver_target == SILVER_LEFT) ? SILVER_LEFT
                                                                       : (behavior_manager->silver_target - 1));
             }
         }
@@ -435,7 +435,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             else if (behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_SILVER_MINING)
             {
                 behavior_manager->silver_target =
-                    ((behavior_manager->silver_target == SILVER_RIGHT) ? SILVER_LEFT
+                    ((behavior_manager->silver_target == SILVER_RIGHT) ? SILVER_RIGHT
                                                                        : (behavior_manager->silver_target + 1));
             }
         }
