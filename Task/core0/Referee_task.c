@@ -33,8 +33,6 @@ volatile bool pm_uart_tx_dma_done = true; // dma传输完成标志位
 fifo_s_t *pm_uart_fifo = NULL;
 uint8_t *pm_tx_frame_pointer;
 
-static uint32_t step_clock = 0;
-
 void pm_rx_referee_dma_isr(void)
 {
     fifo_s_puts(pm_uart_fifo, (char *)pm_rx_buf, PM_UART_RX_BUF_LENGHT);
@@ -59,32 +57,32 @@ void referee_task(void *pvParameters)
     refereeInitFrameProcesser();
     pm_uart_fifo = get_pm_fifo();
 
-    refereeInitRobotInteractionManager(&step_clock, 17, 21, 0);
-    refereeSetRobotInteractionFigureBuilder(MODE_INDICATOR_UI_INDEX, uiModeIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_0_UI_INDEX, uiSplitLine0Builder);
-    refereeSetRobotInteractionFigureBuilder(GRABBER_POWERED_UI_INDEX, uiGrabberPoweredBuilder);
-    refereeSetRobotInteractionFigureBuilder(GRABBED_UI_INDEX, uiGrabbedBuilder);
-    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_1_UI_INDEX_UI_INDEX, uiSplitLine1Builder);
-    refereeSetRobotInteractionFigureBuilder(STORAGE_FRONT_USED_UI_INDEX, uiStorageFrontUsedBuilder);
-    refereeSetRobotInteractionFigureBuilder(STORAGE_BACK_USED_UI_INDEX, uiStorageBackUsedBuilder);
-    refereeSetRobotInteractionFigureBuilder(VAU_AID_0_UI_INDEX, uiVauAid0Builder);
-    refereeSetRobotInteractionFigureBuilder(VAU_AID_1_UI_INDEX, uiVauAid1Builder);
-    refereeSetRobotInteractionFigureBuilder(VAU_AID_2_UI_INDEX, uiVauAid2Builder);
-    refereeSetRobotInteractionFigureBuilder(STORAGE_PUSH_IN_OVERTIME_UI_INDEX, uiPushInOvertimeBuilder);
-    refereeSetRobotInteractionFigureBuilder(VT_LINK_INDICATOR_UI_INDEX, uiVtlinkIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
-                                            uiSafeRightBarrierWarningLineBuilder);
-    refereeSetRobotInteractionFigureBuilder(DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
-                                            uiDangerRightBarrierWarningLineBuilder);
-    refereeSetRobotInteractionFigureBuilder(LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
-                                            uiLifterLeftMotorOverheatWarningBuilder);
-    refereeSetRobotInteractionFigureBuilder(LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
-                                            uiLifterRightMotorOverheatWarningBuilder);
-    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_2_UI_INDEX_UI_INDEX, uiSplitLine2Builder);
-    refereeSetRobotInteractionFigureBuilder(DT7_DR16_LINK_INDICATOR_UI_INDEX, uiDt7Dr16linkIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(MOTOR_STATUS_INDICATOR_UI_INDEX, uiMotorStatusIndicatorBuilder);
-    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_3_UI_INDEX_UI_INDEX, uiSplitLine3Builder);
-    refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_4_UI_INDEX_UI_INDEX, uiSplitLine4Builder);
+    // refereeInitRobotInteractionManager(&step_clock, 17, 21, 0);
+    // refereeSetRobotInteractionFigureBuilder(MODE_INDICATOR_UI_INDEX, uiModeIndicatorBuilder);
+    // refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_0_UI_INDEX, uiSplitLine0Builder);
+    // refereeSetRobotInteractionFigureBuilder(GRABBER_POWERED_UI_INDEX, uiGrabberPoweredBuilder);
+    // refereeSetRobotInteractionFigureBuilder(GRABBED_UI_INDEX, uiGrabbedBuilder);
+    // refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_1_UI_INDEX_UI_INDEX, uiSplitLine1Builder);
+    // refereeSetRobotInteractionFigureBuilder(STORAGE_FRONT_USED_UI_INDEX, uiStorageFrontUsedBuilder);
+    // refereeSetRobotInteractionFigureBuilder(STORAGE_BACK_USED_UI_INDEX, uiStorageBackUsedBuilder);
+    // refereeSetRobotInteractionFigureBuilder(VAU_AID_0_UI_INDEX, uiVauAid0Builder);
+    // refereeSetRobotInteractionFigureBuilder(VAU_AID_1_UI_INDEX, uiVauAid1Builder);
+    // refereeSetRobotInteractionFigureBuilder(VAU_AID_2_UI_INDEX, uiVauAid2Builder);
+    // refereeSetRobotInteractionFigureBuilder(STORAGE_PUSH_IN_OVERTIME_UI_INDEX, uiPushInOvertimeBuilder);
+    // refereeSetRobotInteractionFigureBuilder(VT_LINK_INDICATOR_UI_INDEX, uiVtlinkIndicatorBuilder);
+    // refereeSetRobotInteractionFigureBuilder(SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
+    //                                         uiSafeRightBarrierWarningLineBuilder);
+    // refereeSetRobotInteractionFigureBuilder(DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX,
+    //                                         uiDangerRightBarrierWarningLineBuilder);
+    // refereeSetRobotInteractionFigureBuilder(LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
+    //                                         uiLifterLeftMotorOverheatWarningBuilder);
+    // refereeSetRobotInteractionFigureBuilder(LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX,
+    //                                         uiLifterRightMotorOverheatWarningBuilder);
+    // refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_2_UI_INDEX_UI_INDEX, uiSplitLine2Builder);
+    // refereeSetRobotInteractionFigureBuilder(DT7_DR16_LINK_INDICATOR_UI_INDEX, uiDt7Dr16linkIndicatorBuilder);
+    // refereeSetRobotInteractionFigureBuilder(MOTOR_STATUS_INDICATOR_UI_INDEX, uiMotorStatusIndicatorBuilder);
+    // refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_3_UI_INDEX_UI_INDEX, uiSplitLine3Builder);
+    // refereeSetRobotInteractionFigureBuilder(SPLIT_LINE_4_UI_INDEX_UI_INDEX, uiSplitLine4Builder);
 
     while (1)
     {
@@ -97,25 +95,24 @@ void referee_task(void *pvParameters)
                                 PM_UART_RX_BUF_LENGHT);
         }
 
-        client_ui();
+        // client_ui();
 
-        step_clock++;
-        if (pm_uart_tx_dma_done)
-        {
-            detect_hook(UI_REFEREE_DH);
+        // if (pm_uart_tx_dma_done)
+        // {
+        //     detect_hook(UI_REFEREE_DH);
 
-            pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
+        //     pm_tx_frame_pointer = refereeEncodeRobotInteractionData(CLIENT_UI_PLOT);
 
-            if (pm_tx_frame_pointer != NULL)
-            {
-                memcpy(pm_tx_buf, pm_tx_frame_pointer, getRefSentDataLen());
-                uart_tx_trigger_dma(BOARD_HDMA, PM_UART_TX_DMA_CHN, PM_UART,
-                                    core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_tx_buf),
-                                    getRefSentDataLen());
-                refereeRobotInteractionManagerSuccessfullySentHook();
-                pm_uart_tx_dma_done = false;
-            }
-        }
+        //     if (pm_tx_frame_pointer != NULL)
+        //     {
+        //         memcpy(pm_tx_buf, pm_tx_frame_pointer, getRefSentDataLen());
+        //         uart_tx_trigger_dma(BOARD_HDMA, PM_UART_TX_DMA_CHN, PM_UART,
+        //                             core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)pm_tx_buf),
+        //                             getRefSentDataLen());
+        //         refereeRobotInteractionManagerSuccessfullySentHook();
+        //         pm_uart_tx_dma_done = false;
+        //     }
+        // }
 
         // 发送挂了重新拉起
         if (detect_error(UI_REFEREE_DH))
