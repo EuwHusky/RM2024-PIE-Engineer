@@ -25,11 +25,10 @@ static void vt_link_relay_pack_2_can_rx_callback(uint8_t *rx_data);
 static void vt_link_relay_pack_3_can_rx_callback(uint8_t *rx_data);
 static void vt_link_relay_pack_4_can_rx_callback(uint8_t *rx_data);
 
-remote_control_s *rc_pointer;
-
 ATTR_PLACE_AT_NONCACHEABLE uint8_t dbus_rx_buf[DBUS_RX_BUF_NUM]; // 遥控器数据接收缓冲区
 volatile bool dbus_uart_rx_dma_done = true;                      // dma传输完成标志位
-rfl_dt7_dr16_data_s dt7_dr16_prior_data;
+rfl_dt7_dr16_data_s dt7_dr16_prior_data = {0};
+rfl_dt7_dr16_data_s dt7_dr16_data = {0};
 
 const uint8_t *vt_link_relay_data[5] = {0, 0, 0, 0, 0};
 
@@ -48,7 +47,7 @@ void dbus_dma_isr(void)
         rflDt7Dr16Decode(&dbus_rx_buf[i], &dt7_dr16_prior_data);
         if (rflDt7Dr16CheckIsDataCorrect(&dt7_dr16_prior_data))
         {
-            memcpy(&rc_pointer->dt7_dr16_data, &dt7_dr16_prior_data, sizeof(rfl_dt7_dr16_data_s));
+            memcpy(&dt7_dr16_data, &dt7_dr16_prior_data, sizeof(rfl_dt7_dr16_data_s));
             detect_hook_in_isr(DBUS_DH); // 记录更新时间
             break;
         }
@@ -64,9 +63,7 @@ void rc_task(void *pvParameters)
 
     rflDmaAddCallbackFunction(BOARD_XDMA, DBUS_UART_RX_DMA_CHN, dbus_dma_isr);
 
-    RemoteControlInit();
-
-    rc_pointer = getRemoteControlPointer();
+    RemoteControlInit(&dt7_dr16_data, &vt_rc_data, &cc_data);
 
     for (uint8_t i = 0; i < 5; i++)
     {

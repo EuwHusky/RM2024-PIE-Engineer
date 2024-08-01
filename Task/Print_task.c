@@ -97,8 +97,6 @@ void print_task(void *pvParameters)
     gimbal_print = getGimbalDataPointer();
     storage_print = getStorageDataPointer();
 
-    rc_print = getRemoteControlPointer();
-
     referee_robot_hp = getRobotHp();
     referee_robot_status = getRobotStatus();
     customer_controller = getCustomerControllerData();
@@ -261,7 +259,7 @@ void print_task(void *pvParameters)
              * @brief Remote Control
              */
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d,%d\r\n", getRcMouseX(), getRcMouseY(), getRcMouseZ(),
-            //         checkIsRcKeyPressed(RC_F), checkIfRcKeyFallingEdgeDetected(RC_F),
+            //         checkIfRcKeyPressed(RC_F), checkIfRcKeyFallingEdgeDetected(RC_F),
             //         checkIfRcKeyRisingEdgeDetected(RC_F));
             // sprintf((char *)test_txt, "%d,%d,%d,%d,%d\r\n", test_pm, test_vt, rc_print->use_vt_link_control,
             //         detect_error(DBUS_DH), detect_error(VT_REFEREE_DH));

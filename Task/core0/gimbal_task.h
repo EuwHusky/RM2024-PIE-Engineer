@@ -31,8 +31,6 @@ typedef struct EngineerGimbal
 
     rfl_motor_s yaw_motor;
 
-    const remote_control_s *rc;
-
 } engineer_gimbal_s;
 
 extern void gimbal_task(void *pvParameters);

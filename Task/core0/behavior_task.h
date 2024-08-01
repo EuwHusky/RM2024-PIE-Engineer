@@ -79,9 +79,8 @@ typedef struct EngineerBehaviorManager
 
     /* 设备 */
 
-    const remote_control_s *rc; // 遥控器数据
-    char dt7_behavior_switch_value;
-    char last_dt7_behavior_switch_value;
+    dt7_toggle_switch_position_e dt7_behavior_switch_value;
+    dt7_toggle_switch_position_e last_dt7_behavior_switch_value;
     int16_t dt7_reset_trigger_value;   // 使用DT7复位的触发器值
     uint32_t dt7_reset_trigger_timer;  // 使用DT7复位的触发计时器
     uint32_t km_disable_trigger_timer; // 使用键鼠失能的触发计时器

@@ -201,8 +201,6 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
         rflOsDelayMs(10);
     arm_motor_init(scara_arm);
 
-    scara_arm->rc = getRemoteControlPointer();
-
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[0], 0.02f, 0.98f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[1], 0.02f, 0.98f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[2], 0.01f, 0.99f);

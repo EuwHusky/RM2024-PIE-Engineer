@@ -30,7 +30,6 @@ typedef struct EngineerChassis
     float lidar_obstacle_distance;
     float lidar_obstacle_surface_angle;
 
-    const remote_control_s *rc;             // 遥控器数据
     ramp_function_source_t speed_ramper[3]; // 速度斜坡化滤波器
     float set_speed_vector[3];              // 底盘预期速度vx vy wz
     rfl_angle_s set_control_angle;

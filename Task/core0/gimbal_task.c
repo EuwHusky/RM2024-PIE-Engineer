@@ -123,8 +123,6 @@ static void gimbal_init(engineer_gimbal_s *gimbal)
     motor_config.can_ordinal = GIMBAL_MOTORS_CAN_ORDINAL;
     motor_config.master_can_id = 0x201;
     rflMotorInit(&gimbal->yaw_motor, &motor_config);
-
-    gimbal->rc = getRemoteControlPointer();
 }
 
 static void gimbal_mode_control(engineer_gimbal_s *gimbal)

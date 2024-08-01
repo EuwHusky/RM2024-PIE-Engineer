@@ -130,15 +130,15 @@ static void control_value_process(engineer_scara_arm_s *scara_arm)
     for (uint8_t i = 0; i < 6; i++)
     {
         if (i < 3)
-            rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], scara_arm->rc->cc_data->pose[i]);
+            rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i], getCcPose(i));
         else
             rflFirstOrderFilterCali(&scara_arm->cc_pose_filter[i],
-                                    rflFloatLoopConstrain(scara_arm->rc->cc_data->pose[i], -RAD_PI, RAD_PI));
+                                    rflFloatLoopConstrain(getCcPose(i), -RAD_PI, RAD_PI));
 
         scara_arm->cc_pose_6d[i] = scara_arm->cc_pose_filter[i].out;
     }
 
-    if (!checkIfCustomerControllerKeyPressed(scara_arm->rc->cc_data->key, CC_TRIGGER))
+    if (!checkIsCcKeyPressed(CC_TRIGGER))
     {
         for (uint8_t i = 0; i < 3; i++)
         {
@@ -363,35 +363,35 @@ static void pose_control(engineer_scara_arm_s *scara_arm)
 {
     // DT7控制
     scara_arm->set_pose_6d[0] +=
-        ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[3], RC_DT7_ROCKER_DEADLINE)) / 660.0f *
+        ((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_LEFT_VERTICAL), RC_DT7_ROCKER_DEADLINE)) / 660.0f *
          POSE_X_CONTROL_SEN);
 
     scara_arm->set_pose_6d[1] +=
-        ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[2], RC_DT7_ROCKER_DEADLINE)) / 660.0f *
+        ((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_LEFT_HORIZONTAL), RC_DT7_ROCKER_DEADLINE)) / 660.0f *
          -POSE_Y_CONTROL_SEN);
 
     scara_arm->set_pose_6d[2] +=
-        ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[1], RC_DT7_ROCKER_DEADLINE)) / 660.0f *
+        ((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_RIGHT_VERTICAL), RC_DT7_ROCKER_DEADLINE)) / 660.0f *
          POSE_Z_CONTROL_SEN);
 
-    if (scara_arm->rc->dt7_dr16_data.rc.s[0] == 1)
+    if (getDt7ToggleSwitchPosition(DT7_SWITCH_RIGHT) == DT7_SWITCH_UP)
         scara_arm->set_pose_6d[3] +=
-            ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[0], RC_DT7_ROCKER_DEADLINE)) / 660.0f *
-             -POSE_AY_CONTROL_SEN);
-    else if (scara_arm->rc->dt7_dr16_data.rc.s[0] == 3)
+            ((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_RIGHT_HORIZONTAL), RC_DT7_ROCKER_DEADLINE)) /
+             660.0f * -POSE_AY_CONTROL_SEN);
+    else if (getDt7ToggleSwitchPosition(DT7_SWITCH_RIGHT) == DT7_SWITCH_MID)
         scara_arm->set_pose_6d[4] +=
-            ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[0], RC_DT7_ROCKER_DEADLINE)) / 660.0f *
-             -POSE_AP_CONTROL_SEN);
-    else if (scara_arm->rc->dt7_dr16_data.rc.s[0] == 2)
+            ((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_RIGHT_HORIZONTAL), RC_DT7_ROCKER_DEADLINE)) /
+             660.0f * -POSE_AP_CONTROL_SEN);
+    else if (getDt7ToggleSwitchPosition(DT7_SWITCH_RIGHT) == DT7_SWITCH_DOWN)
         scara_arm->set_pose_6d[5] +=
-            ((float)(rflDeadZoneZero(scara_arm->rc->dt7_dr16_data.rc.ch[0], RC_DT7_ROCKER_DEADLINE)) / 660.0f *
-             POSE_AR_CONTROL_SEN);
+            ((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_RIGHT_HORIZONTAL), RC_DT7_ROCKER_DEADLINE)) /
+             660.0f * POSE_AR_CONTROL_SEN);
 
     // 键鼠控制
     scara_arm->set_pose_6d[POSE_Z] += ((float)getRcMouseZ() * 0.0002);
 
     // 自定义控制器控制
-    if (checkIfCustomerControllerKeyPressed(scara_arm->rc->cc_data->key, CC_TRIGGER))
+    if (checkIsCcKeyPressed(CC_TRIGGER))
     {
         for (uint8_t i = 0; i < 6; i++)
         {

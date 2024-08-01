@@ -4,3 +4,6 @@
 [submodule "Module/referee"]
 	path = Module/referee
 	url = https://gitee.com/wpie/rm---referee-system.git
+[submodule "Module/remote_control"]
+	path = Module/remote_control
+	url = https://gitee.com/wpie/rm---remote-control-system.git

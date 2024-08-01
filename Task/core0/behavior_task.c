@@ -112,8 +112,6 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
 {
     memset(behavior_manager, 0, sizeof(engineer_behavior_manager_s));
 
-    behavior_manager->rc = getRemoteControlPointer();
-
     behavior_manager->behavior = ENGINEER_BEHAVIOR_DISABLE;
     behavior_manager->last_behavior = ENGINEER_BEHAVIOR_DISABLE;
 
@@ -169,13 +167,13 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     /* ================================================== DT7 ================================================== */
 
     behavior_manager->last_dt7_behavior_switch_value = behavior_manager->dt7_behavior_switch_value;
-    behavior_manager->dt7_behavior_switch_value = behavior_manager->rc->dt7_dr16_data.rc.s[1];
+    behavior_manager->dt7_behavior_switch_value = getDt7ToggleSwitchPosition(DT7_SWITCH_LEFT);
 
     /**
      * @brief 失能 -> 复位
      * DT7 逆时针长拨拨轮触发
      */
-    behavior_manager->dt7_reset_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    behavior_manager->dt7_reset_trigger_value = getDt7ThumbWheelPosition();
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE && behavior_manager->dt7_reset_trigger_value > 600)
     {
         behavior_manager->dt7_reset_trigger_timer++;
@@ -241,7 +239,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 机械臂回到默认位姿
      * DT7 逆时针长拨拨轮触发切换
      */
-    behavior_manager->dt7_arm_switch_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    behavior_manager->dt7_arm_switch_trigger_value = getDt7ThumbWheelPosition();
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION &&
         behavior_manager->dt7_arm_switch_trigger_value > 600)
     {
@@ -260,7 +258,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 失能 -> 复位
      * 键鼠 长拨V键触发
      */
-    if (checkIsRcKeyPressed(RC_V) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    if (checkIfRcKeyPressed(RC_V) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
     {
         behavior_manager->km_reset_trigger_timer++;
         if (behavior_manager->km_reset_trigger_timer == 50)
@@ -279,7 +277,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief Any -> 失能
      * 键鼠 长按G键触发
      */
-    if (checkIsRcKeyPressed(RC_G))
+    if (checkIfRcKeyPressed(RC_G))
     {
         behavior_manager->km_disable_trigger_timer++;
         if (behavior_manager->km_disable_trigger_timer == 10)
@@ -304,7 +302,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
     else
         behavior_manager->km_disable_trigger_timer = 0;
 
-    if (checkIsRcKeyPressed(RC_CTRL))
+    if (checkIfRcKeyPressed(RC_CTRL))
     {
         /**
          * @brief 无力模式强制机动 用于死后无法复位的情况下机动脱困
@@ -376,7 +374,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
             behavior_manager->arm_switch_solution = true;
         }
     }
-    else if (!checkIsRcKeyPressed(RC_CTRL))
+    else if (!checkIfRcKeyPressed(RC_CTRL))
     {
         /**
          * @brief 机动 -> 作业 / 作业 -> 机动
@@ -489,7 +487,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 快捷气路控制
      * DT7 顺时针长拨拨轮触发切换
      */
-    behavior_manager->dt7_pump_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    behavior_manager->dt7_pump_trigger_value = getDt7ThumbWheelPosition();
     if (behavior_manager->dt7_pump_trigger_value < -600 && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
     {
         behavior_manager->dt7_pump_trigger_timer++;
@@ -513,7 +511,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 机械臂吸取工作模式切换
      * DT7 顺时针长拨拨轮触发切换
      */
-    behavior_manager->dt7_arm_grab_trigger_value = behavior_manager->rc->dt7_dr16_data.rc.ch[4];
+    behavior_manager->dt7_arm_grab_trigger_value = getDt7ThumbWheelPosition();
     if (behavior_manager->dt7_arm_grab_trigger_value < -600 &&
         behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION)
     {
@@ -543,7 +541,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 重置UI
      * 键鼠 按下V键触发
      */
-    if (checkIsRcKeyPressed(RC_V))
+    if (checkIfRcKeyPressed(RC_V))
     {
         behavior_manager->reset_ui = true;
     }
@@ -552,7 +550,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 重启
      * 键鼠 长按B键触发
      */
-    if (checkIsRcKeyPressed(RC_B))
+    if (checkIfRcKeyPressed(RC_B))
     {
         behavior_manager->km_reboot_trigger_timer++;
         if (behavior_manager->km_reboot_trigger_timer > 20)

@@ -97,7 +97,6 @@ static void chassis_init(engineer_chassis_s *chassis)
     chassis->ins = get_INS_data_point();
 
     // 底盘控制
-    chassis->rc = getRemoteControlPointer();
     rflRampInit(chassis->speed_ramper + 0, CHASSIS_CONTROL_TIME, CHASSIS_VX_MAX, -CHASSIS_VX_MAX);
     rflRampInit(chassis->speed_ramper + 1, CHASSIS_CONTROL_TIME, CHASSIS_VY_MAX, -CHASSIS_VY_MAX);
     rflRampInit(chassis->speed_ramper + 2, CHASSIS_CONTROL_TIME, CHASSIS_WZ_MAX, -CHASSIS_WZ_MAX);
@@ -278,47 +277,47 @@ static void chassis_stop_control(engineer_chassis_s *chassis)
 
 static void chassis_normal_control(engineer_chassis_s *chassis)
 {
-    if (abs(chassis->rc->dt7_dr16_data.rc.ch[0]) + abs(chassis->rc->dt7_dr16_data.rc.ch[2]) +
-            abs(chassis->rc->dt7_dr16_data.rc.ch[3]) >
+    if (abs(getDt7RockerPosition(DT7_ROCKER_RIGHT_HORIZONTAL)) + abs(getDt7RockerPosition(DT7_ROCKER_LEFT_HORIZONTAL)) +
+            abs(getDt7RockerPosition(DT7_ROCKER_LEFT_VERTICAL)) >
         3)
     {
-        chassis->set_speed_vector[0] =
-            rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX,
-                        ((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[3], RC_DT7_ROCKER_DEADLINE)) /
-                         660.0f * CHASSIS_VX_MAX));
-        chassis->set_speed_vector[1] =
-            rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX,
-                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[2], RC_DT7_ROCKER_DEADLINE)) /
-                          660.0f * CHASSIS_VY_MAX));
-        chassis->set_speed_vector[2] =
-            rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
-                        -((float)(rflDeadZoneZero(chassis->rc->dt7_dr16_data.rc.ch[0], RC_DT7_ROCKER_DEADLINE)) /
-                          660.0f * CHASSIS_WZ_MAX));
+        chassis->set_speed_vector[0] = rflRampCalc(
+            chassis->speed_ramper + 0, CHASSIS_VX_MAX,
+            ((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_LEFT_VERTICAL), RC_DT7_ROCKER_DEADLINE)) / 660.0f *
+             CHASSIS_VX_MAX));
+        chassis->set_speed_vector[1] = rflRampCalc(
+            chassis->speed_ramper + 1, CHASSIS_VY_MAX,
+            -((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_LEFT_HORIZONTAL), RC_DT7_ROCKER_DEADLINE)) /
+              660.0f * CHASSIS_VY_MAX));
+        chassis->set_speed_vector[2] = rflRampCalc(
+            chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
+            -((float)(rflDeadZoneZero(getDt7RockerPosition(DT7_ROCKER_RIGHT_HORIZONTAL), RC_DT7_ROCKER_DEADLINE)) /
+              660.0f * CHASSIS_WZ_MAX));
     }
     else
     {
         float x_sign = 0.0f;
         float y_sign = 0.0f;
         float z_sign = 0.0f;
-        if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
+        if (checkIfRcKeyPressed(RC_W) && !checkIfRcKeyPressed(RC_S))
             x_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
+        else if (!checkIfRcKeyPressed(RC_W) && checkIfRcKeyPressed(RC_S))
             x_sign = -1.0f;
-        if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
+        if (checkIfRcKeyPressed(RC_A) && !checkIfRcKeyPressed(RC_D))
             y_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
+        else if (!checkIfRcKeyPressed(RC_A) && checkIfRcKeyPressed(RC_D))
             y_sign = -1.0f;
-        if (!checkIsRcKeyPressed(RC_CTRL))
+        if (!checkIfRcKeyPressed(RC_CTRL))
         {
-            if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+            if (checkIfRcKeyPressed(RC_Q) && !checkIfRcKeyPressed(RC_E))
                 z_sign = 1.0f;
-            else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+            else if (!checkIfRcKeyPressed(RC_Q) && checkIfRcKeyPressed(RC_E))
                 z_sign = -1.0f;
         }
 
         float shift_speed_multiplier = 0.5f;
         float shift_accel_multiplier = 0.5f;
-        if (checkIsRcKeyPressed(RC_SHIFT))
+        if (checkIfRcKeyPressed(RC_SHIFT))
         {
             shift_speed_multiplier = 1.0f;
             shift_accel_multiplier = 0.8f;
@@ -330,7 +329,7 @@ static void chassis_normal_control(engineer_chassis_s *chassis)
         chassis->set_speed_vector[1] =
             rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 3.0f * shift_accel_multiplier,
                         y_sign * CHASSIS_VY_MAX * shift_speed_multiplier);
-        if (!checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+        if (!checkIfRcKeyPressed(RC_Q) && !checkIfRcKeyPressed(RC_E))
         {
             chassis->set_speed_vector[2] =
                 rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
@@ -349,31 +348,31 @@ static void chassis_slowly_control(engineer_chassis_s *chassis)
     float x_sign = 0.0f;
     float y_sign = 0.0f;
     float z_sign = 0.0f;
-    if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
+    if (checkIfRcKeyPressed(RC_W) && !checkIfRcKeyPressed(RC_S))
         x_sign = 1.0f;
-    else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
+    else if (!checkIfRcKeyPressed(RC_W) && checkIfRcKeyPressed(RC_S))
         x_sign = -1.0f;
-    if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
+    if (checkIfRcKeyPressed(RC_A) && !checkIfRcKeyPressed(RC_D))
         y_sign = 1.0f;
-    else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
+    else if (!checkIfRcKeyPressed(RC_A) && checkIfRcKeyPressed(RC_D))
         y_sign = -1.0f;
-    if (!checkIsRcKeyPressed(RC_CTRL))
+    if (!checkIfRcKeyPressed(RC_CTRL))
     {
-        if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+        if (checkIfRcKeyPressed(RC_Q) && !checkIfRcKeyPressed(RC_E))
             z_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+        else if (!checkIfRcKeyPressed(RC_Q) && checkIfRcKeyPressed(RC_E))
             z_sign = -1.0f;
     }
 
     float shift_speed_multiplier = 0.42f;
-    if (checkIsRcKeyPressed(RC_SHIFT))
+    if (checkIfRcKeyPressed(RC_SHIFT))
         shift_speed_multiplier = 1.0f;
 
     chassis->set_speed_vector[0] = rflRampCalc(chassis->speed_ramper + 0, CHASSIS_VX_MAX * 2.0f,
                                                x_sign * CHASSIS_VX_MAX / 15.0f * shift_speed_multiplier);
     chassis->set_speed_vector[1] = rflRampCalc(chassis->speed_ramper + 1, CHASSIS_VY_MAX * 2.0f,
                                                y_sign * CHASSIS_VY_MAX / 10.0f * shift_speed_multiplier);
-    if (!checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+    if (!checkIfRcKeyPressed(RC_Q) && !checkIfRcKeyPressed(RC_E))
     {
         chassis->set_speed_vector[2] = rflRampCalc(chassis->speed_ramper + 2, CHASSIS_WZ_MAX * 6.0f,
                                                    -((float)(getRcMouseX()) / 24.0f) * CHASSIS_WZ_MAX / 6.0f);
@@ -390,24 +389,24 @@ static void chassis_silver_control(engineer_chassis_s *chassis)
     float x_sign = 0.0f;
     float y_sign = 0.0f;
     float z_sign = 0.0f;
-    if (checkIsRcKeyPressed(RC_W) && !checkIsRcKeyPressed(RC_S))
+    if (checkIfRcKeyPressed(RC_W) && !checkIfRcKeyPressed(RC_S))
         x_sign = 1.0f;
-    else if (!checkIsRcKeyPressed(RC_W) && checkIsRcKeyPressed(RC_S))
+    else if (!checkIfRcKeyPressed(RC_W) && checkIfRcKeyPressed(RC_S))
         x_sign = -1.0f;
-    if (checkIsRcKeyPressed(RC_A) && !checkIsRcKeyPressed(RC_D))
+    if (checkIfRcKeyPressed(RC_A) && !checkIfRcKeyPressed(RC_D))
         y_sign = 1.0f;
-    else if (!checkIsRcKeyPressed(RC_A) && checkIsRcKeyPressed(RC_D))
+    else if (!checkIfRcKeyPressed(RC_A) && checkIfRcKeyPressed(RC_D))
         y_sign = -1.0f;
-    if (!checkIsRcKeyPressed(RC_CTRL))
+    if (!checkIfRcKeyPressed(RC_CTRL))
     {
-        if (checkIsRcKeyPressed(RC_Q) && !checkIsRcKeyPressed(RC_E))
+        if (checkIfRcKeyPressed(RC_Q) && !checkIfRcKeyPressed(RC_E))
             z_sign = 1.0f;
-        else if (!checkIsRcKeyPressed(RC_Q) && checkIsRcKeyPressed(RC_E))
+        else if (!checkIfRcKeyPressed(RC_Q) && checkIfRcKeyPressed(RC_E))
             z_sign = -1.0f;
     }
 
     float shift_speed_multiplier = 0.42f;
-    if (checkIsRcKeyPressed(RC_SHIFT))
+    if (checkIfRcKeyPressed(RC_SHIFT))
         shift_speed_multiplier = 1.0f;
 
     float x_align_distance = (chassis->lidar_obstacle_distance - SILVER_MINING_X_DISTANCE_OFFSET);
@@ -415,10 +414,10 @@ static void chassis_silver_control(engineer_chassis_s *chassis)
 
     // 安全启用条件
     // 强制手动控制
-    float x_align_speed = (fabsf(x_align_distance) < 0.3f && !checkIsRcKeyPressed(RC_CTRL))
+    float x_align_speed = (fabsf(x_align_distance) < 0.3f && !checkIfRcKeyPressed(RC_CTRL))
                               ? (x_align_distance * SILVER_MINING_X_ALIGN_KP * shift_speed_multiplier)
                               : 0.0f;
-    float yaw_align_speed = (fabsf(yaw_align_angle) < 12.0f && !checkIsRcKeyPressed(RC_CTRL))
+    float yaw_align_speed = (fabsf(yaw_align_angle) < 12.0f && !checkIfRcKeyPressed(RC_CTRL))
                                 ? (yaw_align_angle * SILVER_MINING_YAW_ALIGN_KP * shift_speed_multiplier)
                                 : 0.0f;
 
