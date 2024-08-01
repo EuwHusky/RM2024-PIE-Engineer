@@ -1,3 +1,6 @@
 [submodule "RoboFusionLib"]
 	path = RoboFusionLib
 	url = https://gitee.com/wpie/robofusionlib.git
+[submodule "Module/referee"]
+	path = Module/referee
+	url = https://gitee.com/wpie/rm---referee-system.git
