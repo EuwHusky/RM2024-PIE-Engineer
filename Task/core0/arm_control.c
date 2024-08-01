@@ -187,8 +187,7 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
     if (checkIfJointNotStartUp(JOINT_2, scara_arm->start_up_status) && !detect_error(ARM_JOINT_2_DH) &&
         !detect_error(ARM_JOINT_3_DH))
     {
-        if ((rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN) +
-             scara_arm->joint_23_front_motor_angle_offset) *
+        if (rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN) *
                 RADIAN_TO_DEGREE_FACTOR <
             -160.0f)
         {
@@ -212,42 +211,25 @@ static void starting_control(engineer_scara_arm_s *scara_arm)
 
     /* 关节3 运动到起始位置 */
     // setJointStartUpStateOk(JOINT_3, scara_arm->start_up_status); // 只是测试时用来关掉这个关节的归中
-    // setJointStartUpStateOk(JOINT_3 + JOINTS_START_UP_STEP1_BIT_OFFSET, scara_arm->start_up_status);
+    setJointStartUpStateOk(JOINT_3 + JOINTS_START_UP_STEP1_BIT_OFFSET,
+                           scara_arm->start_up_status); // 以前有用现在没用了 懒得删了
     if (checkIfJointNotStartUp(JOINT_3, scara_arm->start_up_status) && !detect_error(ARM_JOINT_2_DH) &&
         !detect_error(ARM_JOINT_3_DH))
     {
-        if (checkIfJointNotStartUp(JOINT_3 + JOINTS_START_UP_STEP1_BIT_OFFSET, scara_arm->start_up_status))
-        {
-            if (rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_DEGREE) > 165.0f &&
-                (rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_DEGREE) /
-                 JOINT2_REDUCTION) < -45.0f)
-                scara_arm->joint_23_front_motor_angle_offset = -RAD_2_PI;
-            else if (rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_DEGREE) <
-                         -165.0f &&
-                     (rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_BACK], RFL_ANGLE_FORMAT_DEGREE) /
-                      JOINT2_REDUCTION) > 45.0f)
-                scara_arm->joint_23_front_motor_angle_offset = RAD_2_PI;
-
-            setJointStartUpStateOk(JOINT_3 + JOINTS_START_UP_STEP1_BIT_OFFSET, scara_arm->start_up_status);
-        }
+        if (rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN) *
+                RADIAN_TO_DEGREE_FACTOR <
+            -160.0f)
+            scara_arm->set_joints_value[JOINT_3] = scara_arm->joints_value[JOINT_3] + 0.2f;
+        else if (checkIfJointNotStartUp(JOINT_4, scara_arm->start_up_status))
+            scara_arm->set_joints_value[JOINT_3] = JOINT_3_START_WAIT_ANGLE * DEGREE_TO_RADIAN_FACTOR;
         else
         {
-            if ((rflMotorGetAngle(&scara_arm->joints_motors[MOTOR_JOINT23_FRONT], RFL_ANGLE_FORMAT_RADIAN) +
-                 scara_arm->joint_23_front_motor_angle_offset) *
-                    RADIAN_TO_DEGREE_FACTOR <
-                -160.0f)
-                scara_arm->set_joints_value[JOINT_3] = scara_arm->joints_value[JOINT_3] + 0.2f;
-            else if (checkIfJointNotStartUp(JOINT_4, scara_arm->start_up_status))
-                scara_arm->set_joints_value[JOINT_3] = JOINT_3_START_WAIT_ANGLE * DEGREE_TO_RADIAN_FACTOR;
-            else
-            {
-                scara_arm->set_joints_value[JOINT_3] = JOINT_3_START_ANGLE * DEGREE_TO_RADIAN_FACTOR;
+            scara_arm->set_joints_value[JOINT_3] = JOINT_3_START_ANGLE * DEGREE_TO_RADIAN_FACTOR;
 
-                if (fabsf(scara_arm->joints_value[JOINT_3] - JOINT_3_START_ANGLE * DEGREE_TO_RADIAN_FACTOR) <
-                    TOLERABLE_ANGLE_DEVIATION)
-                {
-                    setJointStartUpStateOk(JOINT_3, scara_arm->start_up_status);
-                }
+            if (fabsf(scara_arm->joints_value[JOINT_3] - JOINT_3_START_ANGLE * DEGREE_TO_RADIAN_FACTOR) <
+                TOLERABLE_ANGLE_DEVIATION)
+            {
+                setJointStartUpStateOk(JOINT_3, scara_arm->start_up_status);
             }
         }
     }

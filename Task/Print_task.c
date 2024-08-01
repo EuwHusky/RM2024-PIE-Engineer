@@ -220,6 +220,15 @@ void print_task(void *pvParameters)
             // sprintf((char *)test_txt, "%d,%f,%f,%d,%f\r\n", arm_print->start_up_status,
             //         arm_print->set_joints_value[JOINT_6], arm_print->joints_value[JOINT_6],
             //         arm_print->joint_6_encoder_value, arm_print->joint_6_encoder_angle);
+            /*这是我最后的DEBUG了 收下吧*/
+            // sprintf(
+            //     (char *)test_txt, "%d,%d,%6.3f,%6.3f,%d,%d,%d\r\n",
+            //     arm_print->joints_motors[MOTOR_JOINT23_BACK].mode_,
+            //     arm_print->joints_motors[MOTOR_JOINT23_FRONT].mode_,
+            //     arm_print->joints_motors[MOTOR_JOINT23_BACK].angle_.deg,
+            //     arm_print->joints_motors[MOTOR_JOINT23_FRONT].angle_.deg,
+            //     can_is_primary_transmit_buffer_full(HPM_CAN0), can_is_secondary_transmit_buffer_full(HPM_CAN0),
+            //     can_is_in_bus_off_mode(HPM_CAN0));
 
             /**
              * @brief Motor

@@ -193,7 +193,6 @@ typedef struct EngineerScaraArm
     sliding_window_filter_s_t joint_6_encoder_angle_filter;
 
     rfl_motor_s joints_motors[7];
-    float joint_23_front_motor_angle_offset;
 
     float printer[6]; // 只是方便把数发出来
 

@@ -200,7 +200,6 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
            detect_error(ARM_JOINT_56_L_DH) || detect_error(ARM_JOINT_56_R_DH))
         rflOsDelayMs(10);
     arm_motor_init(scara_arm);
-    scara_arm->joint_23_front_motor_angle_offset = 0.0f;
 
     scara_arm->rc = getRemoteControlPointer();
 
