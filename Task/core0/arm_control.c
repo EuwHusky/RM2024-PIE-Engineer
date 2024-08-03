@@ -27,6 +27,7 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm);
 static void gold_mining_control(engineer_scara_arm_s *scara_arm);
 static void storage_push_control(engineer_scara_arm_s *scara_arm);
 static void storage_pop_control(engineer_scara_arm_s *scara_arm);
+static void emergency_move_control(engineer_scara_arm_s *scara_arm);
 
 /**
  * @brief 根据机械臂控制模式 配置电机控制模式 更新机械臂控制量
@@ -77,6 +78,16 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
         {
             scara_arm->storage_pop_step = STORAGE_POP_STEP_INIT;
         }
+
+        if (checkIfIsEmergencyMoving())
+        {
+            rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+            rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_MOTOR_CONTROL_MODE_SPEED_ANGLE);
+            arm_motor_set_angle_limit(scara_arm, true);
+            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_LEFT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, false);
+            rflMotorResetAngle(&scara_arm->joints_motors[MOTOR_JOINT1_RIGHT], RFL_ANGLE_FORMAT_DEGREE, 0.0f, false);
+            scara_arm->set_joints_value[JOINT_1] = 0.0f;
+        }
     }
 
     // 关节速度控制
@@ -121,6 +132,9 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
 
     default:
         // 其他模式什么都不做 保持不动
+        // 若需紧急机动，有力抬升并允许对抬升层进行控制操作
+        if (checkIfIsEmergencyMoving())
+            emergency_move_control(scara_arm);
         break;
     }
 }
@@ -995,4 +1009,11 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
                 scara_arm->storage_pop_success = true;
         }
     }
+}
+
+static void emergency_move_control(engineer_scara_arm_s *scara_arm)
+{
+    scara_arm->set_joints_value[JOINT_1] += (checkIfRcKeyPressed(RC_LEFT)    ? 0.0005f
+                                             : checkIfRcKeyPressed(RC_RIGHT) ? -0.0005f
+                                                                             : 0.0f);
 }

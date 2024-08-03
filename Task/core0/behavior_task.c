@@ -108,6 +108,11 @@ bool checkIfMotorFailureDetected(void)
     return behavior_manager.motor_failure_detected;
 }
 
+bool checkIfIsEmergencyMoving(void)
+{
+    return behavior_manager.emergency_move;
+}
+
 static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
 {
     memset(behavior_manager, 0, sizeof(engineer_behavior_manager_s));
@@ -142,6 +147,7 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->show_silver_vau = false;
     behavior_manager->silver_target = SILVER_MID;
     behavior_manager->motor_failure_detected = false;
+    behavior_manager->emergency_move = false;
 }
 
 static void update_robot_status(engineer_behavior_manager_s *behavior_manager)
@@ -258,7 +264,8 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 失能 -> 复位
      * 键鼠 长拨V键触发
      */
-    if (checkIfRcKeyPressed(RC_V) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    if (checkIfRcKeyPressed(RC_V) &&
+        (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE || behavior_manager->emergency_move))
     {
         behavior_manager->km_reset_trigger_timer++;
         if (behavior_manager->km_reset_trigger_timer == 50)
@@ -311,6 +318,7 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         if (checkIfRcKeyFallingEdgeDetected(RC_F) && behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE &&
             !*behavior_manager->arm_reset_success && !*behavior_manager->gimbal_reset_success)
         {
+            behavior_manager->emergency_move = true;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
         }
 
@@ -503,7 +511,8 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
      * @brief 机械臂吸取工作模式切换
      * 键鼠 短按R键触发切换
      */
-    if (checkIfRcKeyFallingEdgeDetected(RC_R) && behavior_manager->behavior != ENGINEER_BEHAVIOR_DISABLE)
+    if (checkIfRcKeyFallingEdgeDetected(RC_R) && (behavior_manager->behavior == ENGINEER_BEHAVIOR_MANUAL_OPERATION ||
+                                                  behavior_manager->behavior == ENGINEER_BEHAVIOR_AUTO_GOLD_MINING))
     {
         behavior_manager->arm_grab = !behavior_manager->arm_grab;
     }
@@ -709,6 +718,11 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
         gpio_write_pin(HPM_GPIO0, ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PORT,
                        ENGINEER_STORAGE_BACK_RELIEF_VALVE_GPIO_PIN,
                        behavior_manager->pump_flag == 3 ? 0 : 1); // 电磁阀
+    }
+
+    if (behavior_manager->behavior != ENGINEER_BEHAVIOR_MOVE)
+    {
+        behavior_manager->emergency_move = false;
     }
 }
 

@@ -221,7 +221,8 @@ void arm_motor_update_and_execute(engineer_scara_arm_s *scara_arm)
  */
 void arm_motor_set_mode(engineer_scara_arm_s *scara_arm)
 {
-    if (!scara_arm->reset_success && scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
+    if (!scara_arm->reset_success && scara_arm->behavior != ENGINEER_BEHAVIOR_DISABLE &&
+        scara_arm->behavior != ENGINEER_BEHAVIOR_RESET)
         return;
 
     if (scara_arm->behavior == ENGINEER_BEHAVIOR_DISABLE || scara_arm->behavior == ENGINEER_BEHAVIOR_MOVE)

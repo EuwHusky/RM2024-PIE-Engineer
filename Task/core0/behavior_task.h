@@ -76,6 +76,7 @@ typedef struct EngineerBehaviorManager
     engineer_silver_mining_target_e silver_target;
     bool motor_failure_detected;
     uint32_t motor_failure_detect_timer;
+    bool emergency_move;
 
     /* 设备 */
 
@@ -113,5 +114,6 @@ extern bool checkIfNeedRebootCore(void);
 extern bool checkIfNeedShowSilverVau(void);
 extern engineer_silver_mining_target_e getSilverTarget(void);
 extern bool checkIfMotorFailureDetected(void);
+extern bool checkIfIsEmergencyMoving(void);
 
 #endif /* _BEHAVIOR_TASK_H__ */
