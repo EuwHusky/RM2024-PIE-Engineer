@@ -57,7 +57,7 @@ void referee_task(void *pvParameters)
     refereeInitFrameProcesser();
     pm_uart_fifo = get_pm_fifo();
 
-    refereeRobotInteractionManagerInit(32, 0);
+    refereeRobotInteractionManagerInit(32, 1);
     refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiModeIndicatorBuilder);
     refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiSplitLine0Builder);
     refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiGrabberPoweredBuilder);
@@ -118,7 +118,7 @@ void referee_task(void *pvParameters)
             uart_flush(PM_UART);
         }
 
-        vTaskDelay(17);
+        vTaskDelay(11);
     }
 }
 
