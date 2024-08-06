@@ -11,8 +11,8 @@
 
 typedef enum EngineerBehavior
 {
-    ENGINEER_BEHAVIOR_DISABLE, // 失能
-    ENGINEER_BEHAVIOR_RESET,   // 复位
+    ENGINEER_BEHAVIOR_DISABLE = 0, // 失能
+    ENGINEER_BEHAVIOR_RESET,       // 复位
 
     ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING, // 自动归位 到机动模式默认位置
     ENGINEER_BEHAVIOR_MOVE,             // 机动
@@ -77,6 +77,7 @@ typedef struct EngineerBehaviorManager
     bool motor_failure_detected;
     uint32_t motor_failure_detect_timer;
     bool emergency_move;
+    uint8_t *arm_aoto_operation_process;
 
     /* 设备 */
 

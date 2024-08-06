@@ -479,6 +479,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
 
     if (scara_arm->silver_mining_step == SILVER_MINING_STEP_INIT)
     {
+        scara_arm->auto_operation_process = 0;
+
         setGrabNuggetType(SILVER_NUGGET);
 
         scara_arm->silver_mining_grab_end_timer = 0;
@@ -496,6 +498,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_START)
     {
+        scara_arm->auto_operation_process = 0;
+
         scara_arm->set_pose_6d[POSE_X] = 0.25f;
         scara_arm->set_pose_6d[POSE_Y] = 0.0f;
         scara_arm->set_pose_6d[POSE_Z] = SILVER_MINING_POSE_Z;
@@ -512,6 +516,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_MOVE)
     {
+        scara_arm->auto_operation_process = 0;
+
         scara_arm->set_pose_6d[POSE_X] = 0.556f;
 
         if (getSilverTarget() == SILVER_MID)
@@ -534,6 +540,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_READY)
     {
+        scara_arm->auto_operation_process = 1;
+
         if (getSilverTarget() != scara_arm->last_silver_target)
         {
             scara_arm->silver_mining_step = SILVER_MINING_STEP_MOVE;
@@ -554,6 +562,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_GRAB)
     {
+        scara_arm->auto_operation_process = 1;
+
         scara_arm->silver_mining_grab_end_timer++;
 
         scara_arm->set_pose_6d[POSE_Z] -= 0.0005f;
@@ -571,6 +581,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_LIFT)
     {
+        scara_arm->auto_operation_process = 1;
+
         scara_arm->set_pose_6d[POSE_Z] += 0.0005f;
 
         if (scara_arm->pose_6d[POSE_Z] > 0.4f)
@@ -584,6 +596,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_WAIT)
     {
+        scara_arm->auto_operation_process = 1;
+
         if (checkIfRcKeyFallingEdgeDetected(RC_LEFT))
         {
             scara_arm->silver_mining_step = SILVER_MINING_STEP_OK;
@@ -602,6 +616,8 @@ static void silver_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->silver_mining_step == SILVER_MINING_STEP_OK)
     {
+        scara_arm->auto_operation_process = 2;
+
         if (scara_arm->grab_top)
             scara_arm->set_pose_6d[POSE_X] = 0.24f;
         else
@@ -633,6 +649,8 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
 {
     if (scara_arm->gold_mining_step == GOLD_MINING_STEP_INIT)
     {
+        scara_arm->auto_operation_process = 0;
+
         setGrabNuggetType(GOLD_NUGGET);
 
         // 清除历史误操作
@@ -662,6 +680,8 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->gold_mining_step == GOLD_MINING_STEP_START)
     {
+        scara_arm->auto_operation_process = 0;
+
         if (fabsf(scara_arm->joints_value[JOINT_1] - scara_arm->set_joints_value[JOINT_1]) <
                 TOLERABLE_DISTANCE_DEVIATION &&
             fabsf(scara_arm->joints_value[JOINT_2] - scara_arm->set_joints_value[JOINT_2]) <
@@ -681,6 +701,8 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->gold_mining_step == GOLD_MINING_STEP_OPERATION)
     {
+        scara_arm->auto_operation_process = 1;
+
         scara_arm->set_joints_value[JOINT_1] += ((float)getRcMouseZ() * 0.00004);
 
         if (scara_arm->grabbed)
@@ -693,6 +715,8 @@ static void gold_mining_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->gold_mining_step == GOLD_MINING_STEP_PULL_OUT)
     {
+        scara_arm->auto_operation_process = 2;
+
         // 无力末端yaw轴以防矿石与隧道挤压
         rflMotorSetMode(&scara_arm->joints_motors[MOTOR_JOINT4], RFL_MOTOR_CONTROL_MODE_NO_FORCE);
 
@@ -715,6 +739,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
 
     if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_INIT)
     {
+        scara_arm->auto_operation_process = 0;
+
         if (getStoragePushInAvailableSlot() >= STORAGE_NULL)
         {
             StorageCancelOperation(STORAGE_PUSH_IN);
@@ -730,6 +756,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_START)
     {
+        scara_arm->auto_operation_process = 1;
+
         scara_arm->set_pose_6d[POSE_X] = -0.02f;
         scara_arm->set_pose_6d[POSE_Y] = -0.425f;
         scara_arm->set_pose_6d[POSE_Z] = 0.0f;
@@ -747,6 +775,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SLOT)
     {
+        scara_arm->auto_operation_process = 1;
+
         scara_arm->set_pose_6d[POSE_YAW] = -185.0f * DEGREE_TO_RADIAN_FACTOR;
 
         if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION &&
@@ -772,6 +802,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_PUSH_IN)
     {
+        scara_arm->auto_operation_process = 2;
+
         scara_arm->storage_push_overtime_timer++;
 
         if (getStorageCurrentTargetSlot() == STORAGE_BACK)
@@ -802,6 +834,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_END)
     {
+        scara_arm->auto_operation_process = 3;
+
         if (fabsf(scara_arm->pose_6d[POSE_X] - scara_arm->set_pose_6d[POSE_X]) < TOLERABLE_DISTANCE_DEVIATION_IN_MOVE &&
             fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION_IN_MOVE &&
             fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION_IN_MOVE)
@@ -822,6 +856,8 @@ static void storage_push_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_push_step == STORAGE_PUSH_STEP_SAFE_FOLD)
     {
+        scara_arm->auto_operation_process = 3;
+
         scara_arm->set_pose_6d[POSE_X] = 0.122f;
         scara_arm->set_pose_6d[POSE_Y] = -0.267f;
         scara_arm->set_pose_6d[POSE_YAW] = -135.0f * DEGREE_TO_RADIAN_FACTOR;
@@ -844,6 +880,8 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
 
     if (scara_arm->storage_pop_step == STORAGE_POP_STEP_INIT)
     {
+        scara_arm->auto_operation_process = 0;
+
         if (getStoragePopOutAvailableSlot() >= STORAGE_NULL)
         {
             scara_arm->storage_pop_success = true;
@@ -855,6 +893,8 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_START)
     {
+        scara_arm->auto_operation_process = 1;
+
         if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
         {
             scara_arm->set_pose_6d[POSE_X] = 0.0f;
@@ -883,6 +923,8 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_SLOT)
     {
+        scara_arm->auto_operation_process = 1;
+
         if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
         {
             scara_arm->set_pose_6d[POSE_Y] = -0.313f;
@@ -920,6 +962,8 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_POP_OUT)
     {
+        scara_arm->auto_operation_process = 2;
+
         if (getNuggetPopOutToward(getStorageCurrentTargetSlot()) == NUGGET_FACING_UPWARD)
         {
             scara_arm->set_pose_6d[POSE_Z] -= 0.0002;
@@ -962,6 +1006,8 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_END)
     {
+        scara_arm->auto_operation_process = 3;
+
         if (fabsf(scara_arm->pose_6d[POSE_Y] - scara_arm->set_pose_6d[POSE_Y]) < TOLERABLE_DISTANCE_DEVIATION_IN_MOVE &&
             fabsf(scara_arm->pose_6d[POSE_Z] - scara_arm->set_pose_6d[POSE_Z]) < TOLERABLE_DISTANCE_DEVIATION_IN_MOVE)
         {
@@ -971,6 +1017,8 @@ static void storage_pop_control(engineer_scara_arm_s *scara_arm)
     }
     else if (scara_arm->storage_pop_step == STORAGE_POP_STEP_SAFE_FOLD)
     {
+        scara_arm->auto_operation_process = 3;
+
         if (xTaskGetTickCount() - scara_arm->storage_pop_time_node < 600u)
         {
             scara_arm->set_pose_6d[POSE_X] = -0.02f;

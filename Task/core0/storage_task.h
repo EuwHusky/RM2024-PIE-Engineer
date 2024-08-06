@@ -83,6 +83,8 @@ extern void setGrabNuggetType(engineer_storage_nugget_type_e nugget_type);
 extern void setPushInNuggetToward(engineer_storage_slot_index_e slot_index, engineer_storage_nugget_toward_e toward);
 extern engineer_storage_nugget_toward_e getNuggetPopOutToward(engineer_storage_slot_index_e slot_index);
 
+extern bool checkIfStorageSlotPowered(engineer_storage_slot_index_e slot_index);
+
 /**
  * @brief 获取可存矿石槽位 若无可存槽位则返回空槽位
  * @note 若成功获取到可存槽位 则会自动打开此槽位的吸取功能

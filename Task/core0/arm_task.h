@@ -108,6 +108,8 @@ typedef struct EngineerScaraArm
     engineer_behavior_e behavior;
     engineer_behavior_e last_behavior;
 
+    /* 控制 */
+
     bool grabbed;  // 抓取到矿石
     bool grab_top; // 抓取矿石顶端
 
@@ -129,6 +131,8 @@ typedef struct EngineerScaraArm
     uint16_t storage_push_overtime_timer;
     uint8_t storage_pop_step;
     TickType_t storage_pop_time_node;
+
+    uint8_t auto_operation_process;
 
     float silver_mining_pose_memory[6]; // 机械臂位置记忆
 
@@ -202,6 +206,7 @@ extern engineer_scara_arm_s *getArmDataPointer(void);
 extern bool *getArmStartedFlag(void);
 
 extern float getArmTargetDirection(void);
+extern float getArmPose(engineer_scara_arm_pose_e pose);
 extern float getArmJointsValue(engineer_scara_arm_joints_e joint);
 extern float getArmSetJointsValue(engineer_scara_arm_joints_e joint);
 extern float getArmMotorTemperature(engineer_scara_arm_joints_motors_index_e motor_index);
@@ -217,6 +222,8 @@ extern bool *getArmOperationHomingStatus(void);
 extern bool *getSilverMiningStatus(void);
 extern bool *getStoragePushStatus(void);
 extern bool *getStoragePopStatus(void);
+
+extern uint8_t *getArmAutoOperationProcess(void);
 
 extern void resetArmPose(void);
 extern void ArmReadyToExchangePose(engineer_scara_arm_solution_e solution);

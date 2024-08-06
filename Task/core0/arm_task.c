@@ -73,6 +73,11 @@ float getArmTargetDirection(void)
     return atan2f(scara_arm.pose_6d[POSE_Y], scara_arm.pose_6d[POSE_X]);
 }
 
+float getArmPose(engineer_scara_arm_pose_e pose)
+{
+    return scara_arm.pose_6d[pose];
+}
+
 float getArmJointsValue(engineer_scara_arm_joints_e joint)
 {
     return scara_arm.joints_value[joint];
@@ -147,6 +152,11 @@ bool *getStoragePopStatus(void)
     return &scara_arm.storage_pop_success;
 }
 
+uint8_t *getArmAutoOperationProcess(void)
+{
+    return &scara_arm.auto_operation_process;
+}
+
 void resetArmPose(void)
 {
     for (uint8_t i = 0; i < 6; i++)
@@ -193,13 +203,22 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     scara_arm->storage_pop_step = 0;
     scara_arm->storage_pop_time_node = 0;
 
+    scara_arm->auto_operation_process = 0;
+
     arm_model_init(scara_arm);
 
-    arm_rm_motor_can_init();
-    while (detect_error(ARM_JOINT_1_L_DH) || detect_error(ARM_JOINT_1_R_DH) || /* detect_error(ARM_JOINT_4_DH) || */
-           detect_error(ARM_JOINT_56_L_DH) || detect_error(ARM_JOINT_56_R_DH))
-        rflOsDelayMs(10);
-    arm_motor_init(scara_arm);
+    // 气泵
+    HPM_IOC->PAD[IOC_PAD_PA25].FUNC_CTL = IOC_PA25_FUNC_CTL_GPIO_A_25;
+    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN, 0);
+    // 卸力阀
+    HPM_IOC->PAD[IOC_PAD_PA31].FUNC_CTL = IOC_PA31_FUNC_CTL_GPIO_A_31;
+    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN, 1);
+    // 气压传感器
+    HPM_IOC->PAD[IOC_PAD_PA05].FUNC_CTL = IOC_PA05_FUNC_CTL_GPIO_A_05;
+    gpio_set_pin_input(HPM_GPIO0, ENGINEER_ARM_SENSOR_GPIO_PORT, ENGINEER_ARM_SENSOR_GPIO_PIN);
+
+    MA600_init();
+    rflSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
 
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[0], 0.02f, 0.98f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[1], 0.02f, 0.98f);
@@ -208,20 +227,11 @@ static void arm_init(engineer_scara_arm_s *scara_arm)
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[4], 0.03f, 0.97f);
     rflFirstOrderFilterInit(&scara_arm->cc_pose_filter[5], 0.03f, 0.97f);
 
-    // 气泵
-    HPM_IOC->PAD[IOC_PAD_PA25].FUNC_CTL = IOC_PA25_FUNC_CTL_GPIO_A_25;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN, 0);
-
-    // 卸力阀
-    HPM_IOC->PAD[IOC_PAD_PA31].FUNC_CTL = IOC_PA31_FUNC_CTL_GPIO_A_31;
-    gpio_set_pin_output_with_initial(HPM_GPIO0, ENGINEER_ARM_VALVE_GPIO_PORT, ENGINEER_ARM_VALVE_GPIO_PIN, 1);
-
-    // 气压传感器
-    HPM_IOC->PAD[IOC_PAD_PA05].FUNC_CTL = IOC_PA05_FUNC_CTL_GPIO_A_05;
-    gpio_set_pin_input(HPM_GPIO0, ENGINEER_ARM_SENSOR_GPIO_PORT, ENGINEER_ARM_SENSOR_GPIO_PIN);
-
-    MA600_init();
-    rflSlidingWindowFilterInit(&scara_arm->joint_6_encoder_angle_filter, 14, 2);
+    arm_rm_motor_can_init();
+    while (detect_error(ARM_JOINT_1_L_DH) || detect_error(ARM_JOINT_1_R_DH) || /* detect_error(ARM_JOINT_4_DH) || */
+           detect_error(ARM_JOINT_56_L_DH) || detect_error(ARM_JOINT_56_R_DH))
+        rflOsDelayMs(10);
+    arm_motor_init(scara_arm);
 }
 
 static void update_and_execute_grabber(engineer_scara_arm_s *scara_arm)

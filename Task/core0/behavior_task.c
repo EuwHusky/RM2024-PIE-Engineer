@@ -148,6 +148,7 @@ static void behavior_manager_init(engineer_behavior_manager_s *behavior_manager)
     behavior_manager->silver_target = SILVER_MID;
     behavior_manager->motor_failure_detected = false;
     behavior_manager->emergency_move = false;
+    behavior_manager->arm_aoto_operation_process = getArmAutoOperationProcess();
 }
 
 static void update_robot_status(engineer_behavior_manager_s *behavior_manager)
@@ -166,6 +167,8 @@ static void update_behavior(engineer_behavior_manager_s *behavior_manager, engin
 
     if (new_behavior == ENGINEER_BEHAVIOR_DISABLE)
         behavior_manager->pump_flag = 0;
+
+    *behavior_manager->arm_aoto_operation_process = 0;
 }
 
 static void operator_manual_operation(engineer_behavior_manager_s *behavior_manager)

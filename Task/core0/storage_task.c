@@ -83,6 +83,11 @@ engineer_storage_nugget_toward_e getNuggetPopOutToward(engineer_storage_slot_ind
     return storage.slot_nugget_toward[slot_index];
 }
 
+bool checkIfStorageSlotPowered(engineer_storage_slot_index_e slot_index)
+{
+    return storage.storage_slot_needed[slot_index];
+}
+
 /**
  * @brief 获取可存矿石槽位 若无可存槽位则返回空槽位
  * @note 若成功获取到可存槽位 则会自动打开此槽位的吸取功能

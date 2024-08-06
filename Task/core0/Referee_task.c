@@ -23,7 +23,7 @@
 // 裁判系统串口初始化
 static void pm_uart_init(void);
 
-static void client_ui(void);
+static void client_ui_operation(void);
 
 // 电管链路裁判系统数据相关变量和结构
 ATTR_PLACE_AT_NONCACHEABLE uint8_t pm_rx_buf[PM_UART_RX_BUF_LENGHT]; // 接收原始数据
@@ -32,6 +32,8 @@ volatile bool pm_uart_rx_dma_done = true; // dma传输完成标志位
 volatile bool pm_uart_tx_dma_done = true; // dma传输完成标志位
 fifo_s_t *pm_uart_fifo = NULL;
 uint8_t *pm_tx_frame_pointer;
+
+static uint8_t ui_gcl_index = 0;
 
 void pm_rx_referee_dma_isr(void)
 {
@@ -58,27 +60,20 @@ void referee_task(void *pvParameters)
     pm_uart_fifo = get_pm_fifo();
 
     refereeRobotInteractionManagerInit(32, 1);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiModeIndicatorBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiSplitLine0Builder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiGrabberPoweredBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiGrabbedBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiSplitLine1Builder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiStorageFrontUsedBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiStorageBackUsedBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiVauAid0Builder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiVauAid1Builder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiVauAid2Builder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiPushInOvertimeBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiVtlinkIndicatorBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiSafeRightBarrierWarningLineBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiDangerRightBarrierWarningLineBuilder);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_REAL_TIME, uiMagicStick0);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_REAL_TIME, uiMagicStick1);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_REAL_TIME, uiMagicStick2);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiBodyIndicator);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_REAL_TIME, uiArmGrabberIndicator);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_REAL_TIME, uiFrontStorageIndicator);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_REAL_TIME, uiBackStorageIndicator);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiDt7Dr16linkIndicator);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiVtlinkIndicator);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_ONCE, uiRemoteIndicatorLeftSplitLine);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_ONCE, uiRemoteIndicatorRightSplitLine);
+    ui_gcl_index = refereeRobotInteractionFigureConfig(UI_REFRESH_ONCE, uiGimbalCaliLine);
     refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiLifterLeftMotorOverheatWarningBuilder);
     refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiLifterRightMotorOverheatWarningBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiSplitLine2Builder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiDt7Dr16linkIndicatorBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiMotorStatusIndicatorBuilder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiSplitLine3Builder);
-    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiSplitLine4Builder);
 
     while (1)
     {
@@ -91,7 +86,7 @@ void referee_task(void *pvParameters)
                                 PM_UART_RX_BUF_LENGHT);
         }
 
-        client_ui();
+        client_ui_operation();
 
         if (pm_uart_tx_dma_done)
         {
@@ -122,7 +117,7 @@ void referee_task(void *pvParameters)
     }
 }
 
-static void client_ui(void)
+static void client_ui_operation(void)
 {
     // 重新刷新UI
     if (checkIfNeedResetUi())
@@ -134,45 +129,11 @@ static void client_ui(void)
     if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_MOVE ||
         getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING)
     {
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
-
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, SPLIT_LINE_3_UI_INDEX_UI_INDEX);
+        refereeClientUiOperate(UI_DISPLAY_FIGURE, ui_gcl_index);
     }
     else
     {
-        refereeClientUiOperate(UI_HIDE_FIGURE, SAFE_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, DANGER_RIGHT_BARRIER_WARNING_LINE_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_LEFT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, LIFTER_RIGHT_MOTOR_OVER_TEMP_WARNING_UI_INDEX);
-
-        refereeClientUiOperate(UI_HIDE_FIGURE, SPLIT_LINE_3_UI_INDEX_UI_INDEX);
-    }
-
-    // 视觉辅助UI
-    if (checkIfNeedShowSilverVau())
-    {
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_0_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_1_UI_INDEX);
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, VAU_AID_2_UI_INDEX);
-    }
-    else
-    {
-        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_0_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_1_UI_INDEX);
-        refereeClientUiOperate(UI_HIDE_FIGURE, VAU_AID_2_UI_INDEX);
-    }
-
-    // 存矿辅助UI 基本没用 但是懒 没删
-    if (getEngineerCurrentBehavior() == ENGINEER_BEHAVIOR_AUTO_STORAGE_PUSH && checkIfStoragePushInOverTime())
-    {
-        refereeClientUiOperate(UI_DISPLAY_FIGURE, STORAGE_PUSH_IN_OVERTIME_UI_INDEX);
-    }
-    else
-    {
-        refereeClientUiOperate(UI_HIDE_FIGURE, STORAGE_PUSH_IN_OVERTIME_UI_INDEX);
+        refereeClientUiOperate(UI_HIDE_FIGURE, ui_gcl_index);
     }
 }
 

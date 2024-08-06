@@ -55,6 +55,9 @@ rm_motor_s *motor_1_driver_test;
 rfl_motor_pid_controller_s *motor_0_controller_test;
 rfl_motor_pid_controller_s *motor_1_controller_test;
 
+#include "ui_element_builder.h"
+extern ui_magic_sticks_s ui_magic_sticks;
+
 void print_dma_isr(void)
 {
     print_uart_tx_dma_done = true;
