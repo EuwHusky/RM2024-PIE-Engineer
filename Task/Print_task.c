@@ -6,7 +6,7 @@
 #include "task.h"
 
 #define PRINT_ERROR (false) // 是否输出异常
-#define PRINT_TIME_MS 10    // 输出数据的周期
+#define PRINT_TIME_MS 5     // 输出数据的周期
 
 #if !BOARD_RUNNING_CORE // core0
 
@@ -50,10 +50,10 @@ ATTR_PLACE_AT_NONCACHEABLE uint8_t test_txt[256] = {0};
 volatile bool print_uart_tx_dma_done = true; // dma传输完成标志位
 
 rm_motor_s *motor_0_driver_test;
-rm_motor_s *motor_1_driver_test;
+// rm_motor_s *motor_1_driver_test;
 
-rfl_motor_pid_controller_s *motor_0_controller_test;
-rfl_motor_pid_controller_s *motor_1_controller_test;
+// rfl_motor_pid_controller_s *motor_0_controller_test;
+// rfl_motor_pid_controller_s *motor_1_controller_test;
 
 #include "ui_element_builder.h"
 extern ui_magic_sticks_s ui_magic_sticks;
@@ -109,6 +109,7 @@ void print_task(void *pvParameters)
     {
 #if !PRINT_ERROR
 
+        motor_0_driver_test = (rm_motor_s *)gimbal_print->yaw_motor.driver;
         // motor_0_driver_test = (rm_motor_s *)arm_print->joints_motors[MOTOR_JOINT1_LEFT].driver;
         // motor_1_driver_test = (rm_motor_s *)arm_print->joints_motors[MOTOR_JOINT1_RIGHT].driver;
 
@@ -148,9 +149,15 @@ void print_task(void *pvParameters)
             /**
              * @brief Gimbal
              */
-            // sprintf((char *)test_txt, "%f,%f,%f,%f\r\n", gimbal_print->yaw_motor.torque_,
-            //         gimbal_print->yaw_motor.speed_, gimbal_print->yaw_motor.set_angle_.deg,
-            //         gimbal_print->yaw_motor.angle_.deg);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", gimbal_print->gimbal_angle.deg,
+            //         gimbal_print->yaw_motor.torque_, gimbal_print->yaw_motor.speed_,
+            //         gimbal_print->yaw_motor.set_angle_.deg, gimbal_print->yaw_motor.angle_.deg);
+            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+                    arm_print->joints_motors[MOTOR_JOINT23_BACK].angle_.deg,
+                    arm_print->joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_print->joints_motors[MOTOR_JOINT23_FRONT].angle_.deg,
+                    arm_print->joints_value[JOINT_3] * RADIAN_TO_DEGREE_FACTOR, gimbal_print->gimbal_angle.deg,
+                    gimbal_print->yaw_motor.set_angle_.deg, gimbal_print->yaw_motor.angle_.deg);
 
             /**
              * @brief Scara Arm
@@ -303,9 +310,9 @@ void print_task(void *pvParameters)
             //         detect_error(CHASSIS_MOTOR_1_DH), detect_error(CHASSIS_MOTOR_2_DH),
             //         detect_error(CHASSIS_MOTOR_3_DH));
 
-            // uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
-            //                     core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
-            //                     strlen((char *)test_txt));
+            uart_tx_trigger_dma(BOARD_XDMA, BOARD_UART6_TX_DMA_CHN, BOARD_UART6,
+                                core_local_mem_to_sys_address(BOARD_RUNNING_CORE, (uint32_t)test_txt),
+                                strlen((char *)test_txt));
         }
 
         vTaskDelay(PRINT_TIME_MS);

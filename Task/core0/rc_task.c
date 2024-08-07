@@ -30,8 +30,6 @@ volatile bool dbus_uart_rx_dma_done = true;                      // dma传输完
 rfl_dt7_dr16_data_s dt7_dr16_prior_data = {0};
 rfl_dt7_dr16_data_s dt7_dr16_data = {0};
 
-const uint8_t *vt_link_relay_data[5] = {0, 0, 0, 0, 0};
-
 ATTR_PLACE_AT_NONCACHEABLE custom_robot_data_t cc_data;
 ATTR_PLACE_AT_NONCACHEABLE vt_link_remote_control_t vt_rc_data;
 
@@ -66,10 +64,7 @@ void rc_task(void *pvParameters)
     RemoteControlInit(&dt7_dr16_data, &vt_rc_data, &cc_data);
 
     for (uint8_t i = 0; i < 5; i++)
-    {
         rflCanRxMessageBoxAddId(4, 0x300 + i);
-        vt_link_relay_data[i] = rflCanGetRxMessageBoxData(4, 0x300 + i);
-    }
 
     rflCanRxMessageBoxAddRxCallbackFunc(4, 0x300, vt_link_relay_pack_0_can_rx_callback);
     rflCanRxMessageBoxAddRxCallbackFunc(4, 0x301, vt_link_relay_pack_1_can_rx_callback);
@@ -131,8 +126,8 @@ static void vt_link_relay_pack_0_can_rx_callback(uint8_t *rx_data)
     float temp_out;
     for (uint8_t i = 0; i < 2; i++)
     {
-        temp = ((vt_link_relay_data[0][4u * i + 3u] << 24) | (vt_link_relay_data[0][4u * i + 2u] << 16) |
-                (vt_link_relay_data[0][4u * i + 1u] << 8) | vt_link_relay_data[0][4u * i + 0u]);
+        temp = ((rx_data[4u * i + 3u] << 24) | (rx_data[4u * i + 2u] << 16) | (rx_data[4u * i + 1u] << 8) |
+                rx_data[4u * i + 0u]);
         temp_out = *(float *)&temp;
         cc_data.pose[0 + i] = temp_out;
     }
@@ -145,8 +140,8 @@ static void vt_link_relay_pack_1_can_rx_callback(uint8_t *rx_data)
     float temp_out;
     for (uint8_t i = 0; i < 2; i++)
     {
-        temp = ((vt_link_relay_data[1][4u * i + 3u] << 24) | (vt_link_relay_data[1][4u * i + 2u] << 16) |
-                (vt_link_relay_data[1][4u * i + 1u] << 8) | vt_link_relay_data[1][4u * i + 0u]);
+        temp = ((rx_data[4u * i + 3u] << 24) | (rx_data[4u * i + 2u] << 16) | (rx_data[4u * i + 1u] << 8) |
+                rx_data[4u * i + 0u]);
         temp_out = *(float *)&temp;
         cc_data.pose[2 + i] = temp_out;
     }
@@ -159,8 +154,8 @@ static void vt_link_relay_pack_2_can_rx_callback(uint8_t *rx_data)
     float temp_out;
     for (uint8_t i = 0; i < 2; i++)
     {
-        temp = ((vt_link_relay_data[2][4u * i + 3u] << 24) | (vt_link_relay_data[2][4u * i + 2u] << 16) |
-                (vt_link_relay_data[2][4u * i + 1u] << 8) | vt_link_relay_data[2][4u * i + 0u]);
+        temp = ((rx_data[4u * i + 3u] << 24) | (rx_data[4u * i + 2u] << 16) | (rx_data[4u * i + 1u] << 8) |
+                rx_data[4u * i + 0u]);
         temp_out = *(float *)&temp;
         cc_data.pose[4 + i] = temp_out;
     }
@@ -169,14 +164,14 @@ static void vt_link_relay_pack_2_can_rx_callback(uint8_t *rx_data)
 }
 static void vt_link_relay_pack_3_can_rx_callback(uint8_t *rx_data)
 {
-    memcpy(&vt_rc_data, vt_link_relay_data[3], 8u);
+    memcpy(&vt_rc_data, rx_data, 8u);
 
     detect_hook_in_isr(VT_REFEREE_DH);
 }
 static void vt_link_relay_pack_4_can_rx_callback(uint8_t *rx_data)
 {
-    vt_rc_data.keyboard_value = ((vt_link_relay_data[4][1] << 8) | vt_link_relay_data[4][0]);
-    cc_data.key = vt_link_relay_data[4][7];
+    vt_rc_data.keyboard_value = ((rx_data[1] << 8) | rx_data[0]);
+    cc_data.key = rx_data[7];
 
     detect_hook_in_isr(VT_REFEREE_DH);
 }

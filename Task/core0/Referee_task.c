@@ -39,7 +39,7 @@ void pm_rx_referee_dma_isr(void)
 {
     fifo_s_puts(pm_uart_fifo, (char *)pm_rx_buf, PM_UART_RX_BUF_LENGHT);
     pm_uart_rx_dma_done = true; // 更新标志位
-    detect_hook(PM_REFEREE_DH);
+    detect_hook_in_isr(PM_REFEREE_DH);
 }
 
 void pm_tx_referee_dma_isr(void)

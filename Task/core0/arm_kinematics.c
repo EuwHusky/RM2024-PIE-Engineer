@@ -82,10 +82,15 @@ void arm_model_update_status(engineer_scara_arm_s *scara_arm)
                                         scara_arm->joints_motors[MOTOR_JOINT1_RIGHT].angle_.deg) *
                                        0.5f / LIFTER_DISTANCE_TO_DEGREE_FACTOR;
     scara_arm->joints_value[JOINT_2] = scara_arm->joints_motors[MOTOR_JOINT23_BACK].angle_.rad / JOINT2_REDUCTION;
-    if (!scara_arm->reset_success && fabsf(scara_arm->joints_value[JOINT_2]) > RAD_PI)
-        scara_arm->joints_value[JOINT_2] = 0.0f;
     scara_arm->joints_value[JOINT_3] =
         scara_arm->joints_motors[MOTOR_JOINT23_FRONT].angle_.rad - scara_arm->joints_value[JOINT_2];
+
+    // 达妙电机解码导致第一次通信前关节电机读数有误，在此做特殊处理，设置为0度
+    if (!scara_arm->reset_success && fabsf(scara_arm->joints_value[JOINT_2]) > RAD_2_PI)
+        scara_arm->joints_value[JOINT_2] = 0.0f;
+    if (!scara_arm->reset_success && fabsf(scara_arm->joints_value[JOINT_3]) > 5.4f)
+        scara_arm->joints_value[JOINT_3] = 0.0f;
+
     scara_arm->joints_value[JOINT_4] = scara_arm->joints_motors[MOTOR_JOINT4].angle_.rad;
     scara_arm->joints_value[JOINT_5] = (scara_arm->joints_motors[MOTOR_JOINT56_LEFT].angle_.rad +
                                         scara_arm->joints_motors[MOTOR_JOINT56_RIGHT].angle_.rad) /
