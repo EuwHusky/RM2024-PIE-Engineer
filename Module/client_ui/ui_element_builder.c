@@ -160,7 +160,8 @@ void uiMagicStick0(interaction_figure_t *figure, figure_operation_type_e figure_
                                  ui_magic_sticks.ms0_set_point_pos, ui_magic_sticks.ms0_animation_start_time,
                                  xTaskGetTickCount(), 500);
         break;
-    case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    // case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    default:
         eular_to_rotmat(getArmPose(POSE_YAW), -getArmPose(POSE_PITCH), getArmPose(POSE_ROLL),
                         &ui_magic_sticks.rotation_mat);
         ui_magic_sticks.origin_x_axis_vector_data[0] = OPERATION_MAGIC_STICK_LENGTH;
@@ -173,9 +174,6 @@ void uiMagicStick0(interaction_figure_t *figure, figure_operation_type_e figure_
         ui_magic_sticks.ms0_point_pos[1] = OPERATION_MAGIC_STICK_Y;
         ui_magic_sticks.ms0_point_pos[2] = OPERATION_MAGIC_STICK_X - (int16_t)(ui_magic_sticks.x_axis_vector.pData[1]);
         ui_magic_sticks.ms0_point_pos[3] = OPERATION_MAGIC_STICK_Y + (int16_t)(ui_magic_sticks.x_axis_vector.pData[2]);
-        break;
-
-    default:
         break;
     }
 
@@ -245,7 +243,8 @@ void uiMagicStick1(interaction_figure_t *figure, figure_operation_type_e figure_
                                  ui_magic_sticks.ms1_set_point_pos, ui_magic_sticks.ms1_animation_start_time,
                                  xTaskGetTickCount(), 500);
         break;
-    case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    // case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    default:
         eular_to_rotmat(getArmPose(POSE_YAW), -getArmPose(POSE_PITCH), getArmPose(POSE_ROLL),
                         &ui_magic_sticks.rotation_mat);
         ui_magic_sticks.origin_y_axis_vector_data[0] = 0.0f;
@@ -258,9 +257,6 @@ void uiMagicStick1(interaction_figure_t *figure, figure_operation_type_e figure_
         ui_magic_sticks.ms1_point_pos[1] = OPERATION_MAGIC_STICK_Y;
         ui_magic_sticks.ms1_point_pos[2] = OPERATION_MAGIC_STICK_X - (int16_t)(ui_magic_sticks.y_axis_vector.pData[1]);
         ui_magic_sticks.ms1_point_pos[3] = OPERATION_MAGIC_STICK_Y + (int16_t)(ui_magic_sticks.y_axis_vector.pData[2]);
-        break;
-
-    default:
         break;
     }
 
@@ -330,7 +326,8 @@ void uiMagicStick2(interaction_figure_t *figure, figure_operation_type_e figure_
                                  ui_magic_sticks.ms2_set_point_pos, ui_magic_sticks.ms2_animation_start_time,
                                  xTaskGetTickCount(), 500);
         break;
-    case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    // case ENGINEER_BEHAVIOR_MANUAL_OPERATION:
+    default:
         eular_to_rotmat(getArmPose(POSE_YAW), -getArmPose(POSE_PITCH), getArmPose(POSE_ROLL),
                         &ui_magic_sticks.rotation_mat);
         ui_magic_sticks.origin_z_axis_vector_data[0] = 0.0f;
@@ -343,9 +340,6 @@ void uiMagicStick2(interaction_figure_t *figure, figure_operation_type_e figure_
         ui_magic_sticks.ms2_point_pos[1] = OPERATION_MAGIC_STICK_Y;
         ui_magic_sticks.ms2_point_pos[2] = OPERATION_MAGIC_STICK_X - (int16_t)(ui_magic_sticks.z_axis_vector.pData[1]);
         ui_magic_sticks.ms2_point_pos[3] = OPERATION_MAGIC_STICK_Y + (int16_t)(ui_magic_sticks.z_axis_vector.pData[2]);
-        break;
-
-    default:
         break;
     }
 
@@ -555,4 +549,17 @@ void uiLifterRightMotorOverheatWarningBuilder(interaction_figure_t *figure,
         (uint32_t)rflFloatLoopConstrain(
             getArmMotorTemperature(MOTOR_JOINT1_RIGHT) / LIFTER_MOTORS_MAX_TEMPERATURE * 360.0f + 180.0f, 0.0f, 360.0f),
         24, 24);
+}
+
+void uiErrorIndicator(interaction_figure_t *figure, figure_operation_type_e figure_operation_type)
+{
+    figure_color_type_e color =
+        (detect_error(PM_REFEREE_DH) || detect_error(ARM_JOINT_1_L_DH) || detect_error(ARM_JOINT_1_R_DH) ||
+         detect_error(ARM_JOINT_4_DH) || detect_error(ARM_JOINT_56_L_DH) || detect_error(ARM_JOINT_56_R_DH) ||
+         detect_error(CHASSIS_MOTOR_0_DH) || detect_error(CHASSIS_MOTOR_1_DH) || detect_error(CHASSIS_MOTOR_2_DH) ||
+         detect_error(CHASSIS_MOTOR_3_DH))
+            ? FIGURE_ORANGE
+            : FIGURE_GREEN;
+    color = checkIfNeedRebootCore() ? FIGURE_BLACK : color;
+    uiPlotCircle(figure, "eri", figure_operation_type, 9, color, 8, BODY_X, BODY_Y, 5);
 }

@@ -63,4 +63,6 @@ extern void uiLifterLeftMotorOverheatWarningBuilder(interaction_figure_t *figure
 extern void uiLifterRightMotorOverheatWarningBuilder(interaction_figure_t *figure,
                                                      figure_operation_type_e figure_operation_type);
 
+extern void uiErrorIndicator(interaction_figure_t *figure, figure_operation_type_e figure_operation_type);
+
 #endif /* _UI_ELEMENT_BUILDER__ */

@@ -74,6 +74,7 @@ void referee_task(void *pvParameters)
     ui_gcl_index = refereeRobotInteractionFigureConfig(UI_REFRESH_ONCE, uiGimbalCaliLine);
     refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiLifterLeftMotorOverheatWarningBuilder);
     refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiLifterRightMotorOverheatWarningBuilder);
+    refereeRobotInteractionFigureConfig(UI_REFRESH_IN_QUEUE, uiErrorIndicator);
 
     while (1)
     {
