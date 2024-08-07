@@ -290,16 +290,16 @@ static void storage_update(engineer_storage_s *storage)
 
     // 失能时关闭并重置储矿功能
 
-    if (storage->last_behavior != storage->behavior && storage->behavior == ENGINEER_BEHAVIOR_DISABLE)
-    {
-        for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
-        {
-            storage->storage_slot_status[i] = STORAGE_SLOT_EMPTY;
-            storage->storage_slot_needed[i] = false;
-            storage->empty_detect_timer[i] = 0;
-            storage->used_detect_timer[i] = 0;
-        }
-    }
+    // if (storage->last_behavior != storage->behavior && storage->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    // {
+    //     for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
+    //     {
+    //         storage->storage_slot_status[i] = STORAGE_SLOT_EMPTY;
+    //         storage->storage_slot_needed[i] = false;
+    //         storage->empty_detect_timer[i] = 0;
+    //         storage->used_detect_timer[i] = 0;
+    //     }
+    // }
 
     // 计算已使用槽位数量
 
@@ -311,7 +311,7 @@ static void storage_update(engineer_storage_s *storage)
 
 static void storage_execute(engineer_storage_s *storage)
 {
-    if (storage->behavior != ENGINEER_BEHAVIOR_DISABLE)
+    if (storage->behavior != ENGINEER_BEHAVIOR_DISABLE || storage->storage_used_num != 0)
     {
         for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
         {

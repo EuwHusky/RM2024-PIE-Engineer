@@ -702,7 +702,7 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     /**
      * @brief 快捷气路控制
      */
-    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE)
+    if (behavior_manager->behavior == ENGINEER_BEHAVIOR_DISABLE && getStorageStatus() == STORAGE_EMPTY)
     {
         // 机械臂
         gpio_write_pin(HPM_GPIO0, ENGINEER_ARM_PUMP_GPIO_PORT, ENGINEER_ARM_PUMP_GPIO_PIN,
