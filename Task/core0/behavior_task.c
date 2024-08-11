@@ -273,7 +273,8 @@ static void operator_manual_operation(engineer_behavior_manager_s *behavior_mana
         behavior_manager->km_reset_trigger_timer++;
         if (behavior_manager->km_reset_trigger_timer == 50)
         {
-            *behavior_manager->arm_reset_success = false;
+            if (!checkIfArmGrabbed())
+                *behavior_manager->arm_reset_success = false;
             *behavior_manager->gimbal_reset_success = false;
             behavior_manager->motor_failure_detected = false;
             update_behavior(behavior_manager, ENGINEER_BEHAVIOR_RESET);
@@ -584,7 +585,7 @@ static void auto_operation(engineer_behavior_manager_s *behavior_manager)
     if (behavior_manager->behavior == ENGINEER_BEHAVIOR_RESET && *behavior_manager->arm_reset_success &&
         *behavior_manager->gimbal_reset_success)
     {
-        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_MOVE);
+        update_behavior(behavior_manager, ENGINEER_BEHAVIOR_AUTO_MOVE_HOMING);
         board_write_led_b(LED_OFF);
     }
 

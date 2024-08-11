@@ -311,7 +311,7 @@ static void storage_update(engineer_storage_s *storage)
 
 static void storage_execute(engineer_storage_s *storage)
 {
-    if (storage->behavior != ENGINEER_BEHAVIOR_DISABLE || storage->storage_used_num != 0)
+    if (storage->behavior != ENGINEER_BEHAVIOR_DISABLE)
     {
         for (uint8_t i = 0; i < STORAGE_MAX_LIMIT; i++)
         {

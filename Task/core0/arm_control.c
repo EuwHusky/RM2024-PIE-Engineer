@@ -47,10 +47,10 @@ void arm_mode_control(engineer_scara_arm_s *scara_arm)
     {
         arm_motor_set_mode(scara_arm);
 
-        if (scara_arm->behavior == ENGINEER_BEHAVIOR_DISABLE)
-            setArmGrabMode(false);
+        // if (scara_arm->behavior == ENGINEER_BEHAVIOR_DISABLE)
+        //     setArmGrabMode(false);
 
-        if (scara_arm->behavior == ENGINEER_BEHAVIOR_RESET)
+        if (scara_arm->behavior == ENGINEER_BEHAVIOR_RESET && !scara_arm->grabbed)
         {
             resetArmStartUpStatus(scara_arm->start_up_status);
             scara_arm->joint_6_homing_timer = 0;
