@@ -149,15 +149,20 @@ void print_task(void *pvParameters)
             /**
              * @brief Gimbal
              */
-            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", gimbal_print->gimbal_angle.deg,
-            //         gimbal_print->yaw_motor.torque_, gimbal_print->yaw_motor.speed_,
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n", gimbal_print->set_gimbal_angle.deg,
+            //         gimbal_print->gimbal_angle.deg, gimbal_print->yaw_motor.torque_, gimbal_print->yaw_motor.speed_,
             //         gimbal_print->yaw_motor.set_angle_.deg, gimbal_print->yaw_motor.angle_.deg);
-            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
-                    arm_print->joints_motors[MOTOR_JOINT23_BACK].angle_.deg,
-                    arm_print->joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
-                    arm_print->joints_motors[MOTOR_JOINT23_FRONT].angle_.deg,
-                    arm_print->joints_value[JOINT_3] * RADIAN_TO_DEGREE_FACTOR, gimbal_print->gimbal_angle.deg,
-                    gimbal_print->yaw_motor.set_angle_.deg, gimbal_print->yaw_motor.angle_.deg);
+            sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+                    arm_print->set_joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
+                    arm_print->joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR, gimbal_print->set_gimbal_angle.deg,
+                    gimbal_print->gimbal_angle.deg, gimbal_print->yaw_motor.set_angle_.deg,
+                    gimbal_print->yaw_motor.angle_.deg);
+            // sprintf((char *)test_txt, "%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f,%6.3f\r\n",
+            //         arm_print->joints_motors[MOTOR_JOINT23_BACK].angle_.deg,
+            //         arm_print->joints_value[JOINT_2] * RADIAN_TO_DEGREE_FACTOR,
+            //         arm_print->joints_motors[MOTOR_JOINT23_FRONT].angle_.deg,
+            //         arm_print->joints_value[JOINT_3] * RADIAN_TO_DEGREE_FACTOR, gimbal_print->gimbal_angle.deg,
+            //         gimbal_print->yaw_motor.set_angle_.deg, gimbal_print->yaw_motor.angle_.deg);
 
             /**
              * @brief Scara Arm

@@ -46,7 +46,7 @@ void gimbal_task(void *pvParameters)
 
         gimbal_update_and_execute(&gimbal);
 
-        rflOsDelayMs(4);
+        rflOsDelayMs(1);
     }
 }
 
@@ -168,9 +168,9 @@ static void gimbal_mode_control(engineer_gimbal_s *gimbal)
     // 根据不同模式使用不同控制
 
     if (gimbal->behavior == ENGINEER_BEHAVIOR_RESET)
-        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.6f);
+        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.2f);
     else
-        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 1.0f);
+        rflMotorSetMaxSpeed(&gimbal->yaw_motor, 0.8f);
 
     switch (gimbal->behavior)
     {
@@ -249,7 +249,7 @@ static void gimbal_reset_control(engineer_gimbal_s *gimbal)
             gimbal->yaw_motor_homing_set_angle -= GIMBAL_YAW_HOMING_STEP_ANGLE;
 
             if (rflMotorGetTorque(&gimbal->yaw_motor) < -GIMBAL_YAW_HOMING_TORQUE_THRESHOLD &&
-                fabsf(rflMotorGetSpeed(&gimbal->yaw_motor)) < 0.02f &&
+                fabsf(rflMotorGetSpeed(&gimbal->yaw_motor)) < 0.01f &&
                 fabsf(rflMotorGetAngle(&gimbal->yaw_motor, RFL_ANGLE_FORMAT_DEGREE) -
                       gimbal->yaw_motor_homing_set_angle) > GIMBAL_YAW_HOMING_ANGLE_THRESHOLD)
             {
@@ -315,5 +315,5 @@ static void gimbal_auto_operation_control(engineer_gimbal_s *gimbal)
 
 static void gimbal_motor_yaw_can_rx_callback(uint8_t *rx_data)
 {
-    detect_hook(GIMBAL_MOTOR_YAW_DH);
+    detect_hook_in_isr(GIMBAL_MOTOR_YAW_DH);
 }

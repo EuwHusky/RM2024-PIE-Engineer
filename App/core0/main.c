@@ -97,7 +97,7 @@ int main(void)
     xTaskCreate(storage_task, "storage_task", configMINIMAL_STACK_SIZE + 128U, NULL, STORAGE_TASK_PRIORITY, NULL);
 
     xTaskCreate(test_task, "test_task", configMINIMAL_STACK_SIZE, NULL, TEST_TASK_PRIORITY, NULL);
-    xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE + 128U, NULL, PRINT_TASK_PRIORITY, NULL);
+    // xTaskCreate(print_task, "print_task", configMINIMAL_STACK_SIZE + 128U, NULL, PRINT_TASK_PRIORITY, NULL);
 
     // 启动freertos
     vTaskStartScheduler();
