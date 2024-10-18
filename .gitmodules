@@ -1,9 +1,9 @@
 [submodule "RoboFusionLib"]
 	path = RoboFusionLib
-	url = https://gitee.com/wpie/robofusionlib.git
+	url = https://github.com/EuwHusky/RoboFusionLib
 [submodule "Module/referee"]
 	path = Module/referee
-	url = https://gitee.com/wpie/rm---referee-system.git
+	url = https://github.com/EuwHusky/RoboMaster-Referee-On-MCU
 [submodule "Module/remote_control"]
 	path = Module/remote_control
-	url = https://gitee.com/wpie/rm---remote-control-system.git
+	url = https://github.com/EuwHusky/RM2024-PIE-Remote-Control
